@@ -1,4 +1,4 @@
-# Scrapeless Actor SDK Go Contribution & Development Guide
+# Scrapeless SDK Go Contribution & Development Guide
 
 Thank you for your interest in contributing to the Scrapeless Actor SDK Go project! This guide outlines both the contribution process and development conventions.
 

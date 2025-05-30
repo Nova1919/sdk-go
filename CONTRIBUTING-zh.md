@@ -1,4 +1,4 @@
-# Scrapeless Actor SDK Go 贡献与开发指南
+# Scrapeless SDK Go 贡献与开发指南
 
 感谢您关注并参与 Scrapeless Actor SDK Go 的开源贡献！本指南同时涵盖贡献流程和开发规范。
 
