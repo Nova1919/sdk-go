@@ -1,0 +1,9 @@
+# .chglog/config.yml
+template: keepachangelog
+categories:
+  - title: Features
+    labels:
+      - feat
+  - title: Bug Fixes
+    labels:
+      - fix

@@ -10,7 +10,6 @@ import (
 func TestActor(t *testing.T) {
 
 	ah := actor.NewActorHttp()
-
 	run, err := ah.Run(context.Background(), ra.IRunActorData{
 		ActorId: "554bbd68-c787-4900-b8b2-1086369c96e1",
 		Input: map[string]string{

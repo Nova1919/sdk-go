@@ -97,10 +97,10 @@ func (q *QueueHttp) Create(ctx context.Context, req *CreateQueueReq) (queueId st
 //
 //	ctx: The context for the request.
 //	name: The name of the queue to retrieve.
-func (q *QueueHttp) Get(ctx context.Context, name string) (*Item, error) {
+func (q *QueueHttp) Get(ctx context.Context, queueId string, name string) (*Item, error) {
 	name = name + "-" + env.GetActorEnv().RunId
 	queue, err := storage_http.Default().GetQueue(ctx, &storage_http.GetQueueRequest{
-		Id:   q.queueId,
+		Id:   queueId,
 		Name: name,
 	})
 	if err != nil {
@@ -125,10 +125,10 @@ func (q *QueueHttp) Get(ctx context.Context, name string) (*Item, error) {
 //	ctx: The context for the request.
 //	name: The new name of the queue.
 //	description: The new description of the queue.
-func (q *QueueHttp) Update(ctx context.Context, name string, description string) error {
+func (q *QueueHttp) Update(ctx context.Context, queueId string, name string, description string) error {
 	name = name + "-" + env.GetActorEnv().RunId
 	err := storage_http.Default().UpdateQueue(ctx, &storage_http.UpdateQueueRequest{
-		QueueId:     q.queueId,
+		QueueId:     queueId,
 		Name:        name,
 		Description: description,
 	})
@@ -139,8 +139,8 @@ func (q *QueueHttp) Update(ctx context.Context, name string, description string)
 // Parameters:
 //
 //	ctx: The context for the request.
-func (q *QueueHttp) Delete(ctx context.Context) error {
-	err := storage_http.Default().DelQueue(ctx, &storage_http.DelQueueRequest{QueueId: q.queueId})
+func (q *QueueHttp) Delete(ctx context.Context, queueId string) error {
+	err := storage_http.Default().DelQueue(ctx, &storage_http.DelQueueRequest{QueueId: queueId})
 	if err != nil {
 		log.Errorf("failed to delete queue: %v", code.Format(err))
 		return code.Format(err)
@@ -148,8 +148,13 @@ func (q *QueueHttp) Delete(ctx context.Context) error {
 	return nil
 }
 
-// QueuePush  timeout-->[60,300]   deadline--> [300,86400]
-func (q *QueueHttp) pushWithId(ctx context.Context, req PushQueue) (string, error) {
+// Push adds a request to the HTTP queue and returns the task ID.  timeout-->[60,300]   deadline--> [300,86400]
+//
+// Parameters:
+//
+//	ctx context.Context: The context for the request, used for cancellation and timeouts.
+//	req PushQueue: The request to be pushed into the queue.
+func (q *QueueHttp) Push(ctx context.Context, queueId string, req PushQueue) (string, error) {
 	// [60,300]
 	if req.Timeout < 60 {
 		req.Timeout = 60
@@ -168,7 +173,7 @@ func (q *QueueHttp) pushWithId(ctx context.Context, req PushQueue) (string, erro
 
 	unix := time.Now().UTC().Add(time.Duration(req.Deadline) * time.Second).Unix()
 	queue, err := storage_http.Default().CreateMsg(ctx, &storage_http.CreateMsgRequest{
-		QueueId:  q.queueId,
+		QueueId:  queueId,
 		Name:     req.Name,
 		PayLoad:  string(req.Payload),
 		Retry:    req.Retry,
@@ -182,16 +187,12 @@ func (q *QueueHttp) pushWithId(ctx context.Context, req PushQueue) (string, erro
 	return queue.MsgId, nil
 }
 
-// Push adds a request to the HTTP queue and returns the task ID.
-//
+// Pull retrieves messages from the HTTP queue.
 // Parameters:
 //
-//	ctx context.Context: The context for the request, used for cancellation and timeouts.
-//	req PushQueue: The request to be pushed into the queue.
-func (q *QueueHttp) Push(ctx context.Context, req PushQueue) (string, error) {
-	return q.pushWithId(ctx, req)
-}
-func (q *QueueHttp) pullWithId(ctx context.Context, size int32) (GetMsgResponse, error) {
+//	ctx: The context used to control the request lifecycle (e.g., cancellation, deadlines).
+//	size: The maximum number of messages to retrieve in this operation.
+func (q *QueueHttp) Pull(ctx context.Context, queueId string, size int32) (GetMsgResponse, error) {
 	if size < 1 {
 		size = 1
 	}
@@ -199,7 +200,7 @@ func (q *QueueHttp) pullWithId(ctx context.Context, size int32) (GetMsgResponse,
 		size = 100
 	}
 	msgs, err := storage_http.Default().GetMsg(ctx, &storage_http.GetMsgRequest{
-		QueueId: q.queueId,
+		QueueId: queueId,
 		Limit:   size,
 	})
 	if err != nil {
@@ -228,18 +229,15 @@ func (q *QueueHttp) pullWithId(ctx context.Context, size int32) (GetMsgResponse,
 	return items, nil
 }
 
-// Pull retrieves messages from the HTTP queue.
+// Ack confirms that a message has been processed successfully.
+//
 // Parameters:
 //
-//	ctx: The context used to control the request lifecycle (e.g., cancellation, deadlines).
-//	size: The maximum number of messages to retrieve in this operation.
-func (q *QueueHttp) Pull(ctx context.Context, size int32) (GetMsgResponse, error) {
-	return q.pullWithId(ctx, size)
-}
-
-func (q *QueueHttp) ackWithId(ctx context.Context, msgId string) error {
+//	ctx: The context used for request cancellation or timeout.
+//	msgId: The unique identifier of the message to acknowledge.
+func (q *QueueHttp) Ack(ctx context.Context, queueId string, msgId string) error {
 	err := storage_http.Default().AckMsg(ctx, &storage_http.AckMsgRequest{
-		QueueId: q.queueId,
+		QueueId: queueId,
 		MsgId:   msgId,
 	})
 	if err != nil {
@@ -247,16 +245,6 @@ func (q *QueueHttp) ackWithId(ctx context.Context, msgId string) error {
 		return code.Format(err)
 	}
 	return nil
-}
-
-// Ack confirms that a message has been processed successfully.
-//
-// Parameters:
-//
-//	ctx: The context used for request cancellation or timeout.
-//	msgId: The unique identifier of the message to acknowledge.
-func (q *QueueHttp) Ack(ctx context.Context, msgId string) error {
-	return q.ackWithId(ctx, msgId)
 }
 
 func (k *QueueHttp) Close() error {

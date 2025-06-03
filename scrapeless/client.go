@@ -130,7 +130,7 @@ func (o *StorageOption) Apply(a *Client) {
 	if o.tp == typeGrpc {
 		a.CloseFun = append(a.CloseFun, a.Storage.Close)
 	} else {
-		a.Storage = storage.NewStorageHttp()
+		a.Storage = storage.NewStorage()
 		a.CloseFun = append(a.CloseFun, a.Storage.Close)
 	}
 }

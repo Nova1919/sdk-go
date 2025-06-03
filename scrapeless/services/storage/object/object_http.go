@@ -89,8 +89,8 @@ func (oh *ObjHttp) CreateBucket(ctx context.Context, name string, description st
 // Parameters:
 //
 //	ctx: The context for the request.
-func (oh *ObjHttp) DeleteBucket(ctx context.Context) (bool, error) {
-	ok, err := storage_http.Default().DeleteBucket(ctx, oh.bucketId)
+func (oh *ObjHttp) DeleteBucket(ctx context.Context, bucketId string) (bool, error) {
+	ok, err := storage_http.Default().DeleteBucket(ctx, bucketId)
 	if err != nil {
 		log.Errorf("failed to delete bucket: %v", code.Format(err))
 		return false, code.Format(err)
@@ -102,8 +102,8 @@ func (oh *ObjHttp) DeleteBucket(ctx context.Context) (bool, error) {
 // Parameters:
 //
 //	ctx: The context for the request.
-func (oh *ObjHttp) GetBucket(ctx context.Context) (*Bucket, error) {
-	bucket, err := storage_http.Default().GetBucket(ctx, oh.bucketId)
+func (oh *ObjHttp) GetBucket(ctx context.Context, bucketId string) (*Bucket, error) {
+	bucket, err := storage_http.Default().GetBucket(ctx, bucketId)
 	if err != nil {
 		log.Errorf("failed to get bucket: %v", code.Format(err))
 		return nil, code.Format(err)
@@ -128,7 +128,7 @@ func (oh *ObjHttp) GetBucket(ctx context.Context) (*Bucket, error) {
 //	fuzzyFileName: Search pattern for matching object filenames.
 //	page: Current page number, defaults to 1 if <1.
 //	pageSize: Number of objects per page, defaults to 10 if <10.
-func (oh *ObjHttp) List(ctx context.Context, fuzzyFileName string, page int64, pageSize int64) (*ListObjectsResponse, error) {
+func (oh *ObjHttp) List(ctx context.Context, bucketId string, fuzzyFileName string, page int64, pageSize int64) (*ListObjectsResponse, error) {
 	if page < 1 {
 		page = 1
 	}
@@ -136,7 +136,7 @@ func (oh *ObjHttp) List(ctx context.Context, fuzzyFileName string, page int64, p
 		pageSize = 10
 	}
 	objects, err := storage_http.Default().ListObjects(ctx, &storage_http.ListObjectsRequest{
-		BucketId: oh.bucketId,
+		BucketId: bucketId,
 		Search:   fuzzyFileName,
 		Page:     page,
 		PageSize: pageSize,
@@ -167,9 +167,15 @@ func (oh *ObjHttp) List(ctx context.Context, fuzzyFileName string, page int64, p
 	}, nil
 }
 
-func (oh *ObjHttp) getWithId(ctx context.Context, objectId string) ([]byte, error) {
+// Get retrieves an object by its ID using HTTP.
+//
+// Parameters:
+//
+//	ctx: The context for the request.
+//	objectId: The unique identifier of the object to retrieve.
+func (oh *ObjHttp) Get(ctx context.Context, bucketId string, objectId string) ([]byte, error) {
 	object, err := storage_http.Default().GetObject(ctx, &storage_http.ObjectRequest{
-		BucketId: oh.bucketId,
+		BucketId: bucketId,
 		ObjectId: objectId,
 	})
 	if err != nil {
@@ -179,23 +185,20 @@ func (oh *ObjHttp) getWithId(ctx context.Context, objectId string) ([]byte, erro
 	return object, nil
 }
 
-// Get retrieves an object by its ID using HTTP.
+// Put uploads the provided data to the object storage with the given filename.
 //
 // Parameters:
 //
 //	ctx: The context for the request.
-//	objectId: The unique identifier of the object to retrieve.
-func (oh *ObjHttp) Get(ctx context.Context, objectId string) ([]byte, error) {
-	return oh.getWithId(ctx, objectId)
-}
-
-func (oh *ObjHttp) putWithId(ctx context.Context, filename string, data []byte) (string, error) {
+//	filename: The name of the file to store.
+//	data: The byte data to upload.
+func (oh *ObjHttp) Put(ctx context.Context, bucketId string, filename string, data []byte) (string, error) {
 	_, ok := getObjectType(filename)
 	if !ok {
 		return "", errors.New("object type not supported")
 	}
 	object, err := storage_http.Default().PutObject(ctx, &storage_http.PutObjectRequest{
-		BucketId: oh.bucketId,
+		BucketId: bucketId,
 		Filename: filename,
 		Data:     data,
 		ActorId:  env.GetActorEnv().ActorId,
@@ -208,25 +211,14 @@ func (oh *ObjHttp) putWithId(ctx context.Context, filename string, data []byte) 
 	return object, nil
 }
 
-// Put uploads the provided data to the object storage with the given filename.
-//
-// Parameters:
-//
-//	ctx: The context for the request.
-//	filename: The name of the file to store.
-//	data: The byte data to upload.
-func (oh *ObjHttp) Put(ctx context.Context, filename string, data []byte) (string, error) {
-	return oh.putWithId(ctx, filename, data)
-}
-
 // Delete deletes an object from the specified bucket.
 // Parameters:
 //
 //	ctx: The context used for the HTTP request.
 //	objectId: The identifier of the object to delete.
-func (oh *ObjHttp) Delete(ctx context.Context, objectId string) (bool, error) {
+func (oh *ObjHttp) Delete(ctx context.Context, bucketId string, objectId string) (bool, error) {
 	resp, err := storage_http.Default().DeleteObject(ctx, &storage_http.ObjectRequest{
-		BucketId: oh.bucketId,
+		BucketId: bucketId,
 		ObjectId: objectId,
 	})
 	if err != nil {

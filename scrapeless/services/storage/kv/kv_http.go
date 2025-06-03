@@ -108,8 +108,8 @@ func (kh *KvHttp) GetNamespace(ctx context.Context, namespaceName string) (*KvNa
 // Parameters:
 //
 //	ctx:The request context.
-func (kh *KvHttp) DelNamespace(ctx context.Context) (bool, error) {
-	ok, err := storage_http.Default().DelNamespace(ctx, kh.namespaceId)
+func (kh *KvHttp) DelNamespace(ctx context.Context, namespaceId string) (bool, error) {
+	ok, err := storage_http.Default().DelNamespace(ctx, namespaceId)
 	if err != nil {
 		log.Errorf("failed to delete kv namespace: %v", code.Format(err))
 		return false, code.Format(err)
@@ -122,9 +122,9 @@ func (kh *KvHttp) DelNamespace(ctx context.Context) (bool, error) {
 //
 //	ctx: The request context.
 //	name: New namespace name
-func (kh *KvHttp) RenameNamespace(ctx context.Context, name string) (ok bool, namespaceName string, err error) {
+func (kh *KvHttp) RenameNamespace(ctx context.Context, namespaceId string, name string) (ok bool, namespaceName string, err error) {
 	name = name + "-" + env.GetActorEnv().RunId
-	ok, err = storage_http.Default().RenameNamespace(ctx, kh.namespaceId, name)
+	ok, err = storage_http.Default().RenameNamespace(ctx, namespaceId, name)
 	if err != nil {
 		log.Errorf("failed to rename kv namespace: %v", code.Format(err))
 		return false, "", code.Format(err)
@@ -138,7 +138,7 @@ func (kh *KvHttp) RenameNamespace(ctx context.Context, name string) (ok bool, na
 //	ctx: Request context
 //	page: Page number (starting from 1). Defaults to 1 if <=0
 //	pageSize: Number of items per page. Minimum 10, defaults to 10 if smaller
-func (kh *KvHttp) ListKeys(ctx context.Context, page int, pageSize int) (*KvKeys, error) {
+func (kh *KvHttp) ListKeys(ctx context.Context, namespaceId string, page int, pageSize int) (*KvKeys, error) {
 	if page <= 0 {
 		page = 1
 	}
@@ -146,7 +146,7 @@ func (kh *KvHttp) ListKeys(ctx context.Context, page int, pageSize int) (*KvKeys
 		pageSize = 10
 	}
 	keys, err := storage_http.Default().ListKeys(ctx, &storage_http.ListKeyInfo{
-		NamespaceId: kh.namespaceId,
+		NamespaceId: namespaceId,
 		Page:        page,
 		Size:        pageSize,
 	})
@@ -166,9 +166,45 @@ func (kh *KvHttp) ListKeys(ctx context.Context, page int, pageSize int) (*KvKeys
 	}
 	return kvKeys, nil
 }
-func (kh *KvHttp) setValueWithId(ctx context.Context, key string, value string, expiration uint) (bool, error) {
+func (kh *KvHttp) DelValue(ctx context.Context, namespaceId string, key string) (bool, error) {
+	ok, err := storage_http.Default().DelValue(ctx, namespaceId, key)
+	if err != nil {
+		log.Errorf("failed to delete kv value: %v", code.Format(err))
+		return false, code.Format(err)
+	}
+	return ok, nil
+}
+
+func (kh *KvHttp) BulkSetValue(ctx context.Context, namespaceId string, data []BulkItem) (successCount int64, err error) {
+	var items []storage_http.BulkItem
+	for _, datum := range data {
+		items = append(items, storage_http.BulkItem{
+			Key:        datum.Key,
+			Value:      datum.Value,
+			Expiration: datum.Expiration,
+		})
+	}
+	val, err := storage_http.Default().BulkSetValue(ctx, &storage_http.BulkSet{
+		NamespaceId: namespaceId,
+		Items:       items,
+	})
+	if err != nil {
+		log.Errorf("failed to bulk set kv value: %v", code.Format(err))
+		return 0, code.Format(err)
+	}
+	return val, nil
+}
+func (kh *KvHttp) BulkDelValue(ctx context.Context, namespaceId string, keys []string) (bool, error) {
+	ok, err := storage_http.Default().BulkDelValue(ctx, namespaceId, keys)
+	if err != nil {
+		log.Errorf("failed to bulk delete kv value: %v", code.Format(err))
+		return false, code.Format(err)
+	}
+	return ok, nil
+}
+func (kh *KvHttp) SetValue(ctx context.Context, namespaceId string, key string, value string, expiration uint) (bool, error) {
 	ok, err := storage_http.Default().SetValue(ctx, &storage_http.SetValue{
-		NamespaceId: kh.namespaceId,
+		NamespaceId: namespaceId,
 		Key:         key,
 		Value:       value,
 		Expiration:  expiration,
@@ -179,54 +215,13 @@ func (kh *KvHttp) setValueWithId(ctx context.Context, key string, value string, 
 	}
 	return ok, nil
 }
-func (kh *KvHttp) DelValue(ctx context.Context, key string) (bool, error) {
-	ok, err := storage_http.Default().DelValue(ctx, kh.namespaceId, key)
-	if err != nil {
-		log.Errorf("failed to delete kv value: %v", code.Format(err))
-		return false, code.Format(err)
-	}
-	return ok, nil
-}
-func (kh *KvHttp) getValueWithId(ctx context.Context, key string) (string, error) {
-	val, err := storage_http.Default().GetValue(ctx, kh.namespaceId, key)
+func (kh *KvHttp) GetValue(ctx context.Context, namespaceId string, key string) (string, error) {
+	val, err := storage_http.Default().GetValue(ctx, namespaceId, key)
 	if err != nil {
 		log.Errorf("failed to get kv value: %v", code.Format(err))
 		return "", code.Format(err)
 	}
 	return val, nil
-}
-func (kh *KvHttp) BulkSetValue(ctx context.Context, data []BulkItem) (successCount int64, err error) {
-	var items []storage_http.BulkItem
-	for _, datum := range data {
-		items = append(items, storage_http.BulkItem{
-			Key:        datum.Key,
-			Value:      datum.Value,
-			Expiration: datum.Expiration,
-		})
-	}
-	val, err := storage_http.Default().BulkSetValue(ctx, &storage_http.BulkSet{
-		NamespaceId: kh.namespaceId,
-		Items:       items,
-	})
-	if err != nil {
-		log.Errorf("failed to bulk set kv value: %v", code.Format(err))
-		return 0, code.Format(err)
-	}
-	return val, nil
-}
-func (kh *KvHttp) BulkDelValue(ctx context.Context, keys []string) (bool, error) {
-	ok, err := storage_http.Default().BulkDelValue(ctx, kh.namespaceId, keys)
-	if err != nil {
-		log.Errorf("failed to bulk delete kv value: %v", code.Format(err))
-		return false, code.Format(err)
-	}
-	return ok, nil
-}
-func (kh *KvHttp) SetValue(ctx context.Context, key string, value string, expiration uint) (bool, error) {
-	return kh.setValueWithId(ctx, key, value, expiration)
-}
-func (kh *KvHttp) GetValue(ctx context.Context, key string) (string, error) {
-	return kh.getValueWithId(ctx, key)
 }
 func (k *KvHttp) Close() error {
 	return storage_http.Default().Close()

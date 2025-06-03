@@ -94,9 +94,9 @@ func (ds *DSHttp) CreateDataset(ctx context.Context, name string) (id string, da
 //
 //	ctx: The request context.
 //	name: Original dataset name (will be combined with runtime ID internally)
-func (ds *DSHttp) UpdateDataset(ctx context.Context, name string) (ok bool, datasetName string, err error) {
+func (ds *DSHttp) UpdateDataset(ctx context.Context, datasetId string, name string) (ok bool, datasetName string, err error) {
 	name = name + "-" + env.GetActorEnv().RunId
-	ok, err = storage_http.Default().UpdateDataset(ctx, ds.datasetId, name)
+	ok, err = storage_http.Default().UpdateDataset(ctx, datasetId, name)
 	if err != nil {
 		log.Errorf("failed to update dataset: %v", code.Format(err))
 		return false, "", code.Format(err)
@@ -109,8 +109,8 @@ func (ds *DSHttp) UpdateDataset(ctx context.Context, name string) (ok bool, data
 // Parameters:
 //
 //	ctx: The context for the request, used for cancellation and timeouts.
-func (ds *DSHttp) DelDataset(ctx context.Context) (bool, error) {
-	ok, err := storage_http.Default().DelDataset(ctx, ds.datasetId)
+func (ds *DSHttp) DelDataset(ctx context.Context, datasetId string) (bool, error) {
+	ok, err := storage_http.Default().DelDataset(ctx, datasetId)
 	if err != nil {
 		log.Errorf("failed to delete dataset: %v", code.Format(err))
 		return false, code.Format(err)
@@ -118,8 +118,13 @@ func (ds *DSHttp) DelDataset(ctx context.Context) (bool, error) {
 	return ok, nil
 }
 
-func (ds *DSHttp) addItemsWithId(ctx context.Context, items []map[string]any) (bool, error) {
-	ok, err := storage_http.Default().AddDatasetItem(ctx, ds.datasetId, items)
+// AddItems adds a list of items to the dataset data store.
+//
+// Parameters:
+//   - ctx: The context for the request.
+//   - items: A slice of maps representing the items to add. Each map contains key-value pairs of any type.
+func (ds *DSHttp) AddItems(ctx context.Context, datasetId string, items []map[string]any) (bool, error) {
+	ok, err := storage_http.Default().AddDatasetItem(ctx, datasetId, items)
 	if err != nil {
 		log.Errorf("failed to add items: %v", err)
 		return false, code.Format(err)
@@ -127,7 +132,15 @@ func (ds *DSHttp) addItemsWithId(ctx context.Context, items []map[string]any) (b
 	return ok, nil
 }
 
-func (ds *DSHttp) getItemsWithId(ctx context.Context, page int, pageSize int, desc bool) (*ItemsResponse, error) {
+// GetItems retrieves a list of items based on the provided pagination and sorting parameters.
+//
+// Parameters:
+//
+//	ctx: The context for the request.
+//	page: The page number to retrieve (starting from 1).
+//	pageSize: The number of items to return per page.
+//	desc: Whether to sort items in descending order (true) or ascending (false).
+func (ds *DSHttp) GetItems(ctx context.Context, datasetId string, page int, pageSize int, desc bool) (*ItemsResponse, error) {
 	if page < 1 {
 		page = 1
 	}
@@ -135,7 +148,7 @@ func (ds *DSHttp) getItemsWithId(ctx context.Context, page int, pageSize int, de
 		pageSize = 10
 	}
 	items, err := storage_http.Default().GetDataset(ctx, &storage_http.GetDataset{
-		DatasetId: ds.datasetId,
+		DatasetId: datasetId,
 		Desc:      desc,
 		Page:      page,
 		PageSize:  pageSize,
@@ -152,27 +165,6 @@ func (ds *DSHttp) getItemsWithId(ctx context.Context, page int, pageSize int, de
 		Items: itemArray,
 		Total: items.Total,
 	}, nil
-}
-
-// AddItems adds a list of items to the dataset data store.
-//
-// Parameters:
-//   - ctx: The context for the request.
-//   - items: A slice of maps representing the items to add. Each map contains key-value pairs of any type.
-func (ds *DSHttp) AddItems(ctx context.Context, items []map[string]any) (bool, error) {
-	return ds.addItemsWithId(ctx, items)
-}
-
-// GetItems retrieves a list of items based on the provided pagination and sorting parameters.
-//
-// Parameters:
-//
-//	ctx: The context for the request.
-//	page: The page number to retrieve (starting from 1).
-//	pageSize: The number of items to return per page.
-//	desc: Whether to sort items in descending order (true) or ascending (false).
-func (ds *DSHttp) GetItems(ctx context.Context, page int, pageSize int, desc bool) (*ItemsResponse, error) {
-	return ds.getItemsWithId(ctx, page, pageSize, desc)
 }
 
 func (ds *DSHttp) Close() error {
