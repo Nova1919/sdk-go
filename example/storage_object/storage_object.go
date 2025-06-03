@@ -11,14 +11,14 @@ func main() {
 	defer client.Close()
 
 	// Put object The supported types include JSON、html、png
-	objectId, err := client.Storage.GetObject().Put(context.Background(), "object.json", []byte("data"))
+	objectId, err := client.Storage.Object.Put(context.Background(), "bucketId", "object.json", []byte("data"))
 	if err != nil {
 		log.Error(err.Error())
 		return
 	}
 	if objectId != "" {
 		// Get object
-		resp, err := client.Storage.GetObject().Get(context.Background(), objectId)
+		resp, err := client.Storage.Object.Get(context.Background(), "bucketId", objectId)
 		if err != nil {
 			panic(err)
 		}

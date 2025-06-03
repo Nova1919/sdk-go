@@ -11,7 +11,7 @@ func main() {
 	client := scrapeless.New(scrapeless.WithStorage())
 
 	// push a message to queue
-	msgId, err := client.Storage.GetQueue().Push(context.Background(), queue.PushQueue{
+	msgId, err := client.Storage.Queue.Push(context.Background(), "queueId", queue.PushQueue{
 		Name:    "test-cy",
 		Payload: []byte("aaaa"),
 	})
@@ -22,7 +22,7 @@ func main() {
 	log.Info(msgId)
 
 	// pull a message from queue
-	pullResp, err := client.Storage.GetQueue().Pull(context.Background(), 100)
+	pullResp, err := client.Storage.Queue.Pull(context.Background(), "queueId", 100)
 	if err != nil {
 		log.Error(err.Error())
 		return
@@ -30,7 +30,7 @@ func main() {
 	log.Infof("%v", pullResp)
 	for _, v := range pullResp {
 		// ack message
-		err = client.Storage.GetQueue().Ack(context.Background(), v.QueueID)
+		err = client.Storage.Queue.Ack(context.Background(), "queueId", v.QueueID)
 		if err != nil {
 			log.Error(err.Error())
 		}

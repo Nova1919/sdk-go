@@ -12,14 +12,14 @@ func main() {
 	defer client.Close()
 
 	// Set value use default namespace
-	ok, err := client.Storage.GetKv().SetValue(context.Background(), "key", "nice boy", 20)
+	ok, err := client.Storage.Kv.SetValue(context.Background(), "namespaceId", "key", "nice boy", 20)
 	if err != nil {
 		log.Error(err.Error())
 	}
 	log.Infof("ok:%v", ok)
 
 	// Get value use default namespace
-	value, err := client.Storage.GetKv().GetValue(context.Background(), "key")
+	value, err := client.Storage.Kv.GetValue(context.Background(), "namespaceId", "key")
 	if err != nil {
 		log.Error(err.Error())
 	}

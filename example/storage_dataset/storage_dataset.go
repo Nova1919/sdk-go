@@ -10,7 +10,7 @@ func main() {
 	client := scrapeless.New(scrapeless.WithStorage())
 	defer client.Close()
 
-	success, err := client.Storage.GetDataset().AddItems(context.Background(), []map[string]any{
+	success, err := client.Storage.Dataset.AddItems(context.Background(), "datasetId", []map[string]any{
 		{
 			"name": "John",
 			"age":  20,
@@ -25,7 +25,7 @@ func main() {
 		return
 	}
 	if success {
-		items, err := client.Storage.GetDataset().GetItems(context.Background(), 1, 10, false)
+		items, err := client.Storage.Dataset.GetItems(context.Background(), "datasetId", 1, 10, false)
 		if err != nil {
 			log.Error(err.Error())
 			return
