@@ -16,7 +16,6 @@ import (
 	"github.com/scrapeless-ai/sdk-go/scrapeless/services/storage/kv"
 	"github.com/scrapeless-ai/sdk-go/scrapeless/services/storage/object"
 	"github.com/scrapeless-ai/sdk-go/scrapeless/services/storage/queue"
-	"github.com/spf13/viper"
 	"reflect"
 )
 
@@ -25,7 +24,7 @@ type Actor struct {
 	Proxy       proxies.Proxy
 	Captcha     captcha.Captcha
 	storage     storage.Storage
-	server      httpserver.Server
+	Server      httpserver.Server
 	Router      router.Router
 	closeFun    []func() error
 	datasetId   string
@@ -41,7 +40,7 @@ func New() *Actor {
 	actor.Browser = browser.NewBHttp()
 	actor.Captcha = captcha.NewCaHttp()
 	actor.Proxy = proxies.NewPHttp()
-	actor.server = httpserver.New()
+	actor.Server = httpserver.New()
 	actor.Router = router.New()
 	actor.datasetId = env.Env.Actor.DatasetId
 	actor.namespaceId = env.Env.Actor.KvNamespaceId
@@ -59,7 +58,10 @@ func (a *Actor) Close() {
 
 // Input get input data from env.
 func (a *Actor) Input(data any) error {
-	input := viper.GetStringMapString("SCRAPELESS_INPUT")
+	input, err := a.GetValue(context.Background(), "INPUT")
+	if err != nil {
+		return err
+	}
 	inputData, _ := json.Marshal(input)
 	tf := reflect.TypeOf(data)
 	if tf.Kind() != reflect.Ptr {
@@ -69,7 +71,7 @@ func (a *Actor) Input(data any) error {
 }
 
 func (a *Actor) Start() error {
-	return a.server.Start(fmt.Sprintf(":%s", env.Env.Actor.HttpPort))
+	return a.Server.Start(fmt.Sprintf(":%s", env.Env.Actor.HttpPort))
 }
 
 /**
