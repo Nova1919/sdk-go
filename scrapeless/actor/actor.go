@@ -63,8 +63,11 @@ func (a *Actor) Input(data any) error {
 	if err != nil {
 		return err
 	}
-	input = gjson.Parse(input).Get("data").String()
-	inputData, _ := json.Marshal(input)
+	input = gjson.Parse(input).String()
+	inputData, err := json.Marshal(input)
+	if err != nil {
+		return err
+	}
 	tf := reflect.TypeOf(data)
 	if tf.Kind() != reflect.Ptr {
 		return errors.New("data must be ptr")
