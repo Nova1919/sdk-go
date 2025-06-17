@@ -16,6 +16,7 @@ import (
 	"github.com/scrapeless-ai/sdk-go/scrapeless/services/storage/kv"
 	"github.com/scrapeless-ai/sdk-go/scrapeless/services/storage/object"
 	"github.com/scrapeless-ai/sdk-go/scrapeless/services/storage/queue"
+	"github.com/tidwall/gjson"
 	"reflect"
 )
 
@@ -62,6 +63,7 @@ func (a *Actor) Input(data any) error {
 	if err != nil {
 		return err
 	}
+	input = gjson.Parse(input).Get("data").String()
 	inputData, _ := json.Marshal(input)
 	tf := reflect.TypeOf(data)
 	if tf.Kind() != reflect.Ptr {
