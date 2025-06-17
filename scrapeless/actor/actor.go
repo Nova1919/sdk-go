@@ -64,15 +64,11 @@ func (a *Actor) Input(data any) error {
 		return err
 	}
 	input = gjson.Parse(input).String()
-	inputData, err := json.Marshal(input)
-	if err != nil {
-		return err
-	}
 	tf := reflect.TypeOf(data)
 	if tf.Kind() != reflect.Ptr {
 		return errors.New("data must be ptr")
 	}
-	return json.Unmarshal(inputData, data)
+	return json.Unmarshal([]byte(input), data)
 }
 
 func (a *Actor) Start() error {
