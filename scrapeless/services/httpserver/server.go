@@ -2,10 +2,12 @@ package httpserver
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/scrapeless-ai/sdk-go/env"
 	"io"
 	"net/http"
+	"strings"
 )
 
 type ServerMode string
@@ -82,5 +84,8 @@ func (s *Server) Start(addr ...string) error {
 	if len(addr) == 0 {
 		addr = append(addr, env.Env.Actor.HttpPort)
 	}
-	return http.ListenAndServe(addr[0], s.handler)
+	if !strings.Contains(addr[0], ":") {
+		addr[0] = fmt.Sprintf(":%s", addr[0])
+	}
+	return http.ListenAndServe(fmt.Sprintf("%s", addr[0]), s.handler)
 }

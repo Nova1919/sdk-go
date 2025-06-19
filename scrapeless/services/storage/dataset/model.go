@@ -15,7 +15,7 @@ type DatasetInfo struct {
 	Name       string   `json:"name,omitempty"`
 	ActorId    string   `json:"actorId,omitempty"`
 	RunId      string   `json:"runId,omitempty"`
-	Fields     []string `json:"fields,omitempty"`
+	Fields     []string `json:"fields,omitempty"` //Fields in the dataset
 	CreatedAt  string   `json:"createdAt,omitempty"`
 	UpdatedAt  string   `json:"updatedAt,omitempty"`
 	AccessedAt string   `json:"accessedAt,omitempty"`

@@ -35,19 +35,19 @@ func main() {
 
 	// 3. Dataset operations
 	// 3.1 Add items to dataset
-	ok, err := a.Storage.GetDataset().AddItems(context.Background(), []map[string]any{{"title": "test"}})
+	ok, err := a.AddItems(context.Background(), []map[string]any{{"title": "test"}})
 	if err != nil {
 		log.Error(err)
 	}
 	log.Info("ok:", ok)
 	// 3.2  Get data from dataset
-	items, err := a.Storage.GetDataset().GetItems(context.Background(), 1, 1, false)
+	items, err := a.GetItems(context.Background(), 1, 1, false)
 	if err != nil {
 		log.Error(err.Error())
 	}
 	log.Infof("%v", items)
 	// 3.3 You can also use the underlying API directly
-	id, name, err := a.Storage.GetDataset().CreateDataset(context.Background(), "New Dataset")
+	id, name, err := a.CreateDataset(context.Background(), "New Dataset")
 	if err != nil {
 		log.Error(err.Error())
 	}
@@ -55,13 +55,13 @@ func main() {
 
 	// 4. KV storage operations
 	// 4.1 Store data
-	value, err := a.Storage.GetKv().SetValue(context.Background(), "key", "value", 0)
+	value, err := a.SetValue(context.Background(), "key", "value", 0)
 	if err != nil {
 		log.Error(err.Error())
 	}
 	log.Infof("value:%v", value)
 	// 4.2 Retrieve data
-	kvValue, err := a.Storage.GetKv().GetValue(context.Background(), "key")
+	kvValue, err := a.GetValue(context.Background(), "key")
 	if err != nil {
 		log.Error(err.Error())
 	}
@@ -69,13 +69,13 @@ func main() {
 	// 4.3  Store structured data
 	m := map[string]any{"name": "test"}
 	kvData, _ := json.Marshal(m)
-	setValue, err := a.Storage.GetKv().SetValue(context.Background(), "key", string(kvData), 0)
+	setValue, err := a.SetValue(context.Background(), "key", string(kvData), 0)
 	if err != nil {
 		log.Error(err.Error())
 	}
 	log.Infof("setValue:%v", setValue)
 	// 4.4 Retrieve and parse structured data
-	kvValue, err = a.Storage.GetKv().GetValue(context.Background(), "key")
+	kvValue, err = a.GetValue(context.Background(), "key")
 	if err != nil {
 		log.Error(err.Error())
 	}
@@ -103,7 +103,7 @@ func main() {
 
 	// 6. Queue operations
 	// 6.1 Push message to queue
-	msgId, err := a.Storage.GetQueue().Push(context.Background(), queue.PushQueue{
+	msgId, err := a.PushMessage(context.Background(), queue.PushQueue{
 		Name:    "example",
 		Payload: []byte("example"),
 	})
@@ -112,13 +112,13 @@ func main() {
 	}
 	log.Infof("msgId:%v", msgId)
 	// 6.2 Pull message from queue
-	queueResp, err := a.Storage.GetQueue().Pull(context.Background(), 1)
+	queueResp, err := a.PullMessage(context.Background(), 1)
 	if err != nil {
 		log.Error(err.Error())
 	}
 	log.Infof("%v", queueResp)
 	// 6.3 Acknowledge message completion
-	err = a.Storage.GetQueue().Ack(context.Background(), queueResp[0].QueueID)
+	err = a.AckMessage(context.Background(), queueResp[0].QueueID)
 	if err != nil {
 		log.Error(err.Error())
 	}

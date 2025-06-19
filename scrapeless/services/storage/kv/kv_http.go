@@ -166,6 +166,13 @@ func (kh *KvHttp) ListKeys(ctx context.Context, namespaceId string, page int, pa
 	}
 	return kvKeys, nil
 }
+
+// DelValue deletes the value associated with the specified key in the given namespace.
+// Parameters:
+//
+//	ctx: Request context
+//	namespaceId: Identifier of the namespace
+//	key: The key to delete
 func (kh *KvHttp) DelValue(ctx context.Context, namespaceId string, key string) (bool, error) {
 	ok, err := storage_http.Default().DelValue(ctx, namespaceId, key)
 	if err != nil {
@@ -175,6 +182,12 @@ func (kh *KvHttp) DelValue(ctx context.Context, namespaceId string, key string) 
 	return ok, nil
 }
 
+// BulkSetValue sets multiple key-value pairs in the specified namespace.
+// Parameters:
+//
+//	ctx: Request context
+//	namespaceId: Identifier of the namespace
+//	data: A slice of BulkItem containing key, value, and optional expiration
 func (kh *KvHttp) BulkSetValue(ctx context.Context, namespaceId string, data []BulkItem) (successCount int64, err error) {
 	var items []storage_http.BulkItem
 	for _, datum := range data {
@@ -194,6 +207,13 @@ func (kh *KvHttp) BulkSetValue(ctx context.Context, namespaceId string, data []B
 	}
 	return val, nil
 }
+
+// BulkDelValue deletes multiple keys from the specified namespace.
+// Parameters:
+//
+//	ctx: Request context
+//	namespaceId: Identifier of the namespace
+//	keys: A slice of keys to delete
 func (kh *KvHttp) BulkDelValue(ctx context.Context, namespaceId string, keys []string) (bool, error) {
 	ok, err := storage_http.Default().BulkDelValue(ctx, namespaceId, keys)
 	if err != nil {
@@ -202,6 +222,15 @@ func (kh *KvHttp) BulkDelValue(ctx context.Context, namespaceId string, keys []s
 	}
 	return ok, nil
 }
+
+// SetValue sets a key-value pair in the specified namespace.
+// Parameters:
+//
+//	ctx: Request context
+//	namespaceId:
+//	key: kv key
+//	value: kv value
+//	expiration: kv expiration  Time-to-live in seconds (s)
 func (kh *KvHttp) SetValue(ctx context.Context, namespaceId string, key string, value string, expiration uint) (bool, error) {
 	ok, err := storage_http.Default().SetValue(ctx, &storage_http.SetValue{
 		NamespaceId: namespaceId,
@@ -215,6 +244,13 @@ func (kh *KvHttp) SetValue(ctx context.Context, namespaceId string, key string, 
 	}
 	return ok, nil
 }
+
+// GetValue retrieves the value for the specified key in the given namespace.
+// Parameters:
+//
+//	ctx: Request context
+//	namespaceId: Identifier of the namespace
+//	key: The key whose value is to be retrieved
 func (kh *KvHttp) GetValue(ctx context.Context, namespaceId string, key string) (string, error) {
 	val, err := storage_http.Default().GetValue(ctx, namespaceId, key)
 	if err != nil {
@@ -223,6 +259,6 @@ func (kh *KvHttp) GetValue(ctx context.Context, namespaceId string, key string) 
 	}
 	return val, nil
 }
-func (k *KvHttp) Close() error {
+func (kh *KvHttp) Close() error {
 	return storage_http.Default().Close()
 }

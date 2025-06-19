@@ -31,8 +31,8 @@ type PushQueue struct {
 	Name     string `json:"name"`
 	Payload  []byte `json:"payload"`
 	Retry    int64  `json:"retry"`
-	Timeout  int64  `json:"timeout"`
-	Deadline int64  `json:"deadline"`
+	Timeout  int64  `json:"timeout"`  // timeout-->[60,300] The execution time after the message is pulled, such as 60 seconds; if it exceeds this time, the message will be reset to the pending pull state; Until the retry count is exceeded or the deadline is exceeded
+	Deadline int64  `json:"deadline"` // deadline--> [300,86400] The deadline by which messages can be pulled, such as two hours later. Messages that are not pulled after this time will be set as failed
 }
 
 type Msg struct {

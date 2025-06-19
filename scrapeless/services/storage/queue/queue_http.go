@@ -247,6 +247,6 @@ func (q *QueueHttp) Ack(ctx context.Context, queueId string, msgId string) error
 	return nil
 }
 
-func (k *QueueHttp) Close() error {
+func (q *QueueHttp) Close() error {
 	return nil
 }

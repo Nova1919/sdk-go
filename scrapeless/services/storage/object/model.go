@@ -27,7 +27,7 @@ type ObjectInfo struct {
 	BucketId  string `json:"bucketId,omitempty"`
 	ActorId   string `json:"actorId,omitempty"`
 	RunId     string `json:"runId,omitempty"`
-	FileType  string `json:"fileType,omitempty"`
+	FileType  string `json:"fileType,omitempty"` // The value of FileType is one of json, html, png
 	CreatedAt string `json:"createdAt,omitempty"`
 	UpdatedAt string `json:"updatedAt,omitempty"`
 }
