@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	scrapeless "github.com/scrapeless-ai/sdk-go/scrapeless"
+	"github.com/scrapeless-ai/sdk-go/scrapeless"
 	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
 	"github.com/scrapeless-ai/sdk-go/scrapeless/services/browser"
 )

@@ -75,7 +75,7 @@ func (c *Client) GetNamespace(ctx context.Context, namespaceId string) (*KvNames
 		Url:     fmt.Sprintf("%s/api/v1/kv/%s", c.BaseUrl, namespaceId),
 		Headers: map[string]string{},
 	})
-	log.Infof("get namespace body:%s\n", body)
+	log.Infof("get namespace body:%s", body)
 	if err != nil {
 		log.Errorf("get namespace err:%v", err)
 		return nil, err
@@ -104,7 +104,7 @@ func (c *Client) DelNamespace(ctx context.Context, namespaceId string) (bool, er
 		Url:     fmt.Sprintf("%s/api/v1/kv/%s", c.BaseUrl, namespaceId),
 		Headers: map[string]string{},
 	})
-	log.Infof("del namespace body:%s\n", body)
+	log.Infof("del namespace body:%s", body)
 	if err != nil {
 		log.Errorf("del namespace err:%v", err)
 		return false, err
@@ -117,9 +117,7 @@ func (c *Client) DelNamespace(ctx context.Context, namespaceId string) (bool, er
 	if resp.Err {
 		return false, fmt.Errorf("get namespace err:%s", resp.Msg)
 	}
-	ok := gjson.Parse(body).Get("data.success").Bool()
-
-	return ok, nil
+	return true, nil
 }
 
 func (c *Client) RenameNamespace(ctx context.Context, namespaceId string, name string) (bool, error) {
@@ -129,7 +127,7 @@ func (c *Client) RenameNamespace(ctx context.Context, namespaceId string, name s
 		Body:    fmt.Sprintf(`{"name":"%s"}`, name),
 		Headers: map[string]string{},
 	})
-	log.Infof("rename namespace body:%s\n", body)
+	log.Infof("rename namespace body:%s", body)
 	if err != nil {
 		log.Errorf("rename namespace err:%v", err)
 		return false, err
@@ -143,9 +141,7 @@ func (c *Client) RenameNamespace(ctx context.Context, namespaceId string, name s
 	if resp.Err {
 		return false, fmt.Errorf("get namespace err:%s", resp.Msg)
 	}
-	ok := gjson.Parse(body).Get("data.success").Bool()
-
-	return ok, nil
+	return true, nil
 }
 
 func (c *Client) SetValue(ctx context.Context, req *SetValue) (bool, error) {
@@ -165,12 +161,11 @@ func (c *Client) SetValue(ctx context.Context, req *SetValue) (bool, error) {
 		Body:    string(reqBodyStr),
 		Headers: map[string]string{},
 	})
-	log.Infof("set value body :%s\n", body)
+	log.Infof("set value body :%s", body)
 	if err != nil {
 		log.Errorf("request error :%v", err)
 		return false, err
 	}
-	log.Infof("set value body :%v", body)
 	var resp request2.RespInfo
 	err = json.Unmarshal([]byte(body), &resp)
 	if err != nil {
@@ -181,9 +176,7 @@ func (c *Client) SetValue(ctx context.Context, req *SetValue) (bool, error) {
 		log.Errorf("set value err :%v", resp.Msg)
 		return false, fmt.Errorf("set value err:%s", resp.Msg)
 	}
-	ok := gjson.Parse(body).Get("data.success").Bool()
-
-	return ok, nil
+	return true, nil
 }
 
 func (c *Client) ListKeys(ctx context.Context, req *ListKeyInfo) (*KvKeys, error) {
@@ -192,7 +185,7 @@ func (c *Client) ListKeys(ctx context.Context, req *ListKeyInfo) (*KvKeys, error
 		Url:     fmt.Sprintf("%s/api/v1/kv/%s/keys?page=%d&pageSize=%d", c.BaseUrl, req.NamespaceId, req.Page, req.Size),
 		Headers: map[string]string{},
 	})
-	log.Infof("list keys body :%s\n", body)
+	log.Infof("list keys body :%s", body)
 	if err != nil {
 		log.Errorf("request error :%v", err)
 		return nil, err
@@ -222,7 +215,7 @@ func (c *Client) GetValue(ctx context.Context, namespaceId string, key string) (
 		Url:     fmt.Sprintf("%s/api/v1/kv/%s/%s", c.BaseUrl, namespaceId, key),
 		Headers: map[string]string{},
 	})
-	log.Infof("get value body :%s\n", body)
+	log.Infof("get value body :%s", body)
 	if err != nil {
 		log.Errorf("request error :%v", err)
 		return "", err
@@ -246,7 +239,7 @@ func (c *Client) DelValue(ctx context.Context, namespaceId string, key string) (
 		Url:     fmt.Sprintf("%s/api/v1/kv/%s/%s", c.BaseUrl, namespaceId, key),
 		Headers: map[string]string{},
 	})
-	log.Infof("del value body :%s\n", body)
+	log.Infof("del value body :%s", body)
 	if err != nil {
 		log.Errorf("request error :%v", err)
 		return false, err
@@ -260,8 +253,7 @@ func (c *Client) DelValue(ctx context.Context, namespaceId string, key string) (
 	if resp.Err {
 		return false, fmt.Errorf("list Keys err:%s", resp.Msg)
 	}
-	ok := gjson.Parse(body).Get("data.success").Bool()
-	return ok, nil
+	return true, nil
 }
 
 func (c *Client) BulkSetValue(ctx context.Context, req *BulkSet) (int64, error) {
@@ -275,7 +267,7 @@ func (c *Client) BulkSetValue(ctx context.Context, req *BulkSet) (int64, error) 
 		Body:    fmt.Sprintf(`{"Items":%s}`, reqBody),
 		Headers: map[string]string{},
 	})
-	log.Infof("bulk set value body :%s\n", body)
+	log.Infof("bulk set value body :%s", body)
 	if err != nil {
 		return 0, err
 	}
@@ -303,9 +295,9 @@ func (c *Client) BulkDelValue(ctx context.Context, namespaceId string, keys []st
 		Body:    fmt.Sprintf(`{"keys":%s}`, reqBody),
 		Headers: map[string]string{},
 	})
-	log.Infof("bulk del value body :%s\n", body)
+	log.Infof("bulk del value body :%s", body)
 	if err != nil {
-		log.Errorf("request error :", err)
+		log.Error("request error :", err)
 		return false, err
 	}
 	var resp request2.RespInfo
@@ -317,6 +309,5 @@ func (c *Client) BulkDelValue(ctx context.Context, namespaceId string, keys []st
 	if resp.Err {
 		return false, fmt.Errorf("bulk set value err:%s", resp.Msg)
 	}
-	ok := gjson.Parse(body).Get("data.success").Bool()
-	return ok, nil
+	return true, nil
 }

@@ -20,7 +20,7 @@ func (c *Client) ListBuckets(ctx context.Context, page, size int) (*Object, erro
 		Url:     fmt.Sprintf("%s/api/v1/object/buckets?page=%d&pageSize=%d", c.BaseUrl, page, size),
 		Headers: map[string]string{},
 	})
-	log.Infof("list buckets body :%s\n", body)
+	log.Infof("list buckets body :%s", body)
 	if err != nil {
 		log.Errorf("list buckets err:%v", err)
 		return nil, err
@@ -55,7 +55,7 @@ func (c *Client) CreateBucket(ctx context.Context, req *CreateBucketRequest) (st
 		Body:    string(reqBody),
 		Headers: map[string]string{},
 	})
-	log.Infof("create bucket body :%s\n", body)
+	log.Infof("create bucket body :%s", body)
 	if err != nil {
 		log.Errorf("create bucket err:%v", err)
 		return "", err
@@ -82,7 +82,7 @@ func (c *Client) DeleteBucket(ctx context.Context, bucketId string) (bool, error
 		Url:     fmt.Sprintf("%s/api/v1/object/buckets/%s", c.BaseUrl, bucketId),
 		Headers: map[string]string{},
 	})
-	log.Infof("del bucket body :%s\n", body)
+	log.Infof("del bucket body :%s", body)
 	if err != nil {
 		log.Errorf("del bucket err:%v", err)
 		return false, err
@@ -96,10 +96,7 @@ func (c *Client) DeleteBucket(ctx context.Context, bucketId string) (bool, error
 	if resp.Err {
 		return false, fmt.Errorf("get bucket err:%s", resp.Msg)
 	}
-	if ok := gjson.Parse(body).Get("data.success").Bool(); ok {
-		return ok, nil
-	}
-	return false, fmt.Errorf("del bucket err:%s", resp.Msg)
+	return true, nil
 }
 func (c *Client) GetBucket(ctx context.Context, bucketId string) (*Bucket, error) {
 	body, err := request2.Request(ctx, request2.ReqInfo{
@@ -107,7 +104,7 @@ func (c *Client) GetBucket(ctx context.Context, bucketId string) (*Bucket, error
 		Url:     fmt.Sprintf("%s/api/v1/object/buckets/%s", c.BaseUrl, bucketId),
 		Headers: map[string]string{},
 	})
-	log.Infof("get bucket body :%s\n", body)
+	log.Infof("get bucket body :%s", body)
 	if err != nil {
 		log.Errorf("get bucket err:%v", err)
 		return nil, err
@@ -137,7 +134,7 @@ func (c *Client) ListObjects(ctx context.Context, req *ListObjectsRequest) (*Obj
 		Url:     fmt.Sprintf("%s/api/v1/object/buckets/%s/objects", c.BaseUrl, req.BucketId),
 		Headers: map[string]string{},
 	})
-	log.Infof("list objects body :%s\n", body)
+	log.Infof("list objects body :%s", body)
 	if err != nil {
 		log.Errorf("list objects err:%v", err)
 		return nil, err
@@ -167,7 +164,7 @@ func (c *Client) GetObject(ctx context.Context, req *ObjectRequest) ([]byte, err
 		Url:     fmt.Sprintf("%s/api/v1/object/buckets/%s/%s", c.BaseUrl, req.BucketId, req.ObjectId),
 		Headers: map[string]string{},
 	})
-	log.Infof("get object body :%s\n", body)
+	log.Infof("get object body :%s", body)
 	if err != nil {
 		log.Errorf("get object err:%v", err)
 		return nil, err
@@ -190,7 +187,7 @@ func (c *Client) DeleteObject(ctx context.Context, req *ObjectRequest) (bool, er
 		Url:     fmt.Sprintf("%s/api/v1/object/buckets/%s/%s", c.BaseUrl, req.BucketId, req.ObjectId),
 		Headers: map[string]string{},
 	})
-	log.Infof("del object body :%s\n", body)
+	log.Infof("del object body :%s", body)
 	if err != nil {
 		log.Errorf("del object err:%v", err)
 		return false, err
@@ -204,10 +201,7 @@ func (c *Client) DeleteObject(ctx context.Context, req *ObjectRequest) (bool, er
 	if resp.Err {
 		return false, fmt.Errorf("delete object err:%s", resp.Msg)
 	}
-	if ok := gjson.Parse(body).Get("data.success").Bool(); ok {
-		return ok, nil
-	}
-	return false, fmt.Errorf("delete object err:%s", resp.Msg)
+	return true, nil
 }
 
 func (c *Client) PutObject(ctx context.Context, req *PutObjectRequest) (string, error) {
@@ -226,7 +220,7 @@ func (c *Client) PutObject(ctx context.Context, req *PutObjectRequest) (string, 
 	resp, err := c.client.Do(request)
 	defer resp.Body.Close()
 	all, _ := io.ReadAll(resp.Body)
-	log.Infof("put object body :%s\n", string(all))
+	log.Infof("put object body :%s", string(all))
 	if err != nil {
 		log.Errorf("request error :%v", err)
 		return "", err

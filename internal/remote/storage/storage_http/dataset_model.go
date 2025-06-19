@@ -29,8 +29,8 @@ type Dataset struct {
 }
 
 type DatasetStats struct {
-	ItemCount      uint64 `json:"itemCount,omitempty"`
-	CleanItemCount uint64 `json:"cleanItemCount,omitempty"`
+	Size  uint64 `json:"size,omitempty"`
+	Count uint64 `json:"count,omitempty"`
 }
 
 type CreateDatasetRequest struct {

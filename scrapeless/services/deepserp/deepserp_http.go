@@ -22,6 +22,7 @@ func New() Deepserp {
 	return DeepserpHttp{}
 }
 
+// CreateTask creates a new deepSerp task with the given context and request parameters.
 func (s DeepserpHttp) CreateTask(ctx context.Context, req DeepserpTaskRequest) ([]byte, error) {
 	if req.ProxyCountry == "" {
 		req.ProxyCountry = env.Env.ProxyCountry
@@ -42,6 +43,7 @@ func (s DeepserpHttp) Close() error {
 	return dh.Default().Close()
 }
 
+// GetTaskResult retrieves the result of a deepSerp task by its ID.
 func (s DeepserpHttp) GetTaskResult(ctx context.Context, taskId string) ([]byte, error) {
 	result, err := dh.Default().GetTaskResult(ctx, taskId)
 	if err != nil {
