@@ -127,12 +127,7 @@ type StorageOption struct {
 }
 
 func (o *StorageOption) Apply(a *Client) {
-	if o.tp == typeGrpc {
-		a.CloseFun = append(a.CloseFun, a.Storage.Close)
-	} else {
-		a.Storage = storage.NewStorage()
-		a.CloseFun = append(a.CloseFun, a.Storage.Close)
-	}
+	a.Storage = storage.NewStorage(o.tp)
 }
 
 // WithStorage choose storage type.

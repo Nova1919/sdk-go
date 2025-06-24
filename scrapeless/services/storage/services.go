@@ -1,5 +1,7 @@
 package storage
 
+import "github.com/scrapeless-ai/sdk-go/internal/remote/storage"
+
 type Storage struct {
 	*Dataset
 	*KV
@@ -21,7 +23,14 @@ func init() {
 	}
 }
 
-func NewStorage(env ...string) Storage {
+func NewStorage(serverMode ...string) Storage {
+	// TODO Judging by the pattern
+	mode := "http"
+	if len(serverMode) > 0 {
+		mode = serverMode[0]
+	}
+	storage.NewClient(mode)
+
 	return defaultStorage
 }
 
