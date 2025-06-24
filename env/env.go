@@ -2,15 +2,19 @@ package env
 
 import (
 	"fmt"
+	"os"
+	"path"
 	"path/filepath"
 	"reflect"
 	"runtime"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
 func init() {
+	initLog()
 	// Set default values
 	setDefaults()
 
@@ -45,6 +49,23 @@ func init() {
 		log.Errorf("scrapeless: validate config err: %v", err)
 	}
 	log.Infof("scrapeless: conf: %+v", Env)
+}
+
+func initLog() {
+	log.SetOutput(os.Stdout)
+	log.SetFormatter(&log.TextFormatter{
+		FullTimestamp: true,
+		DisableColors: false,
+		ForceColors:   true,
+		CallerPrettyfier: func(f *runtime.Frame) (function string, file string) {
+			filename := path.Base(f.File)
+			fc := path.Base(f.Function)
+			return fmt.Sprintf("%s()", fc), fmt.Sprintf(" - %s:%d", filename, f.Line)
+		},
+		TimestampFormat: time.DateTime,
+	})
+	log.SetReportCaller(true)
+	log.SetLevel(log.TraceLevel)
 }
 
 func setDefaults() {
