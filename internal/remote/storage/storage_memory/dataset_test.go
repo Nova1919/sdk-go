@@ -39,7 +39,7 @@ func TestDeleteDataset(t *testing.T) {
 }
 
 func TestGetItems(t *testing.T) {
-	items, err := local.GetItems(ctx, datasetId, 1, 10, true)
+	items, err := local.GetItems(ctx, datasetId, 1, 1, true)
 	if err != nil {
 		t.Error(err)
 	}
@@ -48,7 +48,7 @@ func TestGetItems(t *testing.T) {
 }
 
 func TestListDataset(t *testing.T) {
-	datasets, err := local.ListDatasets(ctx, 1, 10, true)
+	datasets, err := local.ListDatasets(ctx, 1, 1, true)
 	if err != nil {
 		t.Error(err)
 	}

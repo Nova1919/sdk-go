@@ -9,6 +9,7 @@ import (
 	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
 	"os"
 	"path/filepath"
+	"sort"
 	"time"
 )
 
@@ -21,31 +22,61 @@ func (d *DatasetLocal) ListDatasets(ctx context.Context, page int64, pageSize in
 
 	entries, err := os.ReadDir(dirPath)
 	if err != nil {
-		return nil, fmt.Errorf("failed read dir: %v", err)
+		return nil, fmt.Errorf("failed to read dir: %v", err)
 	}
-	var s []storage.DatasetInfo
-	for _, entry := range entries {
-		name := entry.Name()
 
-		file, err := os.ReadFile(filepath.Join(dirPath, name, metadataFile))
+	var allDatasets []storage.DatasetInfo
+
+	for _, entry := range entries {
+		if !entry.IsDir() {
+			continue
+		}
+
+		name := entry.Name()
+		metaPath := filepath.Join(dirPath, name, metadataFile)
+
+		file, err := os.ReadFile(metaPath)
 		if err != nil {
-			return nil, fmt.Errorf("failed to read file: %v", err)
+			continue
 		}
-		var meta = &metadata{}
+
+		var meta metadata
 		if err := json.Unmarshal(file, &meta); err != nil {
-			return nil, fmt.Errorf("parse JSON %s failed: %v", name, err)
+			continue
 		}
-		if entry.IsDir() {
-			s = append(s, storage.DatasetInfo{
-				Id:     name,
-				Name:   name,
-				Fields: meta.Fields,
-			})
-		}
+
+		allDatasets = append(allDatasets, storage.DatasetInfo{
+			Id:     name,
+			Name:   name,
+			Fields: meta.Fields,
+		})
 	}
+
+	// sort
+	sort.Slice(allDatasets, func(i, j int) bool {
+		if desc {
+			return allDatasets[i].Name > allDatasets[j].Name
+		}
+		return allDatasets[i].Name < allDatasets[j].Name
+	})
+
+	total := int64(len(allDatasets))
+
+	// page
+	start := (page - 1) * pageSize
+	if start > total {
+		start = total
+	}
+	end := start + pageSize
+	if end > total {
+		end = total
+	}
+
+	pagedItems := allDatasets[start:end]
+
 	return &storage.ListDatasetsResponse{
-		Items: s,
-		Total: int64(len(s)),
+		Items: pagedItems,
+		Total: total,
 	}, nil
 }
 
@@ -160,18 +191,46 @@ func (d *DatasetLocal) AddItems(ctx context.Context, datasetId string, items []m
 
 func (d *DatasetLocal) GetItems(ctx context.Context, datasetId string, page int, pageSize int, desc bool) (*storage.ItemsResponse, error) {
 	dirPath := filepath.Join(storageDir, datasetDir, datasetId)
+
 	entries, err := os.ReadDir(dirPath)
 	if err != nil {
-		return nil, fmt.Errorf("read file failed: %v", err)
+		return nil, fmt.Errorf("read dir failed: %v", err)
 	}
 
-	var result []map[string]any
+	var files []os.DirEntry
 
 	for _, entry := range entries {
 		if entry.IsDir() || filepath.Ext(entry.Name()) != ".json" {
 			continue
 		}
+		files = append(files, entry)
+	}
 
+	// sort
+	sort.Slice(files, func(i, j int) bool {
+		if desc {
+			return files[i].Name() > files[j].Name()
+		}
+		return files[i].Name() < files[j].Name()
+	})
+
+	total := len(files)
+
+	// page
+	start := (page - 1) * pageSize
+	if start > total {
+		start = total
+	}
+	end := start + pageSize
+	if end > total {
+		end = total
+	}
+
+	pagedFiles := files[start:end]
+
+	var result []map[string]any
+
+	for _, entry := range pagedFiles {
 		fullPath := filepath.Join(dirPath, entry.Name())
 
 		data, err := os.ReadFile(fullPath)
@@ -186,9 +245,10 @@ func (d *DatasetLocal) GetItems(ctx context.Context, datasetId string, page int,
 
 		result = append(result, item)
 	}
+
 	return &storage.ItemsResponse{
 		Items: result,
-		Total: len(result),
+		Total: total,
 	}, nil
 }
 
