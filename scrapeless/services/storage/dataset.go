@@ -5,6 +5,7 @@ import (
 	"github.com/scrapeless-ai/sdk-go/env"
 	"github.com/scrapeless-ai/sdk-go/internal/code"
 	"github.com/scrapeless-ai/sdk-go/internal/remote/storage"
+	"github.com/scrapeless-ai/sdk-go/internal/remote/storage/models"
 	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
 )
 
@@ -24,7 +25,13 @@ func (s *Dataset) ListDatasets(ctx context.Context, page int64, pageSize int64, 
 	if pageSize < 10 {
 		pageSize = 10
 	}
-	datasets, err := storage.ClientInterface.ListDatasets(ctx, page, pageSize, desc)
+	datasets, err := storage.ClientInterface.ListDatasets(ctx, &models.ListDatasetsRequest{
+		ActorId:  &env.GetActorEnv().ActorId,
+		RunId:    &env.GetActorEnv().RunId,
+		Page:     page,
+		PageSize: pageSize,
+		Desc:     desc,
+	})
 	if err != nil {
 		log.Errorf("failed to list datasets: %v", code.Format(err))
 		return nil, code.Format(err)
@@ -55,12 +62,15 @@ func (s *Dataset) ListDatasets(ctx context.Context, page int64, pageSize int64, 
 //	name: The name of the dataset to create.
 func (s *Dataset) CreateDataset(ctx context.Context, name string) (id string, datasetName string, err error) {
 	name = name + "-" + env.GetActorEnv().RunId
-	id, datasetName, err = storage.ClientInterface.CreateDataset(ctx, name)
+	dataset, err := storage.ClientInterface.CreateDataset(ctx, &models.CreateDatasetRequest{
+		ActorId: &env.GetActorEnv().ActorId,
+		RunId:   &env.GetActorEnv().RunId,
+	})
 	if err != nil {
 		log.Errorf("failed to create dataset: %v", code.Format(err))
 		return "", "", code.Format(err)
 	}
-	return
+	return dataset.Id, name, nil
 }
 
 // UpdateDataset updates the dataset name by appending the current runtime ID to ensure uniqueness.
@@ -71,7 +81,7 @@ func (s *Dataset) CreateDataset(ctx context.Context, name string) (id string, da
 //	name: Original dataset name (will be combined with runtime ID internally)
 func (s *Dataset) UpdateDataset(ctx context.Context, datasetId string, name string) (ok bool, datasetName string, err error) {
 	name = name + "-" + env.GetActorEnv().RunId
-	ok, datasetName, err = storage.ClientInterface.UpdateDataset(ctx, datasetId, name)
+	ok, err = storage.ClientInterface.UpdateDataset(ctx, datasetId, name)
 	if err != nil {
 		log.Errorf("failed to update dataset: %v", code.Format(err))
 		return false, "", code.Format(err)
@@ -99,7 +109,7 @@ func (s *Dataset) DelDataset(ctx context.Context, datasetId string) (bool, error
 //   - ctx: The context for the request.
 //   - items: A slice of maps representing the items to add. Each map contains key-value pairs of any type.
 func (s *Dataset) AddItems(ctx context.Context, datasetId string, items []map[string]any) (bool, error) {
-	ok, err := storage.ClientInterface.AddItems(ctx, datasetId, items)
+	ok, err := storage.ClientInterface.AddDatasetItem(ctx, datasetId, items)
 	if err != nil {
 		log.Errorf("failed to add items: %v", err)
 		return false, code.Format(err)
@@ -122,7 +132,12 @@ func (s *Dataset) GetItems(ctx context.Context, datasetId string, page int, page
 	if pageSize < 10 {
 		pageSize = 10
 	}
-	items, err := storage.ClientInterface.GetItems(ctx, datasetId, page, pageSize, desc)
+	items, err := storage.ClientInterface.GetDataset(ctx, &models.GetDataset{
+		DatasetId: datasetId,
+		Desc:      desc,
+		Page:      page,
+		PageSize:  pageSize,
+	})
 	if err != nil {
 		log.Errorf("failed to get items: %v", code.Format(err))
 		return nil, code.Format(err)

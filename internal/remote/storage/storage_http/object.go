@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/scrapeless-ai/sdk-go/env"
 	request2 "github.com/scrapeless-ai/sdk-go/internal/remote/request"
+	"github.com/scrapeless-ai/sdk-go/internal/remote/storage/models"
 	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
 	"github.com/tidwall/gjson"
 	"io"
@@ -14,7 +15,7 @@ import (
 	"net/http"
 )
 
-func (c *Client) ListBuckets(ctx context.Context, page, size int) (*Object, error) {
+func (c *Client) ListBuckets(ctx context.Context, page, size int) (*models.Object, error) {
 	body, err := request2.Request(ctx, request2.ReqInfo{
 		Method:  http.MethodGet,
 		Url:     fmt.Sprintf("%s/api/v1/object/buckets?page=%d&pageSize=%d", c.BaseUrl, page, size),
@@ -35,7 +36,7 @@ func (c *Client) ListBuckets(ctx context.Context, page, size int) (*Object, erro
 		return nil, fmt.Errorf("get dataset list err:%s", resp.Msg)
 	}
 	marshal, _ := json.Marshal(&resp.Data)
-	var respData Object
+	var respData models.Object
 	err = json.Unmarshal(marshal, &respData)
 	if err != nil {
 		log.Errorf("unmarshal resp error :%v", err)
@@ -44,7 +45,7 @@ func (c *Client) ListBuckets(ctx context.Context, page, size int) (*Object, erro
 	return &respData, nil
 }
 
-func (c *Client) CreateBucket(ctx context.Context, req *CreateBucketRequest) (string, error) {
+func (c *Client) CreateBucket(ctx context.Context, req *models.CreateBucketRequest) (string, error) {
 	reqBody, err := json.Marshal(req)
 	if err != nil {
 		return "", err
@@ -98,7 +99,7 @@ func (c *Client) DeleteBucket(ctx context.Context, bucketId string) (bool, error
 	}
 	return true, nil
 }
-func (c *Client) GetBucket(ctx context.Context, bucketId string) (*Bucket, error) {
+func (c *Client) GetBucket(ctx context.Context, bucketId string) (*models.Bucket, error) {
 	body, err := request2.Request(ctx, request2.ReqInfo{
 		Method:  http.MethodGet,
 		Url:     fmt.Sprintf("%s/api/v1/object/buckets/%s", c.BaseUrl, bucketId),
@@ -119,7 +120,7 @@ func (c *Client) GetBucket(ctx context.Context, bucketId string) (*Bucket, error
 		return nil, fmt.Errorf("get bucket err:%s", resp.Msg)
 	}
 	marshal, _ := json.Marshal(&resp.Data)
-	var respData Bucket
+	var respData models.Bucket
 	err = json.Unmarshal(marshal, &respData)
 	if err != nil {
 		log.Errorf("unmarshal resp error :%v", err)
@@ -128,7 +129,7 @@ func (c *Client) GetBucket(ctx context.Context, bucketId string) (*Bucket, error
 	return &respData, nil
 }
 
-func (c *Client) ListObjects(ctx context.Context, req *ListObjectsRequest) (*ObjectList, error) {
+func (c *Client) ListObjects(ctx context.Context, req *models.ListObjectsRequest) (*models.ObjectList, error) {
 	body, err := request2.Request(ctx, request2.ReqInfo{
 		Method:  http.MethodGet,
 		Url:     fmt.Sprintf("%s/api/v1/object/buckets/%s/objects", c.BaseUrl, req.BucketId),
@@ -149,7 +150,7 @@ func (c *Client) ListObjects(ctx context.Context, req *ListObjectsRequest) (*Obj
 		return nil, fmt.Errorf("get bucket err:%s", resp.Msg)
 	}
 	marshal, _ := json.Marshal(&resp.Data)
-	var respData ObjectList
+	var respData models.ObjectList
 	err = json.Unmarshal(marshal, &respData)
 	if err != nil {
 		log.Errorf("unmarshal resp error :%v", err)
@@ -158,7 +159,7 @@ func (c *Client) ListObjects(ctx context.Context, req *ListObjectsRequest) (*Obj
 	return &respData, nil
 }
 
-func (c *Client) GetObject(ctx context.Context, req *ObjectRequest) ([]byte, error) {
+func (c *Client) GetObject(ctx context.Context, req *models.ObjectRequest) ([]byte, error) {
 	body, err := request2.Request(ctx, request2.ReqInfo{
 		Method:  http.MethodGet,
 		Url:     fmt.Sprintf("%s/api/v1/object/buckets/%s/%s", c.BaseUrl, req.BucketId, req.ObjectId),
@@ -181,7 +182,7 @@ func (c *Client) GetObject(ctx context.Context, req *ObjectRequest) ([]byte, err
 	return []byte(body), nil
 }
 
-func (c *Client) DeleteObject(ctx context.Context, req *ObjectRequest) (bool, error) {
+func (c *Client) DeleteObject(ctx context.Context, req *models.ObjectRequest) (bool, error) {
 	body, err := request2.Request(ctx, request2.ReqInfo{
 		Method:  http.MethodDelete,
 		Url:     fmt.Sprintf("%s/api/v1/object/buckets/%s/%s", c.BaseUrl, req.BucketId, req.ObjectId),
@@ -204,7 +205,7 @@ func (c *Client) DeleteObject(ctx context.Context, req *ObjectRequest) (bool, er
 	return true, nil
 }
 
-func (c *Client) PutObject(ctx context.Context, req *PutObjectRequest) (string, error) {
+func (c *Client) PutObject(ctx context.Context, req *models.PutObjectRequest) (string, error) {
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 	part, _ := writer.CreateFormFile("file", req.Filename)

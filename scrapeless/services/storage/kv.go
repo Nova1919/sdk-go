@@ -5,6 +5,7 @@ import (
 	"github.com/scrapeless-ai/sdk-go/env"
 	"github.com/scrapeless-ai/sdk-go/internal/code"
 	"github.com/scrapeless-ai/sdk-go/internal/remote/storage"
+	"github.com/scrapeless-ai/sdk-go/internal/remote/storage/models"
 	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
 )
 
@@ -55,12 +56,16 @@ func (s *KV) ListNamespaces(ctx context.Context, page int, pageSize int, desc bo
 //	name: The name of the namespace to create.
 func (s *KV) CreateNamespace(ctx context.Context, name string) (namespaceId string, namespaceName string, err error) {
 	name = name + "-" + env.GetActorEnv().RunId
-	namespaceId, namespaceName, err = storage.ClientInterface.CreateNamespace(ctx, name)
+	namespaceId, err = storage.ClientInterface.CreateNamespace(ctx, &models.CreateKvNamespaceRequest{
+		Name:    name,
+		ActorId: env.GetActorEnv().ActorId,
+		RunId:   env.GetActorEnv().RunId,
+	})
 	if err != nil {
 		log.Errorf("failed to create kv namespace: %v", code.Format(err))
 		return "", "", code.Format(err)
 	}
-	return namespaceId, namespaceName, nil
+	return namespaceId, name, nil
 }
 
 // GetNamespace retrieves namespace information by name
@@ -106,12 +111,12 @@ func (s *KV) DelNamespace(ctx context.Context, namespaceId string) (bool, error)
 //	name: New namespace name
 func (s *KV) RenameNamespace(ctx context.Context, namespaceId string, name string) (ok bool, namespaceName string, err error) {
 	name = name + "-" + env.GetActorEnv().RunId
-	ok, namespaceName, err = storage.ClientInterface.RenameNamespace(ctx, namespaceId, name)
+	ok, err = storage.ClientInterface.RenameNamespace(ctx, namespaceId, name)
 	if err != nil {
 		log.Errorf("failed to rename kv namespace: %v", code.Format(err))
 		return false, "", code.Format(err)
 	}
-	return ok, namespaceName, nil
+	return ok, name, nil
 }
 
 // ListKeys retrieves key list with pagination from the current namespace
@@ -127,7 +132,11 @@ func (s *KV) ListKeys(ctx context.Context, namespaceId string, page int, pageSiz
 	if pageSize < 10 {
 		pageSize = 10
 	}
-	keys, err := storage.ClientInterface.ListKeys(ctx, namespaceId, page, pageSize)
+	keys, err := storage.ClientInterface.ListKeys(ctx, &models.ListKeyInfo{
+		NamespaceId: namespaceId,
+		Page:        page,
+		Size:        pageSize,
+	})
 	if err != nil {
 		log.Errorf("failed to list kv keys: %v", code.Format(err))
 		return nil, code.Format(err)
@@ -167,16 +176,19 @@ func (s *KV) DelValue(ctx context.Context, namespaceId string, key string) (bool
 //	namespaceId: Identifier of the namespace
 //	data: A slice of BulkItem containing key, value, and optional expiration
 func (s *KV) BulkSetValue(ctx context.Context, namespaceId string, data []BulkItem) (successCount int64, err error) {
-	var items []storage.BulkItem
+	var items []models.BulkItem
 	for _, datum := range data {
-		items = append(items, storage.BulkItem{
+		items = append(items, models.BulkItem{
 			Key:        datum.Key,
 			Value:      datum.Value,
 			Expiration: datum.Expiration,
 		})
 	}
 
-	val, err := storage.ClientInterface.BulkSetValue(ctx, namespaceId, items)
+	val, err := storage.ClientInterface.BulkSetValue(ctx, &models.BulkSet{
+		NamespaceId: namespaceId,
+		Items:       items,
+	})
 	if err != nil {
 		log.Errorf("failed to bulk set kv value: %v", code.Format(err))
 		return 0, code.Format(err)
@@ -208,7 +220,12 @@ func (s *KV) BulkDelValue(ctx context.Context, namespaceId string, keys []string
 //	value: kv value
 //	expiration: kv expiration  Time-to-live in seconds (s)
 func (s *KV) SetValue(ctx context.Context, namespaceId string, key string, value string, expiration uint) (bool, error) {
-	ok, err := storage.ClientInterface.SetValue(ctx, namespaceId, key, value, expiration)
+	ok, err := storage.ClientInterface.SetValue(ctx, &models.SetValue{
+		NamespaceId: namespaceId,
+		Key:         key,
+		Value:       value,
+		Expiration:  expiration,
+	})
 	if err != nil {
 		log.Errorf("failed to set kv value: %v", code.Format(err))
 		return false, code.Format(err)

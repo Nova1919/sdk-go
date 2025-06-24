@@ -6,6 +6,7 @@ import (
 	"github.com/scrapeless-ai/sdk-go/env"
 	"github.com/scrapeless-ai/sdk-go/internal/code"
 	"github.com/scrapeless-ai/sdk-go/internal/remote/storage"
+	"github.com/scrapeless-ai/sdk-go/internal/remote/storage/models"
 	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
 	"path/filepath"
 	"strings"
@@ -60,7 +61,12 @@ func (s *Object) ListBuckets(ctx context.Context, page int, pageSize int) (*List
 //	description: Optional description for the bucket.
 func (s *Object) CreateBucket(ctx context.Context, name string, description string) (bucketId string, bucketName string, err error) {
 	name = name + "-" + env.GetActorEnv().RunId
-	bucketId, bucketName, err = storage.ClientInterface.CreateBucket(ctx, name, description)
+	bucketId, err = storage.ClientInterface.CreateBucket(ctx, &models.CreateBucketRequest{
+		Name:        name,
+		Description: description,
+		ActorId:     env.GetActorEnv().ActorId,
+		RunId:       env.GetActorEnv().RunId,
+	})
 	if err != nil {
 		log.Errorf("failed to create bucket: %v", code.Format(err))
 		return "", "", code.Format(err)
@@ -118,7 +124,12 @@ func (s *Object) List(ctx context.Context, bucketId string, fuzzyFileName string
 	if pageSize < 10 {
 		pageSize = 10
 	}
-	objects, err := storage.ClientInterface.ListObjects(ctx, bucketId, fuzzyFileName, page, pageSize)
+	objects, err := storage.ClientInterface.ListObjects(ctx, &models.ListObjectsRequest{
+		BucketId: bucketId,
+		Search:   fuzzyFileName,
+		Page:     page,
+		PageSize: pageSize,
+	})
 	if err != nil {
 		log.Errorf("failed to list objects: %v", code.Format(err))
 		return nil, code.Format(err)
@@ -152,7 +163,10 @@ func (s *Object) List(ctx context.Context, bucketId string, fuzzyFileName string
 //	ctx: The context for the request.
 //	objectId: The unique identifier of the object to retrieve.
 func (s *Object) Get(ctx context.Context, bucketId string, objectId string) ([]byte, error) {
-	object, err := storage.ClientInterface.GetObject(ctx, bucketId, objectId)
+	object, err := storage.ClientInterface.GetObject(ctx, &models.ObjectRequest{
+		BucketId: bucketId,
+		ObjectId: objectId,
+	})
 	if err != nil {
 		log.Errorf("failed to get object: %v", code.Format(err))
 		return nil, code.Format(err)
@@ -172,7 +186,13 @@ func (s *Object) Put(ctx context.Context, bucketId string, filename string, data
 	if !ok {
 		return "", errors.New("object type not supported")
 	}
-	object, err := storage.ClientInterface.PutObject(ctx, bucketId, filename, data)
+	object, err := storage.ClientInterface.PutObject(ctx, &models.PutObjectRequest{
+		BucketId: bucketId,
+		Filename: filename,
+		Data:     data,
+		ActorId:  env.GetActorEnv().ActorId,
+		RunId:    env.GetActorEnv().RunId,
+	})
 	if err != nil {
 		log.Errorf("failed to put object: %v", code.Format(err))
 		return "", code.Format(err)
@@ -186,7 +206,10 @@ func (s *Object) Put(ctx context.Context, bucketId string, filename string, data
 //	ctx: The context used for the HTTP request.
 //	objectId: The identifier of the object to delete.
 func (s *Object) Delete(ctx context.Context, bucketId string, objectId string) (bool, error) {
-	resp, err := storage.ClientInterface.DeleteObject(ctx, bucketId, objectId)
+	resp, err := storage.ClientInterface.DeleteObject(ctx, &models.ObjectRequest{
+		BucketId: bucketId,
+		ObjectId: objectId,
+	})
 	if err != nil {
 		log.Errorf("failed to delete object: %v", code.Format(err))
 		return false, code.Format(err)

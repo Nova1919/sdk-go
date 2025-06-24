@@ -5,12 +5,13 @@ import (
 	"encoding/json"
 	"fmt"
 	request2 "github.com/scrapeless-ai/sdk-go/internal/remote/request"
+	"github.com/scrapeless-ai/sdk-go/internal/remote/storage/models"
 	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
 	"github.com/tidwall/gjson"
 	"net/http"
 )
 
-func (c *Client) ListNamespaces(ctx context.Context, page int, pageSize int, desc bool) (*KvNamespace, error) {
+func (c *Client) ListNamespaces(ctx context.Context, page int, pageSize int, desc bool) (*models.KvNamespace, error) {
 	body, err := request2.Request(ctx, request2.ReqInfo{
 		Method:  http.MethodGet,
 		Url:     fmt.Sprintf("%s/api/v1/kv/namespaces?desc=%v&page=%d&pageSize=%d", c.BaseUrl, desc, page, pageSize),
@@ -32,7 +33,7 @@ func (c *Client) ListNamespaces(ctx context.Context, page int, pageSize int, des
 		return nil, fmt.Errorf("get dataset list err:%s", resp.Msg)
 	}
 	marshal, _ := json.Marshal(&resp.Data)
-	var respData KvNamespace
+	var respData models.KvNamespace
 	err = json.Unmarshal(marshal, &respData)
 	if err != nil {
 		log.Errorf("unmarshal resp error :%v", err)
@@ -41,7 +42,7 @@ func (c *Client) ListNamespaces(ctx context.Context, page int, pageSize int, des
 	return &respData, nil
 }
 
-func (c *Client) CreateNamespace(ctx context.Context, req *CreateKvNamespaceRequest) (string, error) {
+func (c *Client) CreateNamespace(ctx context.Context, req *models.CreateKvNamespaceRequest) (string, error) {
 	reqBody, err := json.Marshal(req)
 	if err != nil {
 		return "", err
@@ -69,7 +70,7 @@ func (c *Client) CreateNamespace(ctx context.Context, req *CreateKvNamespaceRequ
 	id := gjson.Parse(body).Get("data.id").String()
 	return id, nil
 }
-func (c *Client) GetNamespace(ctx context.Context, namespaceId string) (*KvNamespaceItem, error) {
+func (c *Client) GetNamespace(ctx context.Context, namespaceId string) (*models.KvNamespaceItem, error) {
 	body, err := request2.Request(ctx, request2.ReqInfo{
 		Method:  http.MethodGet,
 		Url:     fmt.Sprintf("%s/api/v1/kv/%s", c.BaseUrl, namespaceId),
@@ -90,7 +91,7 @@ func (c *Client) GetNamespace(ctx context.Context, namespaceId string) (*KvNames
 		return nil, fmt.Errorf("get namespace err:%s", resp.Msg)
 	}
 	data := gjson.Parse(body).Get("data").String()
-	var kvi KvNamespaceItem
+	var kvi models.KvNamespaceItem
 	if err = json.Unmarshal([]byte(data), &kvi); err != nil {
 		log.Errorf("unmarshal resp error :%v", err)
 		return nil, err
@@ -144,7 +145,7 @@ func (c *Client) RenameNamespace(ctx context.Context, namespaceId string, name s
 	return true, nil
 }
 
-func (c *Client) SetValue(ctx context.Context, req *SetValue) (bool, error) {
+func (c *Client) SetValue(ctx context.Context, req *models.SetValue) (bool, error) {
 	reqBody := map[string]any{
 		"expiration": req.Expiration,
 		"key":        req.Key,
@@ -179,7 +180,7 @@ func (c *Client) SetValue(ctx context.Context, req *SetValue) (bool, error) {
 	return true, nil
 }
 
-func (c *Client) ListKeys(ctx context.Context, req *ListKeyInfo) (*KvKeys, error) {
+func (c *Client) ListKeys(ctx context.Context, req *models.ListKeyInfo) (*models.KvKeys, error) {
 	body, err := request2.Request(ctx, request2.ReqInfo{
 		Method:  http.MethodGet,
 		Url:     fmt.Sprintf("%s/api/v1/kv/%s/keys?page=%d&pageSize=%d", c.BaseUrl, req.NamespaceId, req.Page, req.Size),
@@ -200,7 +201,7 @@ func (c *Client) ListKeys(ctx context.Context, req *ListKeyInfo) (*KvKeys, error
 		return nil, fmt.Errorf("list Keys err:%s", resp.Msg)
 	}
 	marshal, _ := json.Marshal(&resp.Data)
-	var respData KvKeys
+	var respData models.KvKeys
 	err = json.Unmarshal(marshal, &respData)
 	if err != nil {
 		log.Errorf("unmarshal resp error :%v", err)
@@ -256,7 +257,7 @@ func (c *Client) DelValue(ctx context.Context, namespaceId string, key string) (
 	return true, nil
 }
 
-func (c *Client) BulkSetValue(ctx context.Context, req *BulkSet) (int64, error) {
+func (c *Client) BulkSetValue(ctx context.Context, req *models.BulkSet) (int64, error) {
 	reqBody, err := json.Marshal(req.Items)
 	if err != nil {
 		return 0, err

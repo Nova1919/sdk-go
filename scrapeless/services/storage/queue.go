@@ -5,6 +5,7 @@ import (
 	"github.com/scrapeless-ai/sdk-go/env"
 	"github.com/scrapeless-ai/sdk-go/internal/code"
 	"github.com/scrapeless-ai/sdk-go/internal/remote/storage"
+	"github.com/scrapeless-ai/sdk-go/internal/remote/storage/models"
 	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
 	"time"
 )
@@ -25,7 +26,11 @@ func (s *Queue) List(ctx context.Context, page int64, pageSize int64, desc bool)
 	if pageSize < 10 {
 		pageSize = 10
 	}
-	queues, err := storage.ClientInterface.ListQueues(ctx, page, pageSize, desc)
+	queues, err := storage.ClientInterface.GetQueues(ctx, &models.GetQueuesRequest{
+		Page:     page,
+		PageSize: pageSize,
+		Desc:     desc,
+	})
 	if err != nil {
 		log.Errorf("failed to list queues: %v", code.Format(err))
 		return nil, code.Format(err)
@@ -59,7 +64,9 @@ func (s *Queue) List(ctx context.Context, page int64, pageSize int64, desc bool)
 //	req: The request object containing queue configuration details.
 func (s *Queue) Create(ctx context.Context, req *CreateQueueReq) (queueId string, queueName string, err error) {
 	name := req.Name + "-" + env.GetActorEnv().RunId
-	queueId, queueName, err = storage.ClientInterface.CreateQueue(ctx, &storage.CreateQueueReq{
+	queue, err := storage.ClientInterface.CreateQueue(ctx, &models.CreateQueueRequest{
+		ActorId:     env.GetActorEnv().ActorId,
+		RunId:       env.GetActorEnv().RunId,
 		Name:        name,
 		Description: req.Description,
 	})
@@ -68,7 +75,7 @@ func (s *Queue) Create(ctx context.Context, req *CreateQueueReq) (queueId string
 		return "", "", code.Format(err)
 	}
 
-	return queueId, name, nil
+	return queue.Id, name, nil
 }
 
 // Get retrieves a queue item by name.
@@ -78,7 +85,10 @@ func (s *Queue) Create(ctx context.Context, req *CreateQueueReq) (queueId string
 //	name: The name of the queue to retrieve.
 func (s *Queue) Get(ctx context.Context, queueId string, name string) (*Item, error) {
 	name = name + "-" + env.GetActorEnv().RunId
-	queue, err := storage.ClientInterface.GetQueue(ctx, queueId, name)
+	queue, err := storage.ClientInterface.GetQueue(ctx, &models.GetQueueRequest{
+		Id:   queueId,
+		Name: name,
+	})
 	if err != nil {
 		log.Errorf("failed to get queue: %v", code.Format(err))
 		return nil, code.Format(err)
@@ -103,7 +113,11 @@ func (s *Queue) Get(ctx context.Context, queueId string, name string) (*Item, er
 //	description: The new description of the queue.
 func (s *Queue) Update(ctx context.Context, queueId string, name string, description string) error {
 	name = name + "-" + env.GetActorEnv().RunId
-	err := storage.ClientInterface.UpdateQueue(ctx, queueId, name, description)
+	err := storage.ClientInterface.UpdateQueue(ctx, &models.UpdateQueueRequest{
+		QueueId:     queueId,
+		Name:        name,
+		Description: description,
+	})
 	return err
 }
 
@@ -112,7 +126,7 @@ func (s *Queue) Update(ctx context.Context, queueId string, name string, descrip
 //
 //	ctx: The context for the request.
 func (s *Queue) Delete(ctx context.Context, queueId string) error {
-	err := storage.ClientInterface.DeleteQueue(ctx, queueId)
+	err := storage.ClientInterface.DelQueue(ctx, &models.DelQueueRequest{QueueId: queueId})
 	if err != nil {
 		log.Errorf("failed to delete queue: %v", code.Format(err))
 		return code.Format(err)
@@ -144,9 +158,10 @@ func (s *Queue) Push(ctx context.Context, queueId string, req PushQueue) (string
 	}
 
 	unix := time.Now().UTC().Add(time.Duration(req.Deadline) * time.Second).Unix()
-	queue, err := storage.ClientInterface.PushMsg(ctx, queueId, storage.PushQueue{
+	queue, err := storage.ClientInterface.CreateMsg(ctx, &models.CreateMsgRequest{
+		QueueId:  queueId,
 		Name:     req.Name,
-		Payload:  req.Payload,
+		PayLoad:  string(req.Payload),
 		Retry:    req.Retry,
 		Timeout:  req.Timeout,
 		Deadline: unix,
@@ -155,7 +170,7 @@ func (s *Queue) Push(ctx context.Context, queueId string, req PushQueue) (string
 		log.Errorf("failed to push to queue: %v", code.Format(err))
 		return "", code.Format(err)
 	}
-	return queue, nil
+	return queue.MsgId, nil
 }
 
 // Pull retrieves messages from the HTTP queue.
@@ -170,7 +185,10 @@ func (s *Queue) Pull(ctx context.Context, queueId string, size int32) (GetMsgRes
 	if size > 100 {
 		size = 100
 	}
-	msgs, err := storage.ClientInterface.PullMsg(ctx, queueId, size)
+	msgs, err := storage.ClientInterface.GetMsg(ctx, &models.GetMsgRequest{
+		QueueId: queueId,
+		Limit:   size,
+	})
 	if err != nil {
 		log.Errorf("failed to pull from queue: %v", code.Format(err))
 		return nil, code.Format(err)
@@ -179,7 +197,7 @@ func (s *Queue) Pull(ctx context.Context, queueId string, size int32) (GetMsgRes
 		return nil, nil
 	}
 	var items []*Msg
-	for _, msg := range msgs {
+	for _, msg := range *msgs {
 		items = append(items, &Msg{
 			ID:        msg.ID,
 			QueueID:   msg.QueueID,
@@ -204,7 +222,10 @@ func (s *Queue) Pull(ctx context.Context, queueId string, size int32) (GetMsgRes
 //	ctx: The context used for request cancellation or timeout.
 //	msgId: The unique identifier of the message to acknowledge.
 func (s *Queue) Ack(ctx context.Context, queueId string, msgId string) error {
-	err := storage.ClientInterface.Ack(ctx, queueId, msgId)
+	err := storage.ClientInterface.AckMsg(ctx, &models.AckMsgRequest{
+		QueueId: queueId,
+		MsgId:   msgId,
+	})
 	if err != nil {
 		log.Errorf("failed to ack msg: %v", code.Format(err))
 		return code.Format(err)

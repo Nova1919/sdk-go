@@ -1,19 +1,24 @@
 package storage
 
-type Client struct {
+import (
+	"github.com/scrapeless-ai/sdk-go/internal/remote/storage/storage_http"
+	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
+)
+
+type Client interface {
 	Dataset
 	KV
 	Queue
 	Object
 }
 
-var ClientInterface *Client
+var ClientInterface Client
 
-func NewClient(env string) {
-	ClientInterface = &Client{
-		Dataset: nil,
-		KV:      nil,
-		Queue:   nil,
-		Object:  nil,
+func NewClient(serverMode, baseUrl string) {
+	if serverMode == "http" {
+		storage_http.Init(baseUrl)
+		ClientInterface = storage_http.Default()
+	} else {
+		log.Info("grpc...")
 	}
 }
