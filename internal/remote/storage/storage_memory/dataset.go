@@ -117,10 +117,10 @@ func updateMetadata(datasetId string, name string) (*metadata, error) {
 		}
 		meta.Id = datasetId
 		meta.UserId = "1"
-		meta.CreatedAt = time.Now().Format("2006-01-02T15:04:05.999999999Z07:00")
+		meta.CreatedAt = time.Now().Format(time.RFC3339Nano)
 	}
 	meta.Name = name
-	meta.ModifiedAt = time.Now().Format("2006-01-02T15:04:05.999999999Z07:00")
+	meta.ModifiedAt = time.Now().Format(time.RFC3339Nano)
 	indent, err := json.MarshalIndent(meta, "", "  ")
 	if err != nil {
 		log.Warnf("warn json marshal err: %v", err)
@@ -174,8 +174,8 @@ func (d *DatasetLocal) AddItems(ctx context.Context, datasetId string, items []m
 			return false, fmt.Errorf("write file %s failed: %v", fileName, err)
 		}
 	}
-	metadataJson.ModifiedAt = time.Now().Format("2006-01-02T15:04:05.999999999Z07:00")
-	metadataJson.AccessedAt = time.Now().Format("2006-01-02T15:04:05.999999999Z07:00")
+	metadataJson.ModifiedAt = time.Now().Format(time.RFC3339Nano)
+	metadataJson.AccessedAt = time.Now().Format(time.RFC3339Nano)
 	metadataJson.ItemCount = int64(len(items))
 	metadataJson.Fields = fields
 	metaFile := filepath.Join(dirPath, metadataFile)
