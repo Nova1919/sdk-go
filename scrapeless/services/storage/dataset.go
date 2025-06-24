@@ -5,7 +5,6 @@ import (
 	"github.com/scrapeless-ai/sdk-go/env"
 	"github.com/scrapeless-ai/sdk-go/internal/code"
 	"github.com/scrapeless-ai/sdk-go/internal/remote/storage"
-	"github.com/scrapeless-ai/sdk-go/internal/remote/storage/storage_http"
 	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
 )
 
@@ -18,19 +17,35 @@ type Dataset struct{}
 //	page: Page number (starting from 1). Defaults to 1 if <=0.
 //	pageSize:  Number of items per page. Minimum 10, defaults to 10 if smaller.
 //	desc: Sort namespaces in descending order by creation time if true.
-func (s *Dataset) ListDatasets(ctx context.Context, page int64, pageSize int64, desc bool) (resp *storage.ListDatasetsResponse, err error) {
+func (s *Dataset) ListDatasets(ctx context.Context, page int64, pageSize int64, desc bool) (*ListDatasetsResponse, error) {
 	if page < 1 {
 		page = 1
 	}
 	if pageSize < 10 {
 		pageSize = 10
 	}
-	resp, err = storage.ClientInterface.ListDatasets(ctx, page, pageSize, desc)
+	datasets, err := storage.ClientInterface.ListDatasets(ctx, page, pageSize, desc)
 	if err != nil {
 		log.Errorf("failed to list datasets: %v", code.Format(err))
 		return nil, code.Format(err)
 	}
-	return
+	var itemArray []DatasetInfo
+	for _, item := range datasets.Items {
+		itemArray = append(itemArray, DatasetInfo{
+			Id:         item.Id,
+			Name:       item.Name,
+			ActorId:    item.ActorId,
+			RunId:      item.RunId,
+			Fields:     item.Fields,
+			CreatedAt:  item.CreatedAt,
+			UpdatedAt:  item.UpdatedAt,
+			AccessedAt: item.AccessedAt,
+		})
+	}
+	return &ListDatasetsResponse{
+		Items: itemArray,
+		Total: datasets.Total,
+	}, nil
 }
 
 // CreateDataset Creates a new dataset storage.
@@ -40,7 +55,6 @@ func (s *Dataset) ListDatasets(ctx context.Context, page int64, pageSize int64, 
 //	name: The name of the dataset to create.
 func (s *Dataset) CreateDataset(ctx context.Context, name string) (id string, datasetName string, err error) {
 	name = name + "-" + env.GetActorEnv().RunId
-
 	id, datasetName, err = storage.ClientInterface.CreateDataset(ctx, name)
 	if err != nil {
 		log.Errorf("failed to create dataset: %v", code.Format(err))
@@ -57,7 +71,6 @@ func (s *Dataset) CreateDataset(ctx context.Context, name string) (id string, da
 //	name: Original dataset name (will be combined with runtime ID internally)
 func (s *Dataset) UpdateDataset(ctx context.Context, datasetId string, name string) (ok bool, datasetName string, err error) {
 	name = name + "-" + env.GetActorEnv().RunId
-
 	ok, datasetName, err = storage.ClientInterface.UpdateDataset(ctx, datasetId, name)
 	if err != nil {
 		log.Errorf("failed to update dataset: %v", code.Format(err))
@@ -102,21 +115,28 @@ func (s *Dataset) AddItems(ctx context.Context, datasetId string, items []map[st
 //	page: The page number to retrieve (starting from 1).
 //	pageSize: The number of items to return per page.
 //	desc: Whether to sort items in descending order (true) or ascending (false).
-func (s *Dataset) GetItems(ctx context.Context, datasetId string, page int, pageSize int, desc bool) (resp *storage.ItemsResponse, err error) {
+func (s *Dataset) GetItems(ctx context.Context, datasetId string, page int, pageSize int, desc bool) (*ItemsResponse, error) {
 	if page < 1 {
 		page = 1
 	}
 	if pageSize < 10 {
 		pageSize = 10
 	}
-	resp, err = storage.ClientInterface.GetItems(ctx, datasetId, page, pageSize, desc)
+	items, err := storage.ClientInterface.GetItems(ctx, datasetId, page, pageSize, desc)
 	if err != nil {
 		log.Errorf("failed to get items: %v", code.Format(err))
 		return nil, code.Format(err)
 	}
-	return resp, nil
+	var itemArray []map[string]any
+	for _, item := range items.Items {
+		itemArray = append(itemArray, item)
+	}
+	return &ItemsResponse{
+		Items: itemArray,
+		Total: items.Total,
+	}, nil
 }
 
 func (s *Dataset) Close() error {
-	return storage_http.Default().Close()
+	return nil
 }

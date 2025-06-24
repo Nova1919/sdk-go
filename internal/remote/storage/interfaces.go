@@ -30,13 +30,13 @@ type KV interface {
 }
 
 type Queue interface {
-	List(ctx context.Context, page int64, pageSize int64, desc bool) (*ListQueuesResponse, error)
-	Create(ctx context.Context, req *CreateQueueReq) (queueId string, queueName string, err error)
-	Get(ctx context.Context, queueId string, name string) (*Item, error)
-	Update(ctx context.Context, queueId string, name string, description string) error
-	Delete(ctx context.Context, queueId string) error
-	Push(ctx context.Context, queueId string, req PushQueue) (string, error)
-	Pull(ctx context.Context, queueId string, size int32) (GetMsgResponse, error)
+	ListQueues(ctx context.Context, page int64, pageSize int64, desc bool) (*ListQueuesResponse, error)
+	CreateQueue(ctx context.Context, req *CreateQueueReq) (queueId string, queueName string, err error)
+	GetQueue(ctx context.Context, queueId string, name string) (*Item, error)
+	UpdateQueue(ctx context.Context, queueId string, name string, description string) error
+	DeleteQueue(ctx context.Context, queueId string) error
+	PushMsg(ctx context.Context, queueId string, req PushQueue) (string, error)
+	PullMsg(ctx context.Context, queueId string, size int32) (GetMsgResponse, error)
 	Ack(ctx context.Context, queueId string, msgId string) error
 	Close() error
 }
@@ -46,9 +46,9 @@ type Object interface {
 	CreateBucket(ctx context.Context, name string, description string) (bucketId string, bucketName string, err error)
 	DeleteBucket(ctx context.Context, bucketId string) (bool, error)
 	GetBucket(ctx context.Context, bucketId string) (*Bucket, error)
-	List(ctx context.Context, bucketId string, fuzzyFileName string, page int64, pageSize int64) (*ListObjectsResponse, error)
-	Get(ctx context.Context, bucketId string, objectId string) ([]byte, error)
-	Put(ctx context.Context, bucketId string, filename string, data []byte) (string, error)
-	Delete(ctx context.Context, bucketId string, objectId string) (bool, error)
+	ListObjects(ctx context.Context, bucketId string, fuzzyFileName string, page int64, pageSize int64) (*ListObjectsResponse, error)
+	GetObject(ctx context.Context, bucketId string, objectId string) ([]byte, error)
+	PutObject(ctx context.Context, bucketId string, filename string, data []byte) (string, error)
+	DeleteObject(ctx context.Context, bucketId string, objectId string) (bool, error)
 	Close() error
 }
