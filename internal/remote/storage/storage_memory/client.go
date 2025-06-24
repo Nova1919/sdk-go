@@ -97,12 +97,12 @@ func (fc *FileClient) DeleteFile(relPath string) error {
 }
 
 type metadata struct {
-	Id         string      `json:"id"`
-	Name       interface{} `json:"name"`
-	AccessedAt string      `json:"accessed_at"`
-	CreatedAt  string      `json:"created_at"`
-	ModifiedAt string      `json:"modified_at"`
-	UserId     string      `json:"user_id"`
-	ItemCount  int64       `json:"item_count"`
-	Fields     []string    `json:"fields"`
+	Id         string   `json:"id"`
+	Name       string   `json:"name"`
+	AccessedAt string   `json:"accessed_at"`
+	CreatedAt  string   `json:"created_at"`
+	ModifiedAt string   `json:"modified_at"`
+	UserId     string   `json:"user_id"`
+	ItemCount  int64    `json:"item_count"`
+	Fields     []string `json:"fields"`
 }

@@ -26,3 +26,4 @@ env/.env
 .idea
 
 .DS_Store
+/internal/remote/storage/storage_memory/storage/

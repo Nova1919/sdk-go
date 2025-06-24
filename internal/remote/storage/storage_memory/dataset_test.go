@@ -55,3 +55,11 @@ func TestListDataset(t *testing.T) {
 	marshal, _ := json.Marshal(datasets)
 	fmt.Println(string(marshal))
 }
+
+func TestUpdateDataset(t *testing.T) {
+	ok, name, err := local.UpdateDataset(ctx, datasetId, "hq")
+	if err != nil {
+		t.Error(err)
+	}
+	fmt.Println(ok, name)
+}

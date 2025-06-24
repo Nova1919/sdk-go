@@ -64,8 +64,40 @@ func (d *DatasetLocal) CreateDataset(ctx context.Context, name string) (id strin
 }
 
 func (d *DatasetLocal) UpdateDataset(ctx context.Context, datasetId string, name string) (ok bool, datasetName string, err error) {
-	//TODO implement me
-	panic("implement me")
+	_, err = updateMetadata(datasetId, name)
+	if err != nil {
+		return false, name, fmt.Errorf("dataset update failed, cause: %v", err)
+	}
+	return true, name, nil
+}
+
+func updateMetadata(datasetId string, name string) (*metadata, error) {
+	path := filepath.Join(storageDir, datasetDir, datasetId, metadataFile)
+	file, err := os.ReadFile(path)
+	var meta = &metadata{}
+	if err == nil {
+		if err := json.Unmarshal(file, &meta); err != nil {
+			return nil, fmt.Errorf("parse JSON %s failed: %v", datasetId, err)
+		}
+	} else {
+		err := os.MkdirAll(filepath.Join(storageDir, datasetDir, datasetId), 0755)
+		if err != nil {
+			return nil, fmt.Errorf("create dataset failed, cause: %v", err)
+		}
+		meta.Id = datasetId
+		meta.UserId = "1"
+		meta.CreatedAt = time.Now().Format("2006-01-02T15:04:05.999999999Z07:00")
+	}
+	meta.Name = name
+	meta.ModifiedAt = time.Now().Format("2006-01-02T15:04:05.999999999Z07:00")
+	indent, err := json.MarshalIndent(meta, "", "  ")
+	if err != nil {
+		log.Warnf("warn json marshal err: %v", err)
+	}
+	if err := os.WriteFile(path, indent, 0644); err != nil {
+		return nil, fmt.Errorf("write file %s failed: %v", path, err)
+	}
+	return meta, nil
 }
 
 func (d *DatasetLocal) DelDataset(ctx context.Context, datasetId string) (bool, error) {
@@ -82,15 +114,13 @@ func (d *DatasetLocal) AddItems(ctx context.Context, datasetId string, items []m
 		datasetId = d.datasetId
 	}
 	dirPath := filepath.Join(storageDir, datasetDir, datasetId)
+	metadataJson, err := updateMetadata(datasetId, "default")
+	if err != nil {
+		return false, err
+	}
 
 	if err := os.MkdirAll(dirPath, 0755); err != nil {
 		return false, fmt.Errorf("create dir failed: %v", err)
-	}
-	var metadataJson = &metadata{
-		Id:        datasetId,
-		Name:      nil,
-		CreatedAt: time.Now().Format("2006-01-02T15:04:05.999999999Z07:00"),
-		UserId:    "1",
 	}
 
 	var fields []string
