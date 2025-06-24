@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/google/uuid"
-	"github.com/scrapeless-ai/sdk-go/internal/remote/storage"
+	"github.com/scrapeless-ai/sdk-go/internal/remote/storage/models"
 	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
 	"os"
 	"path/filepath"
@@ -17,7 +17,7 @@ type DatasetLocal struct {
 	datasetId string
 }
 
-func (d *DatasetLocal) ListDatasets(ctx context.Context, page int64, pageSize int64, desc bool) (*storage.ListDatasetsResponse, error) {
+func (d *DatasetLocal) ListDatasets(ctx context.Context, page int64, pageSize int64, desc bool) (*models.ListDatasetsResponse, error) {
 	dirPath := filepath.Join(storageDir, datasetDir)
 
 	entries, err := os.ReadDir(dirPath)
@@ -25,7 +25,7 @@ func (d *DatasetLocal) ListDatasets(ctx context.Context, page int64, pageSize in
 		return nil, fmt.Errorf("failed to read dir: %v", err)
 	}
 
-	var allDatasets []storage.DatasetInfo
+	var allDatasets []models.Dataset
 
 	for _, entry := range entries {
 		if !entry.IsDir() {
@@ -45,7 +45,7 @@ func (d *DatasetLocal) ListDatasets(ctx context.Context, page int64, pageSize in
 			continue
 		}
 
-		allDatasets = append(allDatasets, storage.DatasetInfo{
+		allDatasets = append(allDatasets, models.Dataset{
 			Id:     name,
 			Name:   meta.Name,
 			Fields: meta.Fields,
@@ -74,7 +74,7 @@ func (d *DatasetLocal) ListDatasets(ctx context.Context, page int64, pageSize in
 
 	pagedItems := allDatasets[start:end]
 
-	return &storage.ListDatasetsResponse{
+	return &models.ListDatasetsResponse{
 		Items: pagedItems,
 		Total: total,
 	}, nil
@@ -189,7 +189,7 @@ func (d *DatasetLocal) AddItems(ctx context.Context, datasetId string, items []m
 	return true, nil
 }
 
-func (d *DatasetLocal) GetItems(ctx context.Context, datasetId string, page int, pageSize int, desc bool) (*storage.ItemsResponse, error) {
+func (d *DatasetLocal) GetItems(ctx context.Context, datasetId string, page int, pageSize int, desc bool) (*models.DatasetItem, error) {
 	dirPath := filepath.Join(storageDir, datasetDir, datasetId)
 
 	entries, err := os.ReadDir(dirPath)
@@ -246,7 +246,7 @@ func (d *DatasetLocal) GetItems(ctx context.Context, datasetId string, page int,
 		result = append(result, item)
 	}
 
-	return &storage.ItemsResponse{
+	return &models.DatasetItem{
 		Items: result,
 		Total: total,
 	}, nil
