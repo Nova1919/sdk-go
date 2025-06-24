@@ -19,6 +19,8 @@ var (
 )
 
 func init() {
+	// todo Judge whether it is online environment IS_ONLINE according to environment variables
+
 	defaultStorage = Storage{
 		Kv:      kv.NewKVHttp(),
 		Object:  object.NewObjHttp(),
