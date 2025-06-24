@@ -47,7 +47,7 @@ func (d *DatasetLocal) ListDatasets(ctx context.Context, page int64, pageSize in
 
 		allDatasets = append(allDatasets, storage.DatasetInfo{
 			Id:     name,
-			Name:   name,
+			Name:   meta.Name,
 			Fields: meta.Fields,
 		})
 	}
@@ -87,7 +87,7 @@ func (d *DatasetLocal) CreateDataset(ctx context.Context, name string) (id strin
 	}
 	id = newUUID.String()
 	path := filepath.Join(storageDir, datasetDir, id)
-	err = os.MkdirAll(path, 0755)
+	err = os.MkdirAll(path, os.ModeDir)
 	if err != nil {
 		return "", "", fmt.Errorf("create dataset failed, cause: %v", err)
 	}
@@ -111,7 +111,7 @@ func updateMetadata(datasetId string, name string) (*metadata, error) {
 			return nil, fmt.Errorf("parse JSON %s failed: %v", datasetId, err)
 		}
 	} else {
-		err := os.MkdirAll(filepath.Join(storageDir, datasetDir, datasetId), 0755)
+		err := os.MkdirAll(filepath.Join(storageDir, datasetDir, datasetId), os.ModeDir)
 		if err != nil {
 			return nil, fmt.Errorf("create dataset failed, cause: %v", err)
 		}
@@ -150,7 +150,7 @@ func (d *DatasetLocal) AddItems(ctx context.Context, datasetId string, items []m
 		return false, err
 	}
 
-	if err := os.MkdirAll(dirPath, 0755); err != nil {
+	if err := os.MkdirAll(dirPath, os.ModeDir); err != nil {
 		return false, fmt.Errorf("create dir failed: %v", err)
 	}
 
