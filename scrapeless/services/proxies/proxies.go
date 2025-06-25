@@ -4,20 +4,19 @@ import (
 	"context"
 	"github.com/scrapeless-ai/sdk-go/env"
 	"github.com/scrapeless-ai/sdk-go/internal/code"
-	proxy2 "github.com/scrapeless-ai/sdk-go/internal/remote/proxy"
+	rp "github.com/scrapeless-ai/sdk-go/internal/remote/proxy"
 	"github.com/scrapeless-ai/sdk-go/internal/remote/proxy/http"
+	proxy2 "github.com/scrapeless-ai/sdk-go/internal/remote/proxy/models"
 	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
 )
 
-type PHttp struct {
+type Proxy struct {
 }
 
-func NewPHttp() Proxy {
-	log.Infof("proxies http init")
-	if http.Default() == nil {
-		http.Init()
-	}
-	return &PHttp{}
+func NewProxy(serverMode string) *Proxy {
+	log.Infof("proxies init")
+	rp.NewClient(serverMode)
+	return &Proxy{}
 }
 
 // Proxy retrieves proxies information.
@@ -26,8 +25,8 @@ func NewPHttp() Proxy {
 //
 //	ctx: context.Context - Context for the request.
 //	proxies: ProxyActor - Struct containing proxies request parameters like country, session duration, etc.
-func (ph *PHttp) Proxy(ctx context.Context, proxy ProxyActor) (string, error) {
-	proxyUrl, err := http.Default().ProxyGetProxy(ctx, &proxy2.GetProxyRequest{
+func (ph *Proxy) Proxy(ctx context.Context, proxy ProxyActor) (string, error) {
+	proxyUrl, err := rp.ClientInterface.ProxyGetProxy(ctx, &proxy2.GetProxyRequest{
 		ApiKey:          env.GetActorEnv().ApiKey,
 		Country:         proxy.Country,
 		SessionDuration: proxy.SessionDuration,
@@ -42,6 +41,6 @@ func (ph *PHttp) Proxy(ctx context.Context, proxy ProxyActor) (string, error) {
 	return proxyUrl, nil
 }
 
-func (ph *PHttp) Close() error {
+func (ph *Proxy) Close() error {
 	return http.Default().Close()
 }

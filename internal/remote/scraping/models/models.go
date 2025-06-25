@@ -1,4 +1,4 @@
-package scraping
+package models
 
 // ScrapingRequest defines parameters for a scraping operation
 type ScrapingRequest struct {

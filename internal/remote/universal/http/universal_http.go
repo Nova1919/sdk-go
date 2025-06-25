@@ -5,12 +5,12 @@ import (
 	"encoding/json"
 	"fmt"
 	request2 "github.com/scrapeless-ai/sdk-go/internal/remote/request"
-	"github.com/scrapeless-ai/sdk-go/internal/remote/universal"
+	"github.com/scrapeless-ai/sdk-go/internal/remote/universal/models"
 	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
 	"net/http"
 )
 
-func (c *Client) CreateTask(ctx context.Context, req universal.UniversalTaskRequest) ([]byte, error) {
+func (c *Client) CreateTask(ctx context.Context, req *models.UniversalTaskRequest) ([]byte, error) {
 	body, _ := json.Marshal(req)
 	response, err := request2.Request(ctx, request2.ReqInfo{
 		Method:  http.MethodPost,

@@ -6,31 +6,30 @@ import (
 	"github.com/scrapeless-ai/sdk-go/internal/code"
 	"github.com/scrapeless-ai/sdk-go/internal/remote/deepserp"
 	dh "github.com/scrapeless-ai/sdk-go/internal/remote/deepserp/http"
+	"github.com/scrapeless-ai/sdk-go/internal/remote/deepserp/models"
 	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
 	"github.com/tidwall/gjson"
 	"strings"
 	"time"
 )
 
-type DeepserpHttp struct{}
+type DeepSerp struct{}
 
-func New() Deepserp {
-	log.Info("Internal Router init")
-	if dh.Default() == nil {
-		dh.Init(env.Env.ScrapelessBaseApiUrl)
-	}
-	return DeepserpHttp{}
+func NewDeepSerp(serverMode string) *DeepSerp {
+	log.Info("Internal DeepSerp init")
+	deepserp.NewClient(serverMode, env.Env.ScrapelessBaseApiUrl)
+	return &DeepSerp{}
 }
 
 // CreateTask creates a new deepSerp task with the given context and request parameters.
-func (s DeepserpHttp) CreateTask(ctx context.Context, req DeepserpTaskRequest) ([]byte, error) {
+func (s *DeepSerp) CreateTask(ctx context.Context, req DeepserpTaskRequest) ([]byte, error) {
 	if req.ProxyCountry == "" {
 		req.ProxyCountry = env.Env.ProxyCountry
 	}
-	response, err := dh.Default().CreateTask(ctx, deepserp.DeepserpTaskRequest{
+	response, err := deepserp.ClientInterface.CreateTask(ctx, &models.DeepserpTaskRequest{
 		Actor: string(req.Actor),
 		Input: req.Input,
-		Proxy: deepserp.TaskProxy{Country: strings.ToUpper(req.ProxyCountry)},
+		Proxy: models.TaskProxy{Country: strings.ToUpper(req.ProxyCountry)},
 	})
 	if err != nil {
 		log.Errorf("deepserp create err:%v", err)
@@ -39,13 +38,13 @@ func (s DeepserpHttp) CreateTask(ctx context.Context, req DeepserpTaskRequest) (
 	return response, nil
 }
 
-func (s DeepserpHttp) Close() error {
+func (s *DeepSerp) Close() error {
 	return dh.Default().Close()
 }
 
 // GetTaskResult retrieves the result of a deepSerp task by its ID.
-func (s DeepserpHttp) GetTaskResult(ctx context.Context, taskId string) ([]byte, error) {
-	result, err := dh.Default().GetTaskResult(ctx, taskId)
+func (s *DeepSerp) GetTaskResult(ctx context.Context, taskId string) ([]byte, error) {
+	result, err := deepserp.ClientInterface.GetTaskResult(ctx, taskId)
 	if err != nil {
 		log.Errorf("get task result err:%v", err)
 		return nil, code.Format(err)
@@ -53,7 +52,7 @@ func (s DeepserpHttp) GetTaskResult(ctx context.Context, taskId string) ([]byte,
 	return result, nil
 }
 
-func (s DeepserpHttp) Scrape(ctx context.Context, req DeepserpTaskRequest) ([]byte, error) {
+func (s *DeepSerp) Scrape(ctx context.Context, req DeepserpTaskRequest) ([]byte, error) {
 	task, err := s.CreateTask(ctx, req)
 	if err != nil {
 		return nil, err

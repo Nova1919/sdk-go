@@ -5,12 +5,12 @@ import (
 	"encoding/json"
 	"fmt"
 	request2 "github.com/scrapeless-ai/sdk-go/internal/remote/request"
-	"github.com/scrapeless-ai/sdk-go/internal/remote/scraping"
+	"github.com/scrapeless-ai/sdk-go/internal/remote/scraping/models"
 	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
 	"net/http"
 )
 
-func (c *Client) Scrape(ctx context.Context, req scraping.ScrapingRequest) ([]byte, error) {
+func (c *Client) Scrape(ctx context.Context, req *models.ScrapingRequest) ([]byte, error) {
 	body, _ := json.Marshal(req)
 	response, err := request2.Request(ctx, request2.ReqInfo{
 		Method:  http.MethodPost,
@@ -24,7 +24,7 @@ func (c *Client) Scrape(ctx context.Context, req scraping.ScrapingRequest) ([]by
 	return []byte(response), nil
 }
 
-func (c *Client) CreateTask(ctx context.Context, req scraping.ScrapingTaskRequest) ([]byte, error) {
+func (c *Client) CreateTask(ctx context.Context, req *models.ScrapingTaskRequest) ([]byte, error) {
 	body, _ := json.Marshal(req)
 	response, err := request2.Request(ctx, request2.ReqInfo{
 		Method:  http.MethodPost,

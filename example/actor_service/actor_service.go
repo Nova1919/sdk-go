@@ -2,9 +2,9 @@ package main
 
 import (
 	"context"
-	"github.com/scrapeless-ai/sdk-go/internal/remote/actor"
 	"github.com/scrapeless-ai/sdk-go/scrapeless"
 	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
+	"github.com/scrapeless-ai/sdk-go/scrapeless/services/actor"
 )
 
 func main() {

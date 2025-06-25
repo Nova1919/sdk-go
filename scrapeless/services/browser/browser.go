@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"github.com/scrapeless-ai/sdk-go/env"
 	"github.com/scrapeless-ai/sdk-go/internal/code"
-	remote_brwoser "github.com/scrapeless-ai/sdk-go/internal/remote/browser"
+	"github.com/scrapeless-ai/sdk-go/internal/remote/browser"
 	"github.com/scrapeless-ai/sdk-go/internal/remote/browser/http"
+	remote_brwoser "github.com/scrapeless-ai/sdk-go/internal/remote/browser/models"
 	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -14,18 +15,19 @@ import (
 	"strings"
 )
 
-type BHttp struct {
+type Browser struct {
 }
 
-func NewBHttp() Browser {
+func NewBrowser(serverMode string) *Browser {
 	log.Info("browser http init")
+	browser.NewClient(serverMode, env.Env.ScrapelessBrowserUrl)
 	if http.Default() == nil {
 		http.Init(env.Env.ScrapelessBrowserUrl)
 	}
-	return &BHttp{}
+	return &Browser{}
 }
-func (bh *BHttp) Create(ctx context.Context, req Actor) (*CreateResp, error) {
-	create, err := http.Default().ScrapingBrowserCreate(ctx, &remote_brwoser.CreateBrowserRequest{
+func (bh *Browser) Create(ctx context.Context, req Actor) (*CreateResp, error) {
+	create, err := browser.ClientInterface.ScrapingBrowserCreate(ctx, &remote_brwoser.CreateBrowserRequest{
 		ApiKey: env.GetActorEnv().ApiKey,
 		Input: map[string]string{
 			"session_ttl": req.Input.SessionTtl,
@@ -52,7 +54,7 @@ func (bh *BHttp) Create(ctx context.Context, req Actor) (*CreateResp, error) {
 	return nil, nil
 }
 
-func (bh *BHttp) CreateOnce(ctx context.Context, req ActorOnce) (*CreateResp, error) {
+func (bh *Browser) CreateOnce(ctx context.Context, req ActorOnce) (*CreateResp, error) {
 	u, err := url.Parse(env.Env.ScrapelessBrowserUrl)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "parse url error: %s", err.Error())
@@ -66,6 +68,6 @@ func (bh *BHttp) CreateOnce(ctx context.Context, req ActorOnce) (*CreateResp, er
 		DevtoolsUrl: devtoolsUrl + "?" + value.Encode(),
 	}, nil
 }
-func (bh *BHttp) Close() error {
+func (bh *Browser) Close() error {
 	return http.Default().Close()
 }

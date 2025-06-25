@@ -10,10 +10,11 @@ type config struct {
 	ProxySessionDurationMax int64  `mapstructure:"SCRAPELESS_PROXY_SESSION_DURATION_MAX"`
 	ProxyGatewayHost        string `mapstructure:"SCRAPELESS_PROXY_GATEWAY_HOST"`
 
-	ScrapelessBaseApiUrl string `mapstructure:"SCRAPELESS_BASE_API_URL"`
-	ScrapelessStorageUrl string `mapstructure:"SCRAPELESS_STORAGE_API_URL"`
-	ScrapelessActorUrl   string `mapstructure:"SCRAPELESS_ACTOR_API_URL"`
-	ScrapelessBrowserUrl string `mapstructure:"SCRAPELESS_BROWSER_API_URL"`
+	ScrapelessBaseApiUrl  string `mapstructure:"SCRAPELESS_BASE_API_URL"`
+	ScrapelessStorageUrl  string `mapstructure:"SCRAPELESS_STORAGE_API_URL"`
+	ScrapelessActorUrl    string `mapstructure:"SCRAPELESS_ACTOR_API_URL"`
+	ScrapelessBrowserUrl  string `mapstructure:"SCRAPELESS_BROWSER_API_URL"`
+	ScrapelessCrawlApiUrl string `mapstructure:"SCRAPELESS_CRAWL_API_URL"`
 
 	//ScrapingBrowserUrl string `mapstructure:"SCRAPELESS_BROWSER_URL"`
 	//ScrapingBrowserApiHost  string `mapstructure:"SCRAPELESS_BROWSER_API_HOST"`

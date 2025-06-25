@@ -28,8 +28,8 @@ func (s *Dataset) ListDatasets(ctx context.Context, page int64, pageSize int64, 
 	datasets, err := storage.ClientInterface.ListDatasets(ctx, &models.ListDatasetsRequest{
 		ActorId:  &env.GetActorEnv().ActorId,
 		RunId:    &env.GetActorEnv().RunId,
-		Page:     page,
-		PageSize: pageSize,
+		Page:     int(page),
+		PageSize: int(pageSize),
 		Desc:     desc,
 	})
 	if err != nil {
@@ -51,7 +51,7 @@ func (s *Dataset) ListDatasets(ctx context.Context, page int64, pageSize int64, 
 	}
 	return &ListDatasetsResponse{
 		Items: itemArray,
-		Total: datasets.Total,
+		Total: int64(datasets.Total),
 	}, nil
 }
 

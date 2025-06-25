@@ -1,4 +1,4 @@
-package captcha
+package models
 
 type CreateTaskRequest struct {
 	ApiKey  string         `json:"apiKey,omitempty"`

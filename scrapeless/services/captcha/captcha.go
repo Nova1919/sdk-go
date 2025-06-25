@@ -5,21 +5,23 @@ import (
 	"encoding/json"
 	"github.com/scrapeless-ai/sdk-go/env"
 	"github.com/scrapeless-ai/sdk-go/internal/code"
-	gateway_captcha "github.com/scrapeless-ai/sdk-go/internal/remote/captcha"
+	"github.com/scrapeless-ai/sdk-go/internal/remote/captcha"
 	"github.com/scrapeless-ai/sdk-go/internal/remote/captcha/http"
+	gateway_captcha "github.com/scrapeless-ai/sdk-go/internal/remote/captcha/models"
 	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
 	"github.com/tidwall/gjson"
 )
 
-type CaHttp struct {
+type Captcha struct {
 }
 
-func NewCaHttp() Captcha {
-	log.Info("captcha http init")
+func NewCaptcha(serverMode string) *Captcha {
+	log.Info("captcha init")
+	captcha.NewClient(serverMode, env.Env.ScrapelessBaseApiUrl)
 	if http.Default() == nil {
 		http.Init(env.Env.ScrapelessBaseApiUrl)
 	}
-	return &CaHttp{}
+	return &Captcha{}
 }
 
 // Solver solves the captcha task by submitting it to the captcha solving service
@@ -28,7 +30,7 @@ func NewCaHttp() Captcha {
 //
 //	ctx: Context for controlling the request lifecycle and deadlines
 //	req: Captcha solving request parameters object containing input data and configuration
-func (c *CaHttp) Solver(ctx context.Context, req *CaptchaSolverReq) (*CaptchaSolverResp, error) {
+func (c *Captcha) Solver(ctx context.Context, req *CaptchaSolverReq) (*CaptchaSolverResp, error) {
 	var (
 		inputMap map[string]any
 	)
@@ -37,7 +39,7 @@ func (c *CaHttp) Solver(ctx context.Context, req *CaptchaSolverReq) (*CaptchaSol
 	_ = json.Unmarshal(input, &inputMap)
 
 	// Submit the captcha solving task to the remote service with provided parameters
-	response, err := http.Default().CaptchaSolverSolverTask(ctx, &gateway_captcha.CreateTaskRequest{
+	response, err := captcha.ClientInterface.CaptchaSolverSolverTask(ctx, &gateway_captcha.CreateTaskRequest{
 		ApiKey: env.GetActorEnv().ApiKey,
 		Actor:  req.Actor,
 		Input:  inputMap,
@@ -67,7 +69,7 @@ func (c *CaHttp) Solver(ctx context.Context, req *CaptchaSolverReq) (*CaptchaSol
 //
 //	ctx: Context for controlling the request lifecycle and deadlines
 //	req: Captcha solving task request parameters
-func (c *CaHttp) Create(ctx context.Context, req *CaptchaSolverReq) (string, error) {
+func (c *Captcha) Create(ctx context.Context, req *CaptchaSolverReq) (string, error) {
 	var (
 		inputMap map[string]any
 	)
@@ -76,7 +78,7 @@ func (c *CaHttp) Create(ctx context.Context, req *CaptchaSolverReq) (string, err
 	_ = json.Unmarshal(input, &inputMap)
 
 	// Submit captcha solving task to remote service with provided configuration
-	taskId, err := http.Default().CaptchaSolverCreateTask(ctx, &gateway_captcha.CreateTaskRequest{
+	taskId, err := captcha.ClientInterface.CaptchaSolverCreateTask(ctx, &gateway_captcha.CreateTaskRequest{
 		ApiKey: env.GetActorEnv().ApiKey,
 		Actor:  req.Actor,
 		Input:  inputMap,
@@ -104,8 +106,8 @@ func (c *CaHttp) Create(ctx context.Context, req *CaptchaSolverReq) (string, err
 //
 //	ctx: context object for controlling the request lifecycle and timeouts
 //	req: captcha solving request parameters containing the task ID
-func (c *CaHttp) ResultGet(ctx context.Context, req *CaptchaSolverReq) (*CaptchaSolverResp, error) {
-	response, err := http.Default().CaptchaSolverGetTaskResult(ctx, &gateway_captcha.GetTaskResultRequest{
+func (c *Captcha) ResultGet(ctx context.Context, req *CaptchaSolverReq) (*CaptchaSolverResp, error) {
+	response, err := captcha.ClientInterface.CaptchaSolverGetTaskResult(ctx, &gateway_captcha.GetTaskResultRequest{
 		ApiKey: env.GetActorEnv().ApiKey,
 		TaskId: req.TaskId,
 	})
@@ -120,6 +122,6 @@ func (c *CaHttp) ResultGet(ctx context.Context, req *CaptchaSolverReq) (*Captcha
 	return &CaptchaSolverResp{Token: token}, nil
 }
 
-func (c *CaHttp) Close() error {
+func (c *Captcha) Close() error {
 	return nil
 }

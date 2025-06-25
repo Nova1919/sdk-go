@@ -6,7 +6,7 @@ import (
 )
 
 func TestScrapingHttp_CreateTask(t *testing.T) {
-	scraping := New()
+	scraping := New("http")
 	task, err := scraping.CreateTask(context.Background(), ScrapingTaskRequest{
 		Actor: "scraper.tiktok.mobile.shop.detail",
 		Input: map[string]any{

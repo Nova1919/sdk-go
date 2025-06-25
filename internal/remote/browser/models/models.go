@@ -1,4 +1,4 @@
-package browser
+package models
 
 type CreateBrowserRequest struct {
 	ApiKey string            `json:"apiKey,omitempty"`

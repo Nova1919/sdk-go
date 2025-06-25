@@ -4,13 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/scrapeless-ai/sdk-go/internal/remote/deepserp"
+	"github.com/scrapeless-ai/sdk-go/internal/remote/deepserp/models"
 	request2 "github.com/scrapeless-ai/sdk-go/internal/remote/request"
 	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
 	"net/http"
 )
 
-func (c *Client) CreateTask(ctx context.Context, req deepserp.DeepserpTaskRequest) ([]byte, error) {
+func (c *Client) CreateTask(ctx context.Context, req *models.DeepserpTaskRequest) ([]byte, error) {
 	body, _ := json.Marshal(req)
 	response, err := request2.Request(ctx, request2.ReqInfo{
 		Method:  http.MethodPost,

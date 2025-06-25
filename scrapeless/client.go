@@ -14,16 +14,16 @@ import (
 )
 
 type Client struct {
-	Browser   browser.Browser
-	Proxy     proxies.Proxy
-	Captcha   captcha.Captcha
-	Storage   storage.Storage
-	Server    httpserver.Server
-	Router    router.Router
-	DeepSerp  deepserp.Deepserp
-	Scraping  scraping.Scraping
-	Universal universal.Universal
-	Actor     actor.ActorService
+	Browser   *browser.Browser
+	Proxy     *proxies.Proxy
+	Captcha   *captcha.Captcha
+	Storage   *storage.Storage
+	Server    *httpserver.Server
+	Router    *router.Router
+	DeepSerp  *deepserp.DeepSerp
+	Scraping  *scraping.Scraping
+	Universal *universal.Universal
+	Actor     *actor.ActorService
 	CloseFun  []func() error
 }
 
@@ -32,7 +32,7 @@ func New(opts ...Option) *Client {
 	for _, opt := range opts {
 		opt.Apply(client)
 	}
-	client.Router = router.New()
+	client.Router = router.New(typeHttp)
 	return client
 }
 
@@ -57,13 +57,8 @@ type BrowserOption struct {
 }
 
 func (o *BrowserOption) Apply(c *Client) {
-	if o.tp == typeGrpc {
-		c.Browser = browser.NewBGrpc()
-		c.CloseFun = append(c.CloseFun, c.Browser.Close)
-	} else {
-		c.Browser = browser.NewBHttp()
-		c.CloseFun = append(c.CloseFun, c.Browser.Close)
-	}
+	c.Browser = browser.NewBrowser(o.tp)
+	c.CloseFun = append(c.CloseFun, c.Browser.Close)
 }
 
 // WithBrowser choose browser type.
@@ -81,12 +76,8 @@ type ProxyOption struct {
 }
 
 func (o *ProxyOption) Apply(a *Client) {
-	if o.tp == typeGrpc {
-		a.CloseFun = append(a.CloseFun, a.Proxy.Close)
-	} else {
-		a.Proxy = proxies.NewPHttp()
-		a.CloseFun = append(a.CloseFun, a.Proxy.Close)
-	}
+	a.Proxy = proxies.NewProxy(o.tp)
+	a.CloseFun = append(a.CloseFun, a.Proxy.Close)
 }
 
 // WithProxy choose proxies type.
@@ -104,12 +95,8 @@ type CaptchaOption struct {
 }
 
 func (o *CaptchaOption) Apply(a *Client) {
-	if o.tp == typeGrpc {
-		a.CloseFun = append(a.CloseFun, a.Captcha.Close)
-	} else {
-		a.Captcha = captcha.NewCaHttp()
-		a.CloseFun = append(a.CloseFun, a.Captcha.Close)
-	}
+	a.Captcha = captcha.NewCaptcha(o.tp)
+	a.CloseFun = append(a.CloseFun, a.Captcha.Close)
 }
 
 // WithCaptcha choose captcha type.
@@ -161,12 +148,8 @@ type DeepSerpOption struct {
 }
 
 func (d *DeepSerpOption) Apply(c *Client) {
-	if d.tp == typeGrpc {
-		c.CloseFun = append(c.CloseFun, c.DeepSerp.Close)
-	} else {
-		c.DeepSerp = deepserp.New()
-		c.CloseFun = append(c.CloseFun, c.DeepSerp.Close)
-	}
+	c.DeepSerp = deepserp.NewDeepSerp(d.tp)
+	c.CloseFun = append(c.CloseFun, c.DeepSerp.Close)
 }
 
 // WithDeepSerp choose DeepSerp type.
@@ -184,12 +167,8 @@ type ScrapingOption struct {
 }
 
 func (s *ScrapingOption) Apply(c *Client) {
-	if s.tp == typeGrpc {
-		c.CloseFun = append(c.CloseFun, c.Scraping.Close)
-	} else {
-		c.Scraping = scraping.New()
-		c.CloseFun = append(c.CloseFun, c.Scraping.Close)
-	}
+	c.Scraping = scraping.New(s.tp)
+	c.CloseFun = append(c.CloseFun, c.Scraping.Close)
 }
 
 // WithScraping choose scraping type.
@@ -207,12 +186,8 @@ type UniversalOption struct {
 }
 
 func (s *UniversalOption) Apply(c *Client) {
-	if s.tp == typeGrpc {
-		c.CloseFun = append(c.CloseFun, c.Universal.Close)
-	} else {
-		c.Universal = universal.New()
-		c.CloseFun = append(c.CloseFun, c.Universal.Close)
-	}
+	c.Universal = universal.New(s.tp)
+	c.CloseFun = append(c.CloseFun, c.Universal.Close)
 }
 
 // WithUniversal choose universal type.
@@ -230,12 +205,8 @@ type ActorOption struct {
 }
 
 func (s *ActorOption) Apply(c *Client) {
-	if s.tp == typeGrpc {
-		c.CloseFun = append(c.CloseFun, c.Actor.Close)
-	} else {
-		c.Actor = actor.NewActorHttp()
-		c.CloseFun = append(c.CloseFun, c.Actor.Close)
-	}
+	c.Actor = actor.NewActor(s.tp)
+	c.CloseFun = append(c.CloseFun, c.Actor.Close)
 }
 
 // WithActor choose Actor type.

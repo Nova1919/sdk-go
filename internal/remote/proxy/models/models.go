@@ -1,4 +1,4 @@
-package proxy
+package models
 
 type GetProxyRequest struct {
 	ApiKey          string `json:"apiKey,omitempty"`

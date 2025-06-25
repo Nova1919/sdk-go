@@ -3,6 +3,7 @@ package storage
 import (
 	"github.com/scrapeless-ai/sdk-go/env"
 	"github.com/scrapeless-ai/sdk-go/internal/remote/storage"
+	"sync"
 )
 
 type Storage struct {
@@ -13,12 +14,12 @@ type Storage struct {
 }
 
 var (
-	defaultStorage Storage
+	defaultStorage *Storage
+	once           = sync.Once{}
 )
 
 func init() {
-	// todo Judge whether it is online environment IS_ONLINE according to environment variables
-	defaultStorage = Storage{
+	defaultStorage = &Storage{
 		Dataset: &Dataset{},
 		KV:      &KV{},
 		Object:  &Object{},
@@ -26,8 +27,10 @@ func init() {
 	}
 }
 
-func NewStorage(serverMode string) Storage {
-	storage.NewClient(serverMode, env.Env.ScrapelessBaseApiUrl)
+func NewStorage(serverMode string) *Storage {
+	once.Do(func() {
+		storage.NewClient(serverMode, env.Env.ScrapelessStorageUrl)
+	})
 	return defaultStorage
 }
 

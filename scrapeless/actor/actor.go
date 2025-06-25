@@ -12,21 +12,18 @@ import (
 	"github.com/scrapeless-ai/sdk-go/scrapeless/services/proxies"
 	"github.com/scrapeless-ai/sdk-go/scrapeless/services/router"
 	"github.com/scrapeless-ai/sdk-go/scrapeless/services/storage"
-	"github.com/scrapeless-ai/sdk-go/scrapeless/services/storage/dataset"
-	"github.com/scrapeless-ai/sdk-go/scrapeless/services/storage/kv"
-	"github.com/scrapeless-ai/sdk-go/scrapeless/services/storage/object"
-	"github.com/scrapeless-ai/sdk-go/scrapeless/services/storage/queue"
+
 	"github.com/tidwall/gjson"
 	"reflect"
 )
 
 type Actor struct {
-	Browser     browser.Browser
-	Proxy       proxies.Proxy
-	Captcha     captcha.Captcha
-	storage     storage.Storage
-	Server      httpserver.Server
-	Router      router.Router
+	Browser     *browser.Browser
+	Proxy       *proxies.Proxy
+	Captcha     *captcha.Captcha
+	storage     *storage.Storage
+	Server      *httpserver.Server
+	Router      *router.Router
 	closeFun    []func() error
 	datasetId   string
 	namespaceId string
@@ -34,15 +31,21 @@ type Actor struct {
 	queueId     string
 }
 
+const (
+	typeGrpc = "grpc"
+	typeHttp = "http"
+)
+
 // New creates a new Actor.
 func New() *Actor {
 	var actor = new(Actor)
-	actor.storage = storage.NewStorage()
-	actor.Browser = browser.NewBHttp()
-	actor.Captcha = captcha.NewCaHttp()
-	actor.Proxy = proxies.NewPHttp()
+	actor.storage = storage.NewStorage(typeHttp)
+	actor.Browser = browser.NewBrowser(typeHttp)
+	actor.Captcha = captcha.NewCaptcha(typeHttp)
+	actor.Proxy = proxies.NewProxy(typeHttp)
+	actor.Router = router.New(typeHttp)
 	actor.Server = httpserver.New()
-	actor.Router = router.New()
+
 	actor.datasetId = env.Env.Actor.DatasetId
 	actor.namespaceId = env.Env.Actor.KvNamespaceId
 	actor.bucketId = env.Env.Actor.BucketId
@@ -80,58 +83,58 @@ func (a *Actor) Start() error {
  */
 
 // ListNamespaces List all available namespaces
-func (a *Actor) ListNamespaces(ctx context.Context, page int, pageSize int, desc bool) (*kv.NamespacesResponse, error) {
-	return a.storage.Kv.ListNamespaces(ctx, page, pageSize, desc)
+func (a *Actor) ListNamespaces(ctx context.Context, page int, pageSize int, desc bool) (*storage.NamespacesResponse, error) {
+	return a.storage.KV.ListNamespaces(ctx, int64(page), int64(pageSize), desc)
 }
 
 // CreateNamespace Create a new namespace
 func (a *Actor) CreateNamespace(ctx context.Context, name string) (namespaceId string, namespaceName string, err error) {
-	return a.storage.Kv.CreateNamespace(ctx, name)
+	return a.storage.KV.CreateNamespace(ctx, name)
 }
 
 // GetNamespace Get a namespace
-func (a *Actor) GetNamespace(ctx context.Context, namespaceName string) (*kv.KvNamespaceItem, error) {
-	return a.storage.Kv.GetNamespace(ctx, namespaceName)
+func (a *Actor) GetNamespace(ctx context.Context, namespaceName string) (*storage.KvNamespaceItem, error) {
+	return a.storage.KV.GetNamespace(ctx, namespaceName)
 }
 
 // DelNamespace Delete a namespace
 func (a *Actor) DelNamespace(ctx context.Context) (bool, error) {
-	return a.storage.Kv.DelNamespace(ctx, a.namespaceId)
+	return a.storage.KV.DelNamespace(ctx, a.namespaceId)
 }
 
 // RenameNamespace Rename a namespace
 func (a *Actor) RenameNamespace(ctx context.Context, name string) (ok bool, namespaceName string, err error) {
-	return a.storage.Kv.RenameNamespace(ctx, a.namespaceId, name)
+	return a.storage.KV.RenameNamespace(ctx, a.namespaceId, name)
 }
 
 // ListKeys List keys in a namespace
-func (a *Actor) ListKeys(ctx context.Context, page int, pageSize int) (*kv.KvKeys, error) {
-	return a.storage.Kv.ListKeys(ctx, a.namespaceId, page, pageSize)
+func (a *Actor) ListKeys(ctx context.Context, page int, pageSize int) (*storage.KvKeys, error) {
+	return a.storage.KV.ListKeys(ctx, a.namespaceId, int64(page), int64(pageSize))
 }
 
 // SetValue Set a key-value pair in the default namespace (from environment variable)
 func (a *Actor) SetValue(ctx context.Context, key string, value string, expiration uint) (bool, error) {
-	return a.storage.Kv.SetValue(ctx, a.namespaceId, key, value, expiration)
+	return a.storage.KV.SetValue(ctx, a.namespaceId, key, value, expiration)
 }
 
 // DeleteValue Delete a value from a namespace
 func (a *Actor) DeleteValue(ctx context.Context, key string) (bool, error) {
-	return a.storage.Kv.DelValue(ctx, a.namespaceId, key)
+	return a.storage.KV.DelValue(ctx, a.namespaceId, key)
 }
 
 // BulkSetValue Bulk set multiple key-value pairs in a namespace
-func (a *Actor) BulkSetValue(ctx context.Context, data []kv.BulkItem) (successCount int64, err error) {
-	return a.storage.Kv.BulkSetValue(ctx, a.namespaceId, data)
+func (a *Actor) BulkSetValue(ctx context.Context, data []storage.BulkItem) (successCount int64, err error) {
+	return a.storage.KV.BulkSetValue(ctx, a.namespaceId, data)
 }
 
 // BulkDelValue Bulk delete multiple keys from a namespace
 func (a *Actor) BulkDelValue(ctx context.Context, keys []string) (bool, error) {
-	return a.storage.Kv.BulkDelValue(ctx, a.namespaceId, keys)
+	return a.storage.KV.BulkDelValue(ctx, a.namespaceId, keys)
 }
 
 // GetValue Get a value by key from the default namespace (from environment variable)
 func (a *Actor) GetValue(ctx context.Context, key string) (string, error) {
-	return a.storage.Kv.GetValue(ctx, a.namespaceId, key)
+	return a.storage.KV.GetValue(ctx, a.namespaceId, key)
 }
 
 /**
@@ -139,7 +142,7 @@ func (a *Actor) GetValue(ctx context.Context, key string) (string, error) {
  */
 
 // ListDatasets  list all available datasets
-func (a *Actor) ListDatasets(ctx context.Context, page int64, pageSize int64, desc bool) (*dataset.ListDatasetsResponse, error) {
+func (a *Actor) ListDatasets(ctx context.Context, page int64, pageSize int64, desc bool) (*storage.ListDatasetsResponse, error) {
 	return a.storage.Dataset.ListDatasets(ctx, page, pageSize, desc)
 }
 
@@ -164,7 +167,7 @@ func (a *Actor) AddItems(ctx context.Context, items []map[string]any) (bool, err
 }
 
 // GetItems Get items from the default dataset (from environment variable)
-func (a *Actor) GetItems(ctx context.Context, page int, pageSize int, desc bool) (*dataset.ItemsResponse, error) {
+func (a *Actor) GetItems(ctx context.Context, page int, pageSize int, desc bool) (*storage.ItemsResponse, error) {
 	return a.storage.Dataset.GetItems(ctx, a.datasetId, page, pageSize, desc)
 }
 
@@ -173,17 +176,17 @@ func (a *Actor) GetItems(ctx context.Context, page int, pageSize int, desc bool)
  */
 
 // ListQueues List all available queues
-func (a *Actor) ListQueues(ctx context.Context, page int64, pageSize int64, desc bool) (*queue.ListQueuesResponse, error) {
+func (a *Actor) ListQueues(ctx context.Context, page int64, pageSize int64, desc bool) (*storage.ListQueuesResponse, error) {
 	return a.storage.Queue.List(ctx, page, pageSize, desc)
 }
 
 // CreateQueue Create a new queue
-func (a *Actor) CreateQueue(ctx context.Context, req *queue.CreateQueueReq) (queueId string, queueName string, err error) {
+func (a *Actor) CreateQueue(ctx context.Context, req *storage.CreateQueueReq) (queueId string, queueName string, err error) {
 	return a.storage.Queue.Create(ctx, req)
 }
 
 // GetQueue Get a queue by name
-func (a *Actor) GetQueue(ctx context.Context, name string) (*queue.Item, error) {
+func (a *Actor) GetQueue(ctx context.Context, name string) (*storage.Item, error) {
 	return a.storage.Queue.Get(ctx, a.queueId, name)
 }
 
@@ -198,12 +201,12 @@ func (a *Actor) DeleteQueue(ctx context.Context) error {
 }
 
 // PushMessage Push a message to the default queue (from environment variable)
-func (a *Actor) PushMessage(ctx context.Context, req queue.PushQueue) (string, error) {
+func (a *Actor) PushMessage(ctx context.Context, req storage.PushQueue) (string, error) {
 	return a.storage.Queue.Push(ctx, a.queueId, req)
 }
 
 // PullMessage Pull a message from the default queue (from environment variable)
-func (a *Actor) PullMessage(ctx context.Context, size int32) (queue.GetMsgResponse, error) {
+func (a *Actor) PullMessage(ctx context.Context, size int32) (storage.GetMsgResponse, error) {
 	return a.storage.Queue.Pull(ctx, a.queueId, size)
 }
 
@@ -217,7 +220,7 @@ func (a *Actor) AckMessage(ctx context.Context, msgId string) error {
  */
 
 // ListBuckets List all available buckets
-func (a *Actor) ListBuckets(ctx context.Context, page int, pageSize int) (*object.ListBucketsResponse, error) {
+func (a *Actor) ListBuckets(ctx context.Context, page int, pageSize int) (*storage.ListBucketsResponse, error) {
 	return a.storage.Object.ListBuckets(ctx, page, pageSize)
 }
 
@@ -232,12 +235,12 @@ func (a *Actor) DeleteBucket(ctx context.Context) (bool, error) {
 }
 
 // GetBucket Get a bucket
-func (a *Actor) GetBucket(ctx context.Context) (*object.Bucket, error) {
+func (a *Actor) GetBucket(ctx context.Context) (*storage.Bucket, error) {
 	return a.storage.Object.GetBucket(ctx, a.bucketId)
 }
 
 // List list objects in a bucket
-func (a *Actor) List(ctx context.Context, fuzzyFileName string, page int64, pageSize int64) (*object.ListObjectsResponse, error) {
+func (a *Actor) List(ctx context.Context, fuzzyFileName string, page int64, pageSize int64) (*storage.ListObjectsResponse, error) {
 	return a.storage.Object.List(ctx, a.bucketId, fuzzyFileName, page, pageSize)
 }
 
