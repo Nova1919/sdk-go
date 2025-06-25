@@ -12,14 +12,14 @@ import (
 
 type Queue struct{}
 
-// List retrieves a list of queues with pagination and sorting options.
+// ListQueues retrieves a list of queues with pagination and sorting options.
 // Parameters:
 //
 //	ctx: The context for the request.
 //	page: int64 - The page number (minimum 1, defaults to 1 if invalid).
 //	pageSize: int64 - Number of items per page (minimum 10, defaults to 10 if invalid).
 //	desc: bool - Whether to sort results in descending order.
-func (s *Queue) List(ctx context.Context, page int64, pageSize int64, desc bool) (*ListQueuesResponse, error) {
+func (s *Queue) ListQueues(ctx context.Context, page int64, pageSize int64, desc bool) (*ListQueuesResponse, error) {
 	if page < 1 {
 		page = 1
 	}
@@ -57,12 +57,12 @@ func (s *Queue) List(ctx context.Context, page int64, pageSize int64, desc bool)
 	}, nil
 }
 
-// Create creates a new HTTP queue with the provided request parameters.
+// CreateQueue creates a new HTTP queue with the provided request parameters.
 // Parameters:
 //
 //	ctx: The context for the request.
 //	req: The request object containing queue configuration details.
-func (s *Queue) Create(ctx context.Context, req *CreateQueueReq) (queueId string, queueName string, err error) {
+func (s *Queue) CreateQueue(ctx context.Context, req *CreateQueueReq) (queueId string, queueName string, err error) {
 	name := req.Name + "-" + env.GetActorEnv().RunId
 	queue, err := storage.ClientInterface.CreateQueue(ctx, &models.CreateQueueRequest{
 		ActorId:     env.GetActorEnv().ActorId,
@@ -78,12 +78,12 @@ func (s *Queue) Create(ctx context.Context, req *CreateQueueReq) (queueId string
 	return queue.Id, name, nil
 }
 
-// Get retrieves a queue item by name.
+// GetQueue retrieves a queue item by name.
 // Parameters:
 //
 //	ctx: The context for the request.
 //	name: The name of the queue to retrieve.
-func (s *Queue) Get(ctx context.Context, queueId string, name string) (*Item, error) {
+func (s *Queue) GetQueue(ctx context.Context, queueId string, name string) (*Item, error) {
 	name = name + "-" + env.GetActorEnv().RunId
 	queue, err := storage.ClientInterface.GetQueue(ctx, &models.GetQueueRequest{
 		Id:   queueId,
@@ -105,13 +105,13 @@ func (s *Queue) Get(ctx context.Context, queueId string, name string) (*Item, er
 	}, nil
 }
 
-// Update updates the queue information with the provided name and description.
+// UpdateQueue updates the queue information with the provided name and description.
 // Parameters:
 //
 //	ctx: The context for the request.
 //	name: The new name of the queue.
 //	description: The new description of the queue.
-func (s *Queue) Update(ctx context.Context, queueId string, name string, description string) error {
+func (s *Queue) UpdateQueue(ctx context.Context, queueId string, name string, description string) error {
 	name = name + "-" + env.GetActorEnv().RunId
 	err := storage.ClientInterface.UpdateQueue(ctx, &models.UpdateQueueRequest{
 		QueueId:     queueId,
@@ -121,11 +121,11 @@ func (s *Queue) Update(ctx context.Context, queueId string, name string, descrip
 	return err
 }
 
-// Delete deletes the queue using the storage HTTP service.
+// DeleteQueue deletes the queue using the storage HTTP service.
 // Parameters:
 //
 //	ctx: The context for the request.
-func (s *Queue) Delete(ctx context.Context, queueId string) error {
+func (s *Queue) DeleteQueue(ctx context.Context, queueId string) error {
 	err := storage.ClientInterface.DelQueue(ctx, &models.DelQueueRequest{QueueId: queueId})
 	if err != nil {
 		log.Errorf("failed to delete queue: %v", code.Format(err))

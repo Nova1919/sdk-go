@@ -39,14 +39,13 @@ func (s *Dataset) ListDatasets(ctx context.Context, page int64, pageSize int64, 
 	var itemArray []DatasetInfo
 	for _, item := range datasets.Items {
 		itemArray = append(itemArray, DatasetInfo{
-			Id:         item.Id,
-			Name:       item.Name,
-			ActorId:    item.ActorId,
-			RunId:      item.RunId,
-			Fields:     item.Fields,
-			CreatedAt:  item.CreatedAt,
-			UpdatedAt:  item.UpdatedAt,
-			AccessedAt: item.AccessedAt,
+			Id:        item.Id,
+			Name:      item.Name,
+			ActorId:   item.ActorId,
+			RunId:     item.RunId,
+			Fields:    item.Fields,
+			CreatedAt: item.CreatedAt,
+			UpdatedAt: item.UpdatedAt,
 		})
 	}
 	return &ListDatasetsResponse{

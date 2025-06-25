@@ -180,7 +180,7 @@ func (c *LocalClient) SetValue(ctx context.Context, req *models.SetValue) (bool,
 	}
 	keyFile := fmt.Sprintf("%s.json", req.Key)
 	if keyFile == metadataFile {
-		return false, fmt.Errorf("key name can't use 'meatadata'")
+		return false, fmt.Errorf("key name can't use 'metadata'")
 	}
 	path := filepath.Join(storageDir, keyValueDir, req.NamespaceId)
 	file := filepath.Join(path, keyFile)

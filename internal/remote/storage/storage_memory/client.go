@@ -67,14 +67,13 @@ func createMetadata(path, category string) {
 	switch category {
 	case datasetDir:
 		datasetData := models.Dataset{
-			Id:         def,
-			Name:       def,
-			ActorId:    def,
-			RunId:      def,
-			CreatedAt:  def,
-			UpdatedAt:  now,
-			AccessedAt: now,
-			Stats:      models.DatasetStats{},
+			Id:        def,
+			Name:      def,
+			ActorId:   def,
+			RunId:     def,
+			CreatedAt: now,
+			UpdatedAt: now,
+			Stats:     models.DatasetStats{},
 		}
 		meta, _ = json.MarshalIndent(datasetData, "", "  ")
 	case keyValueDir:

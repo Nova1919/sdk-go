@@ -33,13 +33,12 @@ func (s *KV) ListNamespaces(ctx context.Context, page int64, pageSize int64, des
 	var KvNamespaceItems []KvNamespaceItem
 	for _, item := range keyResp.Items {
 		namespaceItem := KvNamespaceItem{
-			Id:         item.Id,
-			Name:       item.Name,
-			ActorId:    item.ActorId,
-			RunId:      item.RunId,
-			CreatedAt:  item.CreatedAt,
-			UpdatedAt:  item.UpdatedAt,
-			AccessedAt: item.AccessedAt,
+			Id:        item.Id,
+			Name:      item.Name,
+			ActorId:   item.ActorId,
+			RunId:     item.RunId,
+			CreatedAt: item.CreatedAt,
+			UpdatedAt: item.UpdatedAt,
 		}
 		KvNamespaceItems = append(KvNamespaceItems, namespaceItem)
 	}
@@ -80,13 +79,12 @@ func (s *KV) GetNamespace(ctx context.Context, namespaceName string) (*KvNamespa
 		return nil, code.Format(err)
 	}
 	resp := &KvNamespaceItem{
-		Id:         namespace.Id,
-		Name:       namespace.Name,
-		ActorId:    namespace.ActorId,
-		RunId:      namespace.RunId,
-		CreatedAt:  namespace.CreatedAt,
-		UpdatedAt:  namespace.UpdatedAt,
-		AccessedAt: namespace.AccessedAt,
+		Id:        namespace.Id,
+		Name:      namespace.Name,
+		ActorId:   namespace.ActorId,
+		RunId:     namespace.RunId,
+		CreatedAt: namespace.CreatedAt,
+		UpdatedAt: namespace.UpdatedAt,
 	}
 	return resp, nil
 }
