@@ -16,7 +16,7 @@ type Dataset interface {
 }
 
 type KV interface {
-	ListNamespaces(ctx context.Context, page int, pageSize int, desc bool) (*models.KvNamespace, error)
+	ListNamespaces(ctx context.Context, page int64, pageSize int64, desc bool) (*models.KvNamespace, error)
 	CreateNamespace(ctx context.Context, req *models.CreateKvNamespaceRequest) (string, error)
 	GetNamespace(ctx context.Context, namespaceId string) (*models.KvNamespaceItem, error)
 	DelNamespace(ctx context.Context, namespaceId string) (bool, error)

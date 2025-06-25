@@ -18,7 +18,7 @@ type KV struct{}
 //	page: Page number (starting from 1). Defaults to 1 if <=0.
 //	pageSize:  Number of items per page. Minimum 10, defaults to 10 if smaller.
 //	desc: Sort namespaces in descending order by creation time if true.
-func (s *KV) ListNamespaces(ctx context.Context, page int, pageSize int, desc bool) (*NamespacesResponse, error) {
+func (s *KV) ListNamespaces(ctx context.Context, page int64, pageSize int64, desc bool) (*NamespacesResponse, error) {
 	if page <= 0 {
 		page = 1
 	}

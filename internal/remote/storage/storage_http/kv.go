@@ -11,7 +11,7 @@ import (
 	"net/http"
 )
 
-func (c *Client) ListNamespaces(ctx context.Context, page int, pageSize int, desc bool) (*models.KvNamespace, error) {
+func (c *Client) ListNamespaces(ctx context.Context, page int64, pageSize int64, desc bool) (*models.KvNamespace, error) {
 	body, err := request2.Request(ctx, request2.ReqInfo{
 		Method:  http.MethodGet,
 		Url:     fmt.Sprintf("%s/api/v1/kv/namespaces?desc=%v&page=%d&pageSize=%d", c.BaseUrl, desc, page, pageSize),

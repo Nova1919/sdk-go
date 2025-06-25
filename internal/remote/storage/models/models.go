@@ -1,5 +1,7 @@
 package models
 
+import "time"
+
 // Dataset
 
 type ListDatasetsRequest struct {
@@ -258,6 +260,12 @@ type SetValue struct {
 	Key         string `json:"key"`
 	Value       string `json:"value"`
 	Expiration  uint   `json:"expiration"`
+}
+
+type SetValueFile struct {
+	SetValue
+	Size     int       `json:"size"`
+	ExpireAt time.Time `json:"expireAt"`
 }
 
 type ListKeyInfo struct {
