@@ -9,6 +9,11 @@ import (
 	"path/filepath"
 )
 
+var (
+	ErrResourceNotFound = errors.New("resource not found")
+	ErrResourceExists   = errors.New("resource exists")
+)
+
 func isDirExists(path string) bool {
 	info, err := os.Stat(path)
 	if os.IsNotExist(err) {

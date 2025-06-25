@@ -15,9 +15,7 @@ func init() {
 var (
 	datasetId   = "123456"
 	NamespaceId = "1245434234"
-	local       = DatasetLocal{datasetId: datasetId}
-	kvLocal     = KVLocal{NamespaceId: NamespaceId}
-	queueLocal  = QueueLocal{}
+	local       = LocalClient{}
 	ctx         = context.Background()
 )
 
@@ -92,7 +90,7 @@ func TestUpdateDataset(t *testing.T) {
 
 func TestCreateNamespace(t *testing.T) {
 
-	Id, err := kvLocal.CreateNamespace(ctx, &models.CreateKvNamespaceRequest{
+	Id, err := local.CreateNamespace(ctx, &models.CreateKvNamespaceRequest{
 		Name:    "hq11343342",
 		RunId:   "hq11",
 		ActorId: "hq11",
@@ -105,7 +103,7 @@ func TestCreateNamespace(t *testing.T) {
 
 func TestListNamespace(t *testing.T) {
 
-	ns, err := kvLocal.ListNamespaces(ctx, 2, 2, true)
+	ns, err := local.ListNamespaces(ctx, 2, 2, true)
 	if err != nil {
 		t.Error(err)
 	}
@@ -114,7 +112,7 @@ func TestListNamespace(t *testing.T) {
 
 func TestDelNamespace(t *testing.T) {
 
-	ns, err := kvLocal.DelNamespace(ctx, "6644afa6-4c9e-4904-97ce-4cc30f2e75ff")
+	ns, err := local.DelNamespace(ctx, "6644afa6-4c9e-4904-97ce-4cc30f2e75ff")
 	if err != nil {
 		t.Error(err)
 	}
@@ -122,7 +120,7 @@ func TestDelNamespace(t *testing.T) {
 }
 
 func TestGetNamespace(t *testing.T) {
-	ns, err := kvLocal.GetNamespace(ctx, "56af1a69-8a9f-44eb-8b05-b251a5122619")
+	ns, err := local.GetNamespace(ctx, "56af1a69-8a9f-44eb-8b05-b251a5122619")
 	if err != nil {
 		t.Error(err)
 	}
@@ -130,7 +128,7 @@ func TestGetNamespace(t *testing.T) {
 }
 
 func TestRenameNamespace(t *testing.T) {
-	ns, err := kvLocal.RenameNamespace(ctx, "56af1a69-8a9f-44eb-8b05-b251a5122619", "bbbbsd")
+	ns, err := local.RenameNamespace(ctx, "56af1a69-8a9f-44eb-8b05-b251a5122619", "bbbbsd")
 	if err != nil {
 		t.Error(err)
 	}
@@ -138,7 +136,7 @@ func TestRenameNamespace(t *testing.T) {
 }
 
 func TestSetValue(t *testing.T) {
-	ok, err := kvLocal.SetValue(ctx, &models.SetValue{
+	ok, err := local.SetValue(ctx, &models.SetValue{
 		NamespaceId: "56af1a69-8a9f-44eb-8b05-b251a5122619",
 		Key:         "Mykey5",
 		Value:       "myValue",
@@ -151,7 +149,7 @@ func TestSetValue(t *testing.T) {
 }
 
 func TestListKeys(t *testing.T) {
-	ok, err := kvLocal.ListKeys(ctx, &models.ListKeyInfo{
+	ok, err := local.ListKeys(ctx, &models.ListKeyInfo{
 		NamespaceId: "56af1a69-8a9f-44eb-8b05-b251a5122619",
 		Page:        1,
 		Size:        9,
@@ -163,7 +161,7 @@ func TestListKeys(t *testing.T) {
 }
 
 func TestBulkSetValue(t *testing.T) {
-	ok, err := kvLocal.BulkSetValue(ctx, &models.BulkSet{
+	ok, err := local.BulkSetValue(ctx, &models.BulkSet{
 		NamespaceId: "56af1a69-8a9f-44eb-8b05-b251a5122619",
 		Items: []models.BulkItem{
 			{Key: "Mykey5", Value: "myValue"},
@@ -179,7 +177,7 @@ func TestBulkSetValue(t *testing.T) {
 }
 
 func TestBulkDelValue(t *testing.T) {
-	ok, err := kvLocal.BulkDelValue(ctx, "56af1a69-8a9f-44eb-8b05-b251a5122619", []string{"Mykey7", "Mykey8"})
+	ok, err := local.BulkDelValue(ctx, "56af1a69-8a9f-44eb-8b05-b251a5122619", []string{"Mykey7", "Mykey8"})
 	if err != nil {
 		t.Error(err)
 	}
@@ -187,7 +185,7 @@ func TestBulkDelValue(t *testing.T) {
 }
 
 func TestDelValue(t *testing.T) {
-	ok, err := kvLocal.DelValue(ctx, "56af1a69-8a9f-44eb-8b05-b251a5122619", "metadata")
+	ok, err := local.DelValue(ctx, "56af1a69-8a9f-44eb-8b05-b251a5122619", "metadata")
 	if err != nil {
 		t.Error(err)
 	}
@@ -195,7 +193,7 @@ func TestDelValue(t *testing.T) {
 }
 
 func TestGetValue(t *testing.T) {
-	ok, err := kvLocal.GetValue(ctx, "56af1a69-8a9f-44eb-8b05-b251a5122619", "Mykey2")
+	ok, err := local.GetValue(ctx, "56af1a69-8a9f-44eb-8b05-b251a5122619", "Mykey2")
 	if err != nil {
 		t.Error(err)
 	}
@@ -203,7 +201,7 @@ func TestGetValue(t *testing.T) {
 }
 
 func TestCreateQueue(t *testing.T) {
-	ok, err := queueLocal.CreateQueue(ctx, &models.CreateQueueRequest{
+	ok, err := local.CreateQueue(ctx, &models.CreateQueueRequest{
 		Name:        "myQuefwudwae23wrq2",
 		Description: "dwafmaio",
 	})
@@ -214,7 +212,7 @@ func TestCreateQueue(t *testing.T) {
 }
 
 func TestGetQueue(t *testing.T) {
-	ok, err := queueLocal.GetQueue(ctx, &models.GetQueueRequest{
+	ok, err := local.GetQueue(ctx, &models.GetQueueRequest{
 		Id: "2050499a-f190-4d03-a1cc-335a438c5c6d",
 	})
 	if err != nil {
@@ -224,7 +222,7 @@ func TestGetQueue(t *testing.T) {
 }
 
 func TestListQueue(t *testing.T) {
-	ok, err := queueLocal.GetQueues(ctx, &models.GetQueuesRequest{
+	ok, err := local.GetQueues(ctx, &models.GetQueuesRequest{
 		Page:     1,
 		PageSize: 3,
 		Desc:     false,
@@ -236,7 +234,7 @@ func TestListQueue(t *testing.T) {
 }
 
 func TestUpdateQueue(t *testing.T) {
-	err := queueLocal.UpdateQueue(ctx, &models.UpdateQueueRequest{
+	err := local.UpdateQueue(ctx, &models.UpdateQueueRequest{
 		QueueId:     "2050499a-f190-4d03-a1cc-335a438c5c6d",
 		Name:        "6666",
 		Description: "myQueue",
@@ -247,16 +245,40 @@ func TestUpdateQueue(t *testing.T) {
 }
 
 func TestCreateMsg(t *testing.T) {
-	ok, err := queueLocal.CreateMsg(ctx, &models.CreateMsgRequest{
+	ok, err := local.CreateMsg(ctx, &models.CreateMsgRequest{
 		QueueId:  "2050499a-f190-4d03-a1cc-335a438c5c6d",
 		Name:     "6666",
 		PayLoad:  "myQueue",
-		Retry:    3,
-		Timeout:  10,
-		Deadline: 1750836277,
+		Retry:    2,
+		Timeout:  50,
+		Deadline: 1750843969,
 	})
 	if err != nil {
 		t.Error(err)
 	}
 	fmt.Println(ok, err)
+}
+
+func TestGetMsg(t *testing.T) {
+	resp, err := local.GetMsg(ctx, &models.GetMsgRequest{
+		QueueId: "2050499a-f190-4d03-a1cc-335a438c5c6d",
+		Limit:   3,
+	})
+	if err != nil {
+		t.Error(err)
+	}
+	for i := 0; i < len(*resp); i++ {
+		fmt.Println((*resp)[i])
+	}
+}
+
+func TestAckMsg(t *testing.T) {
+	err := local.AckMsg(ctx, &models.AckMsgRequest{
+		QueueId: "2050499a-f190-4d03-a1cc-335a438c5c6d",
+		MsgId:   "29b708ab-cbac-4a41-8143-fe5fb08bb92d",
+	})
+	if err != nil {
+		t.Error(err)
+	}
+
 }

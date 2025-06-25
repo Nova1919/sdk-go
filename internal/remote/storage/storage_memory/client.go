@@ -68,6 +68,6 @@ func EnsureDir(storageDir string) error {
 	return err
 }
 
-func (d *LocalClient) Close() error {
+func (c *LocalClient) Close() error {
 	return nil
 }
