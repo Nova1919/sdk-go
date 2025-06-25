@@ -48,8 +48,8 @@ func (c *LocalClient) CreateQueue(ctx context.Context, req *models.CreateQueueRe
 
 func (c *LocalClient) GetQueue(ctx context.Context, req *models.GetQueueRequest) (*models.GetQueueResponse, error) {
 	queuePath := filepath.Join(storageDir, queueDir, req.Id)
-	ok := isDirExists(queuePath)
-	if !ok {
+
+	if !isDirExists(queuePath) {
 		return nil, ErrResourceNotFound
 	}
 	metaDataPath := filepath.Join(queuePath, metadataFile)
@@ -170,7 +170,7 @@ func (c *LocalClient) CreateMsg(ctx context.Context, req *models.CreateMsgReques
 	}
 	queuePath := filepath.Join(storageDir, queueDir, req.QueueId)
 	if !isDirExists(queuePath) {
-		return nil, ErrResourceExists
+		return nil, ErrResourceNotFound
 	}
 	msgPath := filepath.Join(storageDir, queueDir, req.QueueId, fmt.Sprintf("%s.json", id))
 	msg := models.MsgLocal{
@@ -227,7 +227,7 @@ func (c *LocalClient) GetMsg(ctx context.Context, req *models.GetMsgRequest) (*m
 			_ = os.Remove(msgPath)
 			return nil
 		}
-		// msg is not reenter
+		// msg is not reenter queue
 		if !msg.ReenterTime.Equal(time.Time{}) && msg.ReenterTime.After(now) {
 			return nil
 		}
@@ -280,7 +280,7 @@ func (c *LocalClient) GetMsg(ctx context.Context, req *models.GetMsgRequest) (*m
 func (c *LocalClient) AckMsg(ctx context.Context, req *models.AckMsgRequest) error {
 	msgPath := filepath.Join(storageDir, queueDir, req.QueueId, fmt.Sprintf("%s.json", req.MsgId))
 	if !isFileExists(msgPath) {
-		return nil
+		return ErrResourceNotFound
 	}
 
 	buf, err := os.ReadFile(msgPath)
