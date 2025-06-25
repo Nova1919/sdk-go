@@ -17,6 +17,7 @@ var (
 	NamespaceId = "1245434234"
 	local       = DatasetLocal{datasetId: datasetId}
 	kvLocal     = KVLocal{NamespaceId: NamespaceId}
+	queueLocal  = QueueLocal{}
 	ctx         = context.Background()
 )
 
@@ -195,6 +196,65 @@ func TestDelValue(t *testing.T) {
 
 func TestGetValue(t *testing.T) {
 	ok, err := kvLocal.GetValue(ctx, "56af1a69-8a9f-44eb-8b05-b251a5122619", "Mykey2")
+	if err != nil {
+		t.Error(err)
+	}
+	fmt.Println(ok, err)
+}
+
+func TestCreateQueue(t *testing.T) {
+	ok, err := queueLocal.CreateQueue(ctx, &models.CreateQueueRequest{
+		Name:        "myQuefwudwae23wrq2",
+		Description: "dwafmaio",
+	})
+	if err != nil {
+		t.Error(err)
+	}
+	fmt.Println(ok, err)
+}
+
+func TestGetQueue(t *testing.T) {
+	ok, err := queueLocal.GetQueue(ctx, &models.GetQueueRequest{
+		Id: "2050499a-f190-4d03-a1cc-335a438c5c6d",
+	})
+	if err != nil {
+		t.Error(err)
+	}
+	fmt.Println(ok, err)
+}
+
+func TestListQueue(t *testing.T) {
+	ok, err := queueLocal.GetQueues(ctx, &models.GetQueuesRequest{
+		Page:     1,
+		PageSize: 3,
+		Desc:     false,
+	})
+	if err != nil {
+		t.Error(err)
+	}
+	fmt.Println(ok, err)
+}
+
+func TestUpdateQueue(t *testing.T) {
+	err := queueLocal.UpdateQueue(ctx, &models.UpdateQueueRequest{
+		QueueId:     "2050499a-f190-4d03-a1cc-335a438c5c6d",
+		Name:        "6666",
+		Description: "myQueue",
+	})
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestCreateMsg(t *testing.T) {
+	ok, err := queueLocal.CreateMsg(ctx, &models.CreateMsgRequest{
+		QueueId:  "2050499a-f190-4d03-a1cc-335a438c5c6d",
+		Name:     "6666",
+		PayLoad:  "myQueue",
+		Retry:    3,
+		Timeout:  10,
+		Deadline: 1750836277,
+	})
 	if err != nil {
 		t.Error(err)
 	}

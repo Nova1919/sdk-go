@@ -40,7 +40,6 @@ func (s *Queue) List(ctx context.Context, page int64, pageSize int64, desc bool)
 		items = append(items, Item{
 			Id:          item.Id,
 			Name:        item.Name,
-			UserId:      item.UserId,
 			TeamId:      item.TeamId,
 			ActorId:     item.ActorId,
 			RunId:       item.RunId,
@@ -50,10 +49,11 @@ func (s *Queue) List(ctx context.Context, page int64, pageSize int64, desc bool)
 		})
 	}
 	return &ListQueuesResponse{
-		Items:  items,
-		Total:  queues.Total,
-		Limit:  queues.Limit,
-		Offset: queues.Offset,
+		Items:     items,
+		Total:     queues.Total,
+		TotalPage: queues.TotalPage,
+		Page:      queues.Page,
+		PageSize:  queues.PageSize,
 	}, nil
 }
 

@@ -7,17 +7,17 @@ import "time"
 type ListDatasetsRequest struct {
 	ActorId  *string `json:"actorId,omitempty"`
 	RunId    *string `json:"runId,omitempty"`
-	Page     int     `json:"page,omitempty"`
-	PageSize int     `json:"pageSize,omitempty"`
+	Page     int64   `json:"page,omitempty"`
+	PageSize int64   `json:"pageSize,omitempty"`
 	Desc     bool    `json:"desc,omitempty"`
 }
 
 type ListDatasetsResponse struct {
 	Items     []Dataset `json:"items,omitempty"`
-	Total     int       `json:"total,omitempty"`
-	TotalPage int       `json:"totalPage,omitempty"`
-	Page      int       `json:"page,omitempty"`
-	PageSize  int       `son:"pageSize,omitempty"`
+	Total     int64     `json:"total,omitempty"`
+	TotalPage int64     `json:"totalPage,omitempty"`
+	Page      int64     `json:"page,omitempty"`
+	PageSize  int64     `son:"pageSize,omitempty"`
 }
 
 type Dataset struct {
@@ -75,7 +75,6 @@ type QueueStats struct {
 type Queue struct {
 	Id          string     `json:"id,omitempty"`
 	Name        string     `json:"name,omitempty"`
-	UserId      string     `json:"userId,omitempty"`
 	TeamId      string     `json:"teamId,omitempty"`
 	ActorId     string     `json:"actorId,omitempty"`
 	RunId       string     `json:"runId,omitempty"`
@@ -107,10 +106,11 @@ type GetQueuesRequest struct {
 }
 
 type ListQueuesResponse struct {
-	Items  []*Queue `json:"items"`
-	Total  int32    `json:"total"`
-	Limit  int32    `json:"limit"`
-	Offset int32    `json:"offset"`
+	Items     []*Queue `json:"items"`
+	Total     int64    `json:"total"`
+	TotalPage int64    `json:"totalPage"`
+	Page      int64    `json:"page"`
+	PageSize  int64    `json:"pageSize"`
 }
 
 type UpdateQueueRequest struct {
@@ -155,6 +155,12 @@ type Msg struct {
 	Desc      string `json:"desc"`
 }
 
+type MsgLocal struct {
+	Msg
+	ReenterTime time.Time `json:"reenterTime"`
+	UpdateTime  time.Time `json:"updateTime"`
+}
+
 type GetMsgResponse []*Msg
 
 type AckMsgRequest struct {
@@ -177,10 +183,10 @@ type Bucket struct {
 
 type Object struct {
 	Buckets   []Bucket `json:"buckets"`
-	Total     int      `json:"total"`
-	TotalPage int      `json:"totalPage"`
-	Page      int      `json:"page"`
-	PageSize  int      `json:"pageSize"`
+	Total     int64    `json:"total"`
+	TotalPage int64    `json:"totalPage"`
+	Page      int64    `json:"page"`
+	PageSize  int64    `json:"pageSize"`
 }
 
 type CreateBucketRequest struct {
@@ -199,10 +205,10 @@ type ListObjectsRequest struct {
 
 type ObjectList struct {
 	Objects   []BucketObject `json:"objects"`
-	Total     int            `json:"total"`
-	TotalPage int            `json:"totalPage"`
-	Page      int            `json:"page"`
-	PageSize  int            `json:"pageSize"`
+	Total     int64          `json:"total"`
+	TotalPage int64          `json:"totalPage"`
+	Page      int64          `json:"page"`
+	PageSize  int64          `json:"pageSize"`
 }
 
 type BucketObject struct {
@@ -262,7 +268,7 @@ type SetValue struct {
 	Expiration  uint   `json:"expiration"`
 }
 
-type SetValueFile struct {
+type SetValueLocal struct {
 	SetValue
 	Size     int       `json:"size"`
 	ExpireAt time.Time `json:"expireAt"`
@@ -270,16 +276,16 @@ type SetValueFile struct {
 
 type ListKeyInfo struct {
 	NamespaceId string `json:"namespaceId"`
-	Page        int    `json:"page"`
-	Size        int    `json:"size"`
+	Page        int64  `json:"page"`
+	Size        int64  `json:"size"`
 }
 
 type KvKeys struct {
 	Items     []map[string]any `json:"items"`
-	Total     int              `json:"total"`
-	Page      int              `json:"page"`
-	PageSize  int              `json:"pageSize"`
-	TotalPage int              `json:"totalPage"`
+	Total     int64            `json:"total"`
+	Page      int64            `json:"page"`
+	PageSize  int64            `json:"pageSize"`
+	TotalPage int64            `json:"totalPage"`
 }
 
 type BulkSet struct {

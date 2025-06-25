@@ -56,7 +56,7 @@ func (d *LocalClient) ListDatasets(ctx context.Context, req *models.ListDatasets
 		return allDatasets[i].Name < allDatasets[j].Name
 	})
 
-	total := len(allDatasets)
+	total := int64(len(allDatasets))
 
 	// page
 	start := (req.Page - 1) * req.PageSize

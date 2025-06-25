@@ -14,7 +14,10 @@ import (
 	"time"
 )
 
-var ErrResourceNotFound = errors.New("resource not found")
+var (
+	ErrResourceNotFound = errors.New("resource not found")
+	ErrResourceExists   = errors.New("resource exists")
+)
 
 const MaxExpireTime = 24 * 60 * 60 * 7
 
@@ -92,8 +95,11 @@ func (d *LocalClient) ListNamespaces(ctx context.Context, page int64, pageSize i
 	pagedItems := allNamespaces[start:end]
 
 	return &models.KvNamespace{
-		Items: pagedItems,
-		Total: total,
+		Items:     pagedItems,
+		Total:     total,
+		Page:      page,
+		PageSize:  pageSize,
+		TotalPage: totalPage(total, pageSize),
 	}, nil
 }
 
@@ -101,7 +107,10 @@ func (d *LocalClient) CreateNamespace(ctx context.Context, req *models.CreateKvN
 	id := uuid.NewString()
 	path := filepath.Join(storageDir, keyValueDir, id)
 
-	exists := isDirExists(path)
+	exists, err := isNameExists(filepath.Join(storageDir, keyValueDir), req.Name)
+	if err != nil {
+		return "", err
+	}
 	if exists {
 		return "", fmt.Errorf("namespace %s already exists", req.Name)
 	}
@@ -136,7 +145,7 @@ func (d *LocalClient) DelNamespace(ctx context.Context, namespaceId string) (boo
 	absPath := filepath.Join(storageDir, keyValueDir, namespaceId)
 	err := os.RemoveAll(absPath)
 	if err != nil {
-		return false, fmt.Errorf("delete dataset failed, cause: %v", err)
+		return false, fmt.Errorf("delete namespace failed, cause: %v", err)
 	}
 	return true, nil
 }
@@ -177,7 +186,7 @@ func (d *LocalClient) SetValue(ctx context.Context, req *models.SetValue) (bool,
 	if req.Expiration == 0 {
 		req.Expiration = MaxExpireTime
 	}
-	local := models.SetValueFile{
+	local := models.SetValueLocal{
 		SetValue: models.SetValue{
 			Expiration:  req.Expiration,
 			Key:         req.Key,
@@ -214,8 +223,7 @@ func (d *LocalClient) ListKeys(ctx context.Context, req *models.ListKeyInfo) (*m
 		if err != nil {
 			return fmt.Errorf("read file %s failed: %v", path, err)
 		}
-		var kv models.SetValueFile
-
+		var kv models.SetValueLocal
 		err = json.Unmarshal(kvFile, &kv)
 		if err != nil {
 			return fmt.Errorf("json unmarshal failed: %s", err)
@@ -235,7 +243,7 @@ func (d *LocalClient) ListKeys(ctx context.Context, req *models.ListKeyInfo) (*m
 	if err != nil {
 		return nil, err
 	}
-	total := len(keys)
+	total := int64(len(keys))
 	kvKeys := &models.KvKeys{
 		Total:     total,
 		Page:      req.Page,
@@ -244,13 +252,13 @@ func (d *LocalClient) ListKeys(ctx context.Context, req *models.ListKeyInfo) (*m
 	}
 
 	start := (req.Page - 1) * req.Size
-	if start >= len(keys) {
+	if start >= total {
 		return kvKeys, nil
 	}
 
 	end := start + req.Size
-	if end > len(keys) {
-		end = len(keys)
+	if end > total {
+		end = total
 	}
 	kvKeys.Items = keys[start:end]
 	return kvKeys, nil
@@ -304,7 +312,7 @@ func (d *LocalClient) GetValue(ctx context.Context, namespaceId string, key stri
 	if err != nil {
 		return "", fmt.Errorf("read file %s failed: %v", path, err)
 	}
-	var kv models.SetValueFile
+	var kv models.SetValueLocal
 	if err := json.Unmarshal(buff, &kv); err != nil {
 		return "", fmt.Errorf("json unmarshal failed: %s", err)
 	}

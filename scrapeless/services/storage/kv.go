@@ -125,7 +125,7 @@ func (s *KV) RenameNamespace(ctx context.Context, namespaceId string, name strin
 //	ctx: Request context
 //	page: Page number (starting from 1). Defaults to 1 if <=0
 //	pageSize: Number of items per page. Minimum 10, defaults to 10 if smaller
-func (s *KV) ListKeys(ctx context.Context, namespaceId string, page int, pageSize int) (*KvKeys, error) {
+func (s *KV) ListKeys(ctx context.Context, namespaceId string, page int64, pageSize int64) (*KvKeys, error) {
 	if page <= 0 {
 		page = 1
 	}

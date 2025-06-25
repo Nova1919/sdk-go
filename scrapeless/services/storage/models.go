@@ -69,10 +69,10 @@ type ListKeyInfo struct {
 
 type KvKeys struct {
 	Items     []map[string]any `json:"items"`
-	Total     int              `json:"total"`
-	Page      int              `json:"page"`
-	PageSize  int              `json:"pageSize"`
-	TotalPage int              `json:"totalPage"`
+	Total     int64            `json:"total"`
+	Page      int64            `json:"page"`
+	PageSize  int64            `json:"pageSize"`
+	TotalPage int64            `json:"totalPage"`
 }
 
 type BulkSet struct {
@@ -105,12 +105,12 @@ type Bucket struct {
 }
 type ListBucketsResponse struct {
 	Buckets []Bucket `json:"buckets,omitempty"`
-	Total   int      `json:"total,omitempty"`
+	Total   int64    `json:"total,omitempty"`
 }
 
 type ListObjectsResponse struct {
 	Objects []ObjectInfo `json:"objects,omitempty"`
-	Total   int          `json:"total,omitempty"`
+	Total   int64        `json:"total,omitempty"`
 }
 type ObjectInfo struct {
 	Id        string `json:"id,omitempty"`
@@ -128,15 +128,16 @@ type ObjectInfo struct {
 // Queue
 
 type ListQueuesResponse struct {
-	Items  []Item `json:"items,omitempty"`
-	Total  int32  `json:"total,omitempty"`
-	Limit  int32  `json:"limit,omitempty"`
-	Offset int32  `json:"offset,omitempty"`
+	Items     []Item `json:"items,omitempty"`
+	Total     int64  `json:"total"`
+	TotalPage int64  `json:"totalPage"`
+	Page      int64  `json:"page"`
+	PageSize  int64  `json:"pageSize"`
 }
+
 type Item struct {
 	Id          string `json:"id,omitempty"`
 	Name        string `json:"name,omitempty"`
-	UserId      string `json:"userId,omitempty"`
 	TeamId      string `json:"teamId,omitempty"`
 	ActorId     string `json:"actorId,omitempty"`
 	RunId       string `json:"runId,omitempty"`
