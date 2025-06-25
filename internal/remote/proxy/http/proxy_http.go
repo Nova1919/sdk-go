@@ -4,13 +4,13 @@ import (
 	"context"
 	"fmt"
 	"github.com/scrapeless-ai/sdk-go/env"
-	"github.com/scrapeless-ai/sdk-go/internal/remote/proxy"
+	"github.com/scrapeless-ai/sdk-go/internal/remote/proxy/models"
 	"github.com/thoas/go-funk"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
-func (c *Client) ProxyGetProxy(ctx context.Context, req *proxy.GetProxyRequest) (string, error) {
+func (c *Client) ProxyGetProxy(ctx context.Context, req *models.GetProxyRequest) (string, error) {
 	if req.ApiKey == "" {
 		return "", status.Errorf(codes.InvalidArgument, "api key is required")
 	}

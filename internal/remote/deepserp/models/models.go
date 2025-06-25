@@ -1,4 +1,4 @@
-package deepserp
+package models
 
 type DeepserpTaskRequest struct {
 	// Actor identifier (e.g., "scraper.amazon", "scraper.walmart")

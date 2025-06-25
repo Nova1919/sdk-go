@@ -6,31 +6,30 @@ import (
 	"github.com/scrapeless-ai/sdk-go/internal/code"
 	"github.com/scrapeless-ai/sdk-go/internal/remote/scraping"
 	sh "github.com/scrapeless-ai/sdk-go/internal/remote/scraping/http"
+	"github.com/scrapeless-ai/sdk-go/internal/remote/scraping/models"
 	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
 	"github.com/tidwall/gjson"
 	"strings"
 	"time"
 )
 
-type ScrapingHttp struct{}
+type Scraping struct{}
 
-func New() Scraping {
+func New(serverMode string) *Scraping {
 	log.Info("Internal Router init")
-	if sh.Default() == nil {
-		sh.Init(env.Env.ScrapelessBaseApiUrl)
-	}
-	return ScrapingHttp{}
+	scraping.NewClient(serverMode, env.Env.ScrapelessBaseApiUrl)
+	return &Scraping{}
 }
 
 // CreateTask creates a new scraping task with the given context and request parameters.
-func (s ScrapingHttp) CreateTask(ctx context.Context, req ScrapingTaskRequest) ([]byte, error) {
+func (s *Scraping) CreateTask(ctx context.Context, req ScrapingTaskRequest) ([]byte, error) {
 	if req.ProxyCountry == "" {
 		req.ProxyCountry = env.Env.ProxyCountry
 	}
-	response, err := sh.Default().CreateTask(ctx, scraping.ScrapingTaskRequest{
+	response, err := scraping.ClientInterface.CreateTask(ctx, &models.ScrapingTaskRequest{
 		Actor: string(req.Actor),
 		Input: req.Input,
-		Proxy: scraping.TaskProxy{Country: strings.ToUpper(req.ProxyCountry)},
+		Proxy: models.TaskProxy{Country: strings.ToUpper(req.ProxyCountry)},
 	})
 	if err != nil {
 		log.Errorf("scraping create err:%v", err)
@@ -39,13 +38,13 @@ func (s ScrapingHttp) CreateTask(ctx context.Context, req ScrapingTaskRequest) (
 	return response, nil
 }
 
-func (s ScrapingHttp) Close() error {
+func (s *Scraping) Close() error {
 	return sh.Default().Close()
 }
 
 // GetTaskResult retrieves the result of a scraping task by its ID.
-func (s ScrapingHttp) GetTaskResult(ctx context.Context, taskId string) ([]byte, error) {
-	result, err := sh.Default().GetTaskResult(ctx, taskId)
+func (s *Scraping) GetTaskResult(ctx context.Context, taskId string) ([]byte, error) {
+	result, err := scraping.ClientInterface.GetTaskResult(ctx, taskId)
 	if err != nil {
 		log.Errorf("get task result err:%v", err)
 		return nil, code.Format(err)
@@ -54,7 +53,7 @@ func (s ScrapingHttp) GetTaskResult(ctx context.Context, taskId string) ([]byte,
 }
 
 // Scrape performs a web scraping task by creating a task and polling for the result.
-func (s ScrapingHttp) Scrape(ctx context.Context, req ScrapingTaskRequest) ([]byte, error) {
+func (s *Scraping) Scrape(ctx context.Context, req ScrapingTaskRequest) ([]byte, error) {
 	task, err := s.CreateTask(ctx, req)
 	if err != nil {
 		return nil, err

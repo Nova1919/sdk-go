@@ -1,4 +1,4 @@
-package universal
+package models
 
 type UniversalTaskRequest struct {
 	// Actor identifier (e.g., "scraper.amazon", "scraper.walmart")

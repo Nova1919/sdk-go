@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/scrapeless-ai/sdk-go/internal/remote/actor"
+	"github.com/scrapeless-ai/sdk-go/internal/remote/actor/models"
 	request2 "github.com/scrapeless-ai/sdk-go/internal/remote/request"
 	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
 	"github.com/tidwall/gjson"
@@ -13,7 +13,7 @@ import (
 	"strconv"
 )
 
-func (c *Client) Run(ctx context.Context, req actor.IRunActorData) (string, error) {
+func (c *Client) Run(ctx context.Context, req *models.IRunActorData) (string, error) {
 	reqBody, _ := json.Marshal(req)
 	body, err := request2.RequestData(ctx, request2.ReqInfo{
 		Method:  http.MethodPost,
@@ -28,7 +28,7 @@ func (c *Client) Run(ctx context.Context, req actor.IRunActorData) (string, erro
 	return runId, nil
 }
 
-func (c *Client) GetRunInfo(ctx context.Context, runId string) (*actor.RunInfo, error) {
+func (c *Client) GetRunInfo(ctx context.Context, runId string) (*models.RunInfo, error) {
 	body, err := request2.RequestData(ctx, request2.ReqInfo{
 		Method:  http.MethodGet,
 		Url:     fmt.Sprintf("%s/api/v1/actors/runs/%s", c.BaseUrl, runId),
@@ -39,7 +39,7 @@ func (c *Client) GetRunInfo(ctx context.Context, runId string) (*actor.RunInfo, 
 		log.Errorf("get runInfo err:%v", err)
 		return nil, err
 	}
-	var respData actor.RunInfo
+	var respData models.RunInfo
 	err = json.Unmarshal(body, &respData)
 	if err != nil {
 		log.Errorf("unmarshal resp error :%v", err)
@@ -77,7 +77,7 @@ func (c *Client) Build(ctx context.Context, actorId string, version string) (str
 	return buildId, nil
 }
 
-func (c *Client) GetBuildStatus(ctx context.Context, actorId string, buildId string) (*actor.BuildInfo, error) {
+func (c *Client) GetBuildStatus(ctx context.Context, actorId string, buildId string) (*models.BuildInfo, error) {
 	fmt.Println(fmt.Sprintf("%s/api/v1/actors/%s/builds/%s", c.BaseUrl, actorId, buildId))
 	body, err := request2.RequestData(ctx, request2.ReqInfo{
 		Method:  http.MethodGet,
@@ -88,7 +88,7 @@ func (c *Client) GetBuildStatus(ctx context.Context, actorId string, buildId str
 		log.Errorf("get build status err:%v", err)
 		return nil, err
 	}
-	var respData actor.BuildInfo
+	var respData models.BuildInfo
 	err = json.Unmarshal(body, &respData)
 	return &respData, nil
 }
@@ -107,7 +107,7 @@ func (c *Client) AbortBuild(ctx context.Context, actorId string, buildId string)
 	return success, nil
 }
 
-func (c *Client) GetRunList(ctx context.Context, paginationParams actor.IPaginationParams) ([]actor.Payload, error) {
+func (c *Client) GetRunList(ctx context.Context, paginationParams *models.IPaginationParams) ([]models.Payload, error) {
 	parse, err := url.Parse(fmt.Sprintf("%s/api/v1/actors/runs", c.BaseUrl))
 	if err != nil {
 		log.Errorf("parse url err:%v", err)
@@ -128,7 +128,7 @@ func (c *Client) GetRunList(ctx context.Context, paginationParams actor.IPaginat
 		return nil, err
 	}
 	items := gjson.Parse(string(body)).Get("items").String()
-	var respData = []actor.Payload{}
+	var respData = []models.Payload{}
 	err = json.Unmarshal([]byte(items), &respData)
 	if err != nil {
 		log.Errorf("unmarshal resp error :%v", err)

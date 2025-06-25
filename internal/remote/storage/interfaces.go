@@ -2,7 +2,11 @@ package storage
 
 import (
 	"context"
+	"github.com/scrapeless-ai/sdk-go/env"
 	"github.com/scrapeless-ai/sdk-go/internal/remote/storage/models"
+	"github.com/scrapeless-ai/sdk-go/internal/remote/storage/storage_http"
+	"github.com/scrapeless-ai/sdk-go/internal/remote/storage/storage_memory"
+	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
 )
 
 type Dataset interface {
@@ -52,4 +56,30 @@ type Object interface {
 	DeleteObject(ctx context.Context, req *models.ObjectRequest) (bool, error)
 	PutObject(ctx context.Context, req *models.PutObjectRequest) (string, error)
 	Close() error
+}
+
+type Storage interface {
+	Dataset
+	KV
+	Object
+	Queue
+}
+
+var ClientInterface Storage
+
+func NewClient(serverMode, baseUrl string) {
+	if !env.Env.IsOnline {
+		serverMode = "dev"
+	}
+	switch serverMode {
+	case "grpc":
+		log.Info("grpc...")
+	case "dev":
+		log.Info("dev...")
+		storage_memory.Init()
+		ClientInterface = storage_memory.Default()
+	default:
+		storage_http.Init(baseUrl)
+		ClientInterface = storage_http.Default()
+	}
 }
