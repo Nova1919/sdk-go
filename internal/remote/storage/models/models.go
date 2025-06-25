@@ -7,17 +7,17 @@ import "time"
 type ListDatasetsRequest struct {
 	ActorId  *string `json:"actorId,omitempty"`
 	RunId    *string `json:"runId,omitempty"`
-	Page     int64   `json:"page,omitempty"`
-	PageSize int64   `json:"pageSize,omitempty"`
+	Page     int     `json:"page,omitempty"`
+	PageSize int     `json:"pageSize,omitempty"`
 	Desc     bool    `json:"desc,omitempty"`
 }
 
 type ListDatasetsResponse struct {
 	Items     []Dataset `json:"items,omitempty"`
-	Total     int64     `json:"total,omitempty"`
-	TotalPage int64     `json:"totalPage,omitempty"`
-	Page      int64     `json:"page,omitempty"`
-	PageSize  int64     `son:"pageSize,omitempty"`
+	Total     int       `json:"total,omitempty"`
+	TotalPage int       `json:"totalPage,omitempty"`
+	Page      int       `json:"page,omitempty"`
+	PageSize  int       `son:"pageSize,omitempty"`
 }
 
 type Dataset struct {
@@ -66,10 +66,10 @@ type GetQueueRequest struct {
 }
 
 type QueueStats struct {
-	Pending int64 `json:"pending,omitempty"`
-	Running int64 `json:"running,omitempty"`
-	Success int64 `json:"success,omitempty"`
-	Failed  int64 `json:"failed,omitempty"`
+	Pending int `json:"pending,omitempty"`
+	Running int `json:"running,omitempty"`
+	Success int `json:"success,omitempty"`
+	Failed  int `json:"failed,omitempty"`
 }
 
 type Queue struct {
