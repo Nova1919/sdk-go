@@ -24,7 +24,7 @@ type config struct {
 	Actor actorEnv `mapstructure:",squash"`
 	Log   logEnv   `mapstructure:",squash"`
 
-	IsOnline bool `mapstructure:"IS_LOCAL"`
+	IsOnline bool `mapstructure:"SCRAPELESS_IS_ONLINE"`
 }
 
 type actorEnv struct {

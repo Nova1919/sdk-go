@@ -79,7 +79,6 @@ func setDefaults() {
 	viper.SetDefault("SCRAPELESS_STORAGE_API_URL", "https://storage.scrapeless.com")
 	viper.SetDefault("SCRAPELESS_BROWSER_API_URL", "https://browser.scrapeless.com")
 	viper.SetDefault("SCRAPELESS_CRAWL_API_URL", "https://api.scrapeless.com")
-	viper.SetDefault("IS_ONLINE", "true")
 }
 
 func bindEnvs(v *viper.Viper, iface any) error {
