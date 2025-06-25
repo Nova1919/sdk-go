@@ -40,7 +40,7 @@ func (d *DatasetLocal) ListDatasets(ctx context.Context, page int64, pageSize in
 			continue
 		}
 
-		var meta metadata
+		var meta models.Dataset
 		if err := json.Unmarshal(file, &meta); err != nil {
 			continue
 		}
@@ -102,10 +102,10 @@ func (d *DatasetLocal) UpdateDataset(ctx context.Context, datasetId string, name
 	return true, name, nil
 }
 
-func updateMetadata(datasetId string, name string) (*metadata, error) {
+func updateMetadata(datasetId string, name string) (*models.Dataset, error) {
 	path := filepath.Join(storageDir, datasetDir, datasetId, metadataFile)
 	file, err := os.ReadFile(path)
-	var meta = &metadata{}
+	var meta = &models.Dataset{}
 	if err == nil {
 		if err := json.Unmarshal(file, &meta); err != nil {
 			return nil, fmt.Errorf("parse JSON %s failed: %v", datasetId, err)
@@ -116,11 +116,10 @@ func updateMetadata(datasetId string, name string) (*metadata, error) {
 			return nil, fmt.Errorf("create dataset failed, cause: %v", err)
 		}
 		meta.Id = datasetId
-		meta.UserId = "1"
 		meta.CreatedAt = time.Now().Format(time.RFC3339Nano)
 	}
 	meta.Name = name
-	meta.ModifiedAt = time.Now().Format(time.RFC3339Nano)
+	meta.UpdatedAt = time.Now().Format(time.RFC3339Nano)
 	indent, err := json.MarshalIndent(meta, "", "  ")
 	if err != nil {
 		log.Warnf("warn json marshal err: %v", err)
@@ -174,9 +173,11 @@ func (d *DatasetLocal) AddItems(ctx context.Context, datasetId string, items []m
 			return false, fmt.Errorf("write file %s failed: %v", fileName, err)
 		}
 	}
-	metadataJson.ModifiedAt = time.Now().Format(time.RFC3339Nano)
+	metadataJson.UpdatedAt = time.Now().Format(time.RFC3339Nano)
 	metadataJson.AccessedAt = time.Now().Format(time.RFC3339Nano)
-	metadataJson.ItemCount = int64(len(items))
+	metadataJson.Stats = models.DatasetStats{
+		Count: uint64(len(items)),
+	}
 	metadataJson.Fields = fields
 	metaFile := filepath.Join(dirPath, metadataFile)
 	data, err := json.MarshalIndent(metadataJson, "", "  ")
