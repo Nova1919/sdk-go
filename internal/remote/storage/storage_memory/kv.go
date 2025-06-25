@@ -175,6 +175,9 @@ func (c *LocalClient) RenameNamespace(ctx context.Context, namespaceId string, n
 }
 
 func (c *LocalClient) SetValue(ctx context.Context, req *models.SetValue) (bool, error) {
+	if req.Key == "INPUT" && req.NamespaceId == "default" {
+		return false, nil
+	}
 	path := filepath.Join(storageDir, keyValueDir, req.NamespaceId)
 	file := filepath.Join(path, fmt.Sprintf("%s.json", req.Key))
 	if req.Expiration == 0 {
@@ -310,6 +313,11 @@ func (c *LocalClient) GetValue(ctx context.Context, namespaceId string, key stri
 	if err != nil {
 		return "", fmt.Errorf("read file %s failed: %v", path, err)
 	}
+
+	if key == "INPUT" && namespaceId == "default" {
+		return string(buff), nil
+	}
+
 	var kv models.SetValueLocal
 	if err := json.Unmarshal(buff, &kv); err != nil {
 		return "", fmt.Errorf("json unmarshal failed: %s", err)
