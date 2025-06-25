@@ -18,11 +18,7 @@ var ErrResourceNotFound = errors.New("resource not found")
 
 const MaxExpireTime = 24 * 60 * 60 * 7
 
-type KVLocal struct {
-	NamespaceId string
-}
-
-func (k *KVLocal) GetNamespace(ctx context.Context, namespaceId string) (*models.KvNamespaceItem, error) {
+func (d *LocalClient) GetNamespace(ctx context.Context, namespaceId string) (*models.KvNamespaceItem, error) {
 	nsPath := filepath.Join(storageDir, keyValueDir, namespaceId)
 	ok := isDirExists(nsPath)
 	if !ok {
@@ -42,7 +38,7 @@ func (k *KVLocal) GetNamespace(ctx context.Context, namespaceId string) (*models
 	return &namespace, nil
 }
 
-func (k *KVLocal) ListNamespaces(ctx context.Context, page int64, pageSize int64, desc bool) (*models.KvNamespace, error) {
+func (d *LocalClient) ListNamespaces(ctx context.Context, page int64, pageSize int64, desc bool) (*models.KvNamespace, error) {
 	dirPath := filepath.Join(storageDir, keyValueDir)
 
 	entries, err := os.ReadDir(dirPath)
@@ -101,7 +97,7 @@ func (k *KVLocal) ListNamespaces(ctx context.Context, page int64, pageSize int64
 	}, nil
 }
 
-func (k *KVLocal) CreateNamespace(ctx context.Context, req *models.CreateKvNamespaceRequest) (namespaceId string, err error) {
+func (d *LocalClient) CreateNamespace(ctx context.Context, req *models.CreateKvNamespaceRequest) (namespaceId string, err error) {
 	id := uuid.NewString()
 	path := filepath.Join(storageDir, keyValueDir, id)
 
@@ -136,7 +132,7 @@ func (k *KVLocal) CreateNamespace(ctx context.Context, req *models.CreateKvNames
 	return id, nil
 }
 
-func (k *KVLocal) DelNamespace(ctx context.Context, namespaceId string) (bool, error) {
+func (d *LocalClient) DelNamespace(ctx context.Context, namespaceId string) (bool, error) {
 	absPath := filepath.Join(storageDir, keyValueDir, namespaceId)
 	err := os.RemoveAll(absPath)
 	if err != nil {
@@ -145,7 +141,7 @@ func (k *KVLocal) DelNamespace(ctx context.Context, namespaceId string) (bool, e
 	return true, nil
 }
 
-func (k *KVLocal) RenameNamespace(ctx context.Context, namespaceId string, name string) (ok bool, err error) {
+func (d *LocalClient) RenameNamespace(ctx context.Context, namespaceId string, name string) (ok bool, err error) {
 	nsPath := filepath.Join(storageDir, keyValueDir, namespaceId)
 	exists := isDirExists(nsPath)
 	if !exists {
@@ -175,7 +171,7 @@ func (k *KVLocal) RenameNamespace(ctx context.Context, namespaceId string, name 
 	return true, nil
 }
 
-func (k *KVLocal) SetValue(ctx context.Context, req *models.SetValue) (bool, error) {
+func (d *LocalClient) SetValue(ctx context.Context, req *models.SetValue) (bool, error) {
 	path := filepath.Join(storageDir, keyValueDir, req.NamespaceId)
 	file := filepath.Join(path, fmt.Sprintf("%s.json", req.Key))
 	if req.Expiration == 0 {
@@ -201,7 +197,7 @@ func (k *KVLocal) SetValue(ctx context.Context, req *models.SetValue) (bool, err
 	return true, nil
 }
 
-func (k *KVLocal) ListKeys(ctx context.Context, req *models.ListKeyInfo) (*models.KvKeys, error) {
+func (d *LocalClient) ListKeys(ctx context.Context, req *models.ListKeyInfo) (*models.KvKeys, error) {
 	dirPath := filepath.Join(storageDir, keyValueDir, req.NamespaceId)
 	var keys []map[string]any
 
@@ -260,10 +256,10 @@ func (k *KVLocal) ListKeys(ctx context.Context, req *models.ListKeyInfo) (*model
 	return kvKeys, nil
 }
 
-func (k *KVLocal) BulkSetValue(ctx context.Context, req *models.BulkSet) (int64, error) {
+func (d *LocalClient) BulkSetValue(ctx context.Context, req *models.BulkSet) (int64, error) {
 	var success int64
 	for i := range req.Items {
-		ok, _ := k.SetValue(ctx, &models.SetValue{
+		ok, _ := d.SetValue(ctx, &models.SetValue{
 			NamespaceId: req.NamespaceId,
 			Key:         req.Items[i].Key,
 			Value:       req.Items[i].Value,
@@ -277,7 +273,7 @@ func (k *KVLocal) BulkSetValue(ctx context.Context, req *models.BulkSet) (int64,
 	return success, nil
 }
 
-func (k *KVLocal) DelValue(ctx context.Context, namespaceId string, key string) (bool, error) {
+func (d *LocalClient) DelValue(ctx context.Context, namespaceId string, key string) (bool, error) {
 	file := fmt.Sprintf("%s.json", key)
 	if file == metadataFile {
 		return true, nil
@@ -291,9 +287,9 @@ func (k *KVLocal) DelValue(ctx context.Context, namespaceId string, key string) 
 	return true, nil
 }
 
-func (k *KVLocal) BulkDelValue(ctx context.Context, namespaceId string, keys []string) (bool, error) {
+func (d *LocalClient) BulkDelValue(ctx context.Context, namespaceId string, keys []string) (bool, error) {
 	for i := range keys {
-		_, err := k.DelValue(ctx, namespaceId, keys[i])
+		_, err := d.DelValue(ctx, namespaceId, keys[i])
 		if err != nil {
 			return false, err
 		}
@@ -301,7 +297,7 @@ func (k *KVLocal) BulkDelValue(ctx context.Context, namespaceId string, keys []s
 	return true, nil
 }
 
-func (k *KVLocal) GetValue(ctx context.Context, namespaceId string, key string) (string, error) {
+func (d *LocalClient) GetValue(ctx context.Context, namespaceId string, key string) (string, error) {
 	file := fmt.Sprintf("%s.json", key)
 	path := filepath.Join(storageDir, keyValueDir, namespaceId, file)
 	buff, err := os.ReadFile(path)
@@ -316,8 +312,4 @@ func (k *KVLocal) GetValue(ctx context.Context, namespaceId string, key string) 
 		return "", nil
 	}
 	return kv.Value, nil
-}
-
-func (k *KVLocal) Close() error {
-	return nil
 }

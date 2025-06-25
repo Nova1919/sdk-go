@@ -17,11 +17,9 @@ const (
 	metadataFile = "metadata.json"
 )
 
-var fileClient *FileClient
+var defaultLocalClient *LocalClient
 
-type FileClient struct {
-	dir string
-}
+type LocalClient struct{}
 
 func Init() {
 	cwd, err := os.Getwd()
@@ -29,18 +27,20 @@ func Init() {
 		panic("Unable to get the current working directory：" + err.Error())
 	}
 	storageDir = filepath.Join(cwd, "storage")
-	fileClient = &FileClient{
-		dir: storageDir,
-	}
-	err = fileClient.EnsureDir()
+	err = EnsureDir(storageDir)
 	if err != nil {
 		log.Warnf("warn create storage dir err: %v", err)
 	}
+	defaultLocalClient = &LocalClient{}
+}
+
+func Default() *LocalClient {
+	return defaultLocalClient
 }
 
 // EnsureDir Ensure that the directory exists (create if it does not exist)
-func (fc *FileClient) EnsureDir() error {
-	absPath := filepath.Join(fc.dir)
+func EnsureDir(storageDir string) error {
+	absPath := filepath.Join(storageDir)
 	err := os.MkdirAll(absPath, os.ModeDir)
 	if err != nil {
 		log.Warnf("warn create storage dir err: %v", err)
@@ -66,4 +66,8 @@ func (fc *FileClient) EnsureDir() error {
 		log.Warnf("warn create storage dir err: %v", err)
 	}
 	return err
+}
+
+func (d *LocalClient) Close() error {
+	return nil
 }

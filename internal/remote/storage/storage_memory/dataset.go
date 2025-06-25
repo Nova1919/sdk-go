@@ -13,11 +13,7 @@ import (
 	"time"
 )
 
-type DatasetLocal struct {
-	datasetId string
-}
-
-func (d *DatasetLocal) ListDatasets(ctx context.Context, req *models.ListDatasetsRequest) (*models.ListDatasetsResponse, error) {
+func (d *LocalClient) ListDatasets(ctx context.Context, req *models.ListDatasetsRequest) (*models.ListDatasetsResponse, error) {
 	dirPath := filepath.Join(storageDir, datasetDir)
 
 	entries, err := os.ReadDir(dirPath)
@@ -83,7 +79,7 @@ func (d *DatasetLocal) ListDatasets(ctx context.Context, req *models.ListDataset
 	}, nil
 }
 
-func (d *DatasetLocal) CreateDataset(ctx context.Context, req *models.CreateDatasetRequest) (*models.Dataset, error) {
+func (d *LocalClient) CreateDataset(ctx context.Context, req *models.CreateDatasetRequest) (*models.Dataset, error) {
 	newUUID, err := uuid.NewUUID()
 	var rep = &models.Dataset{}
 	rep.Name = req.Name
@@ -103,7 +99,7 @@ func (d *DatasetLocal) CreateDataset(ctx context.Context, req *models.CreateData
 	return rep, nil
 }
 
-func (d *DatasetLocal) UpdateDataset(ctx context.Context, datasetID string, name string) (ok bool, err error) {
+func (d *LocalClient) UpdateDataset(ctx context.Context, datasetID string, name string) (ok bool, err error) {
 	_, err = updateMetadata(datasetID, name)
 	if err != nil {
 		return false, fmt.Errorf("dataset update failed, cause: %v", err)
@@ -111,7 +107,7 @@ func (d *DatasetLocal) UpdateDataset(ctx context.Context, datasetID string, name
 	return true, nil
 }
 
-func (d *DatasetLocal) DelDataset(ctx context.Context, datasetID string) (bool, error) {
+func (d *LocalClient) DelDataset(ctx context.Context, datasetID string) (bool, error) {
 	absPath := filepath.Join(storageDir, datasetDir, datasetID)
 	err := os.RemoveAll(absPath)
 	if err != nil {
@@ -120,7 +116,7 @@ func (d *DatasetLocal) DelDataset(ctx context.Context, datasetID string) (bool, 
 	return true, nil
 }
 
-func (d *DatasetLocal) GetDataset(ctx context.Context, req *models.GetDataset) (*models.DatasetItem, error) {
+func (d *LocalClient) GetDataset(ctx context.Context, req *models.GetDataset) (*models.DatasetItem, error) {
 	dirPath := filepath.Join(storageDir, datasetDir, req.DatasetId)
 
 	entries, err := os.ReadDir(dirPath)
@@ -186,12 +182,9 @@ func (d *DatasetLocal) GetDataset(ctx context.Context, req *models.GetDataset) (
 	}, nil
 }
 
-func (d *DatasetLocal) AddDatasetItem(ctx context.Context, datasetId string, items []map[string]any) (bool, error) {
-	if datasetId == "" {
-		datasetId = d.datasetId
-	}
+func (d *LocalClient) AddDatasetItem(ctx context.Context, datasetId string, items []map[string]any) (bool, error) {
 	dirPath := filepath.Join(storageDir, datasetDir, datasetId)
-	metadataJson, err := updateMetadata(datasetId, "default")
+	meta, err := updateMetadata(datasetId, "default")
 	if err != nil {
 		return false, err
 	}
@@ -220,14 +213,14 @@ func (d *DatasetLocal) AddDatasetItem(ctx context.Context, datasetId string, ite
 			return false, fmt.Errorf("write file %s failed: %v", fileName, err)
 		}
 	}
-	metadataJson.UpdatedAt = time.Now().Format(time.RFC3339Nano)
-	metadataJson.AccessedAt = time.Now().Format(time.RFC3339Nano)
-	metadataJson.Stats = models.DatasetStats{
+	meta.UpdatedAt = time.Now().Format(time.RFC3339Nano)
+	meta.AccessedAt = time.Now().Format(time.RFC3339Nano)
+	meta.Stats = models.DatasetStats{
 		Count: uint64(len(items)),
 	}
-	metadataJson.Fields = fields
+	meta.Fields = fields
 	metaFile := filepath.Join(dirPath, metadataFile)
-	data, err := json.MarshalIndent(metadataJson, "", "  ")
+	data, err := json.MarshalIndent(meta, "", "  ")
 	if err != nil {
 		log.Warnf("warn json marshal err: %v", err)
 	}
@@ -235,10 +228,6 @@ func (d *DatasetLocal) AddDatasetItem(ctx context.Context, datasetId string, ite
 		return false, fmt.Errorf("write file %s failed: %v", metaFile, err)
 	}
 	return true, nil
-}
-
-func (d *DatasetLocal) Close() error {
-	return nil
 }
 
 func updateMetadata(datasetId string, name string) (*models.Dataset, error) {
