@@ -52,16 +52,21 @@ func (c *config) Validate() error {
 	if c.Actor.TeamId == "" {
 		return errors.New("invalid env param team_Id")
 	}
+	defaultID := "default"
 	if c.Actor.ActorId == "" {
 		if !c.IsOnline {
-			c.Actor.ActorId = "default"
+			c.Actor.ActorId = defaultID
 		} else {
 			return errors.New("invalid env param actor_Id")
 		}
 	}
 	if c.Actor.RunId == "" {
 		if !c.IsOnline {
-			c.Actor.RunId = "default"
+			c.Actor.RunId = defaultID
+			c.Actor.DatasetId = defaultID
+			c.Actor.QueueId = defaultID
+			c.Actor.KvNamespaceId = defaultID
+			c.Actor.BucketId = defaultID
 		} else {
 			return errors.New("invalid env param run_Id")
 		}
