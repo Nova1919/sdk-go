@@ -17,7 +17,7 @@ type DatasetLocal struct {
 	datasetId string
 }
 
-func (d *DatasetLocal) ListDatasets(ctx context.Context, page int64, pageSize int64, desc bool) (*models.ListDatasetsResponse, error) {
+func (d *DatasetLocal) ListDatasets(ctx context.Context, req *models.ListDatasetsRequest) (*models.ListDatasetsResponse, error) {
 	dirPath := filepath.Join(storageDir, datasetDir)
 
 	entries, err := os.ReadDir(dirPath)
@@ -54,7 +54,7 @@ func (d *DatasetLocal) ListDatasets(ctx context.Context, page int64, pageSize in
 
 	// sort
 	sort.Slice(allDatasets, func(i, j int) bool {
-		if desc {
+		if req.Desc {
 			return allDatasets[i].Name > allDatasets[j].Name
 		}
 		return allDatasets[i].Name < allDatasets[j].Name
@@ -63,11 +63,11 @@ func (d *DatasetLocal) ListDatasets(ctx context.Context, page int64, pageSize in
 	total := int64(len(allDatasets))
 
 	// page
-	start := (page - 1) * pageSize
+	start := (req.Page - 1) * req.PageSize
 	if start > total {
 		start = total
 	}
-	end := start + pageSize
+	end := start + req.PageSize
 	if end > total {
 		end = total
 	}
@@ -80,58 +80,36 @@ func (d *DatasetLocal) ListDatasets(ctx context.Context, page int64, pageSize in
 	}, nil
 }
 
-func (d *DatasetLocal) CreateDataset(ctx context.Context, name string) (id string, datasetName string, err error) {
+func (d *DatasetLocal) CreateDataset(ctx context.Context, req *models.CreateDatasetRequest) (*models.Dataset, error) {
 	newUUID, err := uuid.NewUUID()
+	var rep = &models.Dataset{}
+	rep.Name = req.Name
 	if err != nil {
-		return "", "", fmt.Errorf("create dataset failed, cause: %v", err)
+		return rep, fmt.Errorf("create dataset failed, cause: %v", err)
 	}
-	id = newUUID.String()
+	id := newUUID.String()
 	path := filepath.Join(storageDir, datasetDir, id)
 	err = os.MkdirAll(path, os.ModeDir)
+	rep.Id = id
+	rep.CreatedAt = time.Now().Format(time.RFC3339Nano)
+	rep.UpdatedAt = time.Now().Format(time.RFC3339Nano)
+	updateMetadata(id, req.Name)
 	if err != nil {
-		return "", "", fmt.Errorf("create dataset failed, cause: %v", err)
+		return rep, fmt.Errorf("create dataset failed, cause: %v", err)
 	}
-	return id, name, nil
+	return rep, nil
 }
 
-func (d *DatasetLocal) UpdateDataset(ctx context.Context, datasetId string, name string) (ok bool, datasetName string, err error) {
-	_, err = updateMetadata(datasetId, name)
+func (d *DatasetLocal) UpdateDataset(ctx context.Context, datasetID string, name string) (ok bool, err error) {
+	_, err = updateMetadata(datasetID, name)
 	if err != nil {
-		return false, name, fmt.Errorf("dataset update failed, cause: %v", err)
+		return false, fmt.Errorf("dataset update failed, cause: %v", err)
 	}
-	return true, name, nil
+	return true, nil
 }
 
-func updateMetadata(datasetId string, name string) (*models.Dataset, error) {
-	path := filepath.Join(storageDir, datasetDir, datasetId, metadataFile)
-	file, err := os.ReadFile(path)
-	var meta = &models.Dataset{}
-	if err == nil {
-		if err := json.Unmarshal(file, &meta); err != nil {
-			return nil, fmt.Errorf("parse JSON %s failed: %v", datasetId, err)
-		}
-	} else {
-		err := os.MkdirAll(filepath.Join(storageDir, datasetDir, datasetId), os.ModeDir)
-		if err != nil {
-			return nil, fmt.Errorf("create dataset failed, cause: %v", err)
-		}
-		meta.Id = datasetId
-		meta.CreatedAt = time.Now().Format(time.RFC3339Nano)
-	}
-	meta.Name = name
-	meta.UpdatedAt = time.Now().Format(time.RFC3339Nano)
-	indent, err := json.MarshalIndent(meta, "", "  ")
-	if err != nil {
-		log.Warnf("warn json marshal err: %v", err)
-	}
-	if err := os.WriteFile(path, indent, 0644); err != nil {
-		return nil, fmt.Errorf("write file %s failed: %v", path, err)
-	}
-	return meta, nil
-}
-
-func (d *DatasetLocal) DelDataset(ctx context.Context, datasetId string) (bool, error) {
-	absPath := filepath.Join(storageDir, datasetDir, datasetId)
+func (d *DatasetLocal) DelDataset(ctx context.Context, datasetID string) (bool, error) {
+	absPath := filepath.Join(storageDir, datasetDir, datasetID)
 	err := os.RemoveAll(absPath)
 	if err != nil {
 		return false, fmt.Errorf("delete dataset failed, cause: %v", err)
@@ -139,7 +117,70 @@ func (d *DatasetLocal) DelDataset(ctx context.Context, datasetId string) (bool, 
 	return true, nil
 }
 
-func (d *DatasetLocal) AddItems(ctx context.Context, datasetId string, items []map[string]any) (bool, error) {
+func (d *DatasetLocal) GetDataset(ctx context.Context, req *models.GetDataset) (*models.DatasetItem, error) {
+	dirPath := filepath.Join(storageDir, datasetDir, req.DatasetId)
+
+	entries, err := os.ReadDir(dirPath)
+	if err != nil {
+		return nil, fmt.Errorf("read dir failed: %v", err)
+	}
+
+	var files []os.DirEntry
+
+	for _, entry := range entries {
+		if entry.IsDir() || filepath.Ext(entry.Name()) != ".json" {
+			continue
+		}
+		files = append(files, entry)
+	}
+
+	// sort
+	sort.Slice(files, func(i, j int) bool {
+		if req.Desc {
+			return files[i].Name() > files[j].Name()
+		}
+		return files[i].Name() < files[j].Name()
+	})
+
+	total := len(files)
+
+	// page
+	start := (req.Page - 1) * req.PageSize
+	if start > total {
+		start = total
+	}
+	end := start + req.PageSize
+	if end > total {
+		end = total
+	}
+
+	pagedFiles := files[start:end]
+
+	var result []map[string]any
+
+	for _, entry := range pagedFiles {
+		fullPath := filepath.Join(dirPath, entry.Name())
+
+		data, err := os.ReadFile(fullPath)
+		if err != nil {
+			return nil, fmt.Errorf("read %s failed: %v", entry.Name(), err)
+		}
+
+		var item map[string]any
+		if err := json.Unmarshal(data, &item); err != nil {
+			return nil, fmt.Errorf("parse JSON %s failed: %v", entry.Name(), err)
+		}
+
+		result = append(result, item)
+	}
+
+	return &models.DatasetItem{
+		Items: result,
+		Total: total,
+	}, nil
+}
+
+func (d *DatasetLocal) AddDatasetItem(ctx context.Context, datasetId string, items []map[string]any) (bool, error) {
 	if datasetId == "" {
 		datasetId = d.datasetId
 	}
@@ -190,69 +231,34 @@ func (d *DatasetLocal) AddItems(ctx context.Context, datasetId string, items []m
 	return true, nil
 }
 
-func (d *DatasetLocal) GetItems(ctx context.Context, datasetId string, page int, pageSize int, desc bool) (*models.DatasetItem, error) {
-	dirPath := filepath.Join(storageDir, datasetDir, datasetId)
-
-	entries, err := os.ReadDir(dirPath)
-	if err != nil {
-		return nil, fmt.Errorf("read dir failed: %v", err)
-	}
-
-	var files []os.DirEntry
-
-	for _, entry := range entries {
-		if entry.IsDir() || filepath.Ext(entry.Name()) != ".json" {
-			continue
-		}
-		files = append(files, entry)
-	}
-
-	// sort
-	sort.Slice(files, func(i, j int) bool {
-		if desc {
-			return files[i].Name() > files[j].Name()
-		}
-		return files[i].Name() < files[j].Name()
-	})
-
-	total := len(files)
-
-	// page
-	start := (page - 1) * pageSize
-	if start > total {
-		start = total
-	}
-	end := start + pageSize
-	if end > total {
-		end = total
-	}
-
-	pagedFiles := files[start:end]
-
-	var result []map[string]any
-
-	for _, entry := range pagedFiles {
-		fullPath := filepath.Join(dirPath, entry.Name())
-
-		data, err := os.ReadFile(fullPath)
-		if err != nil {
-			return nil, fmt.Errorf("read %s failed: %v", entry.Name(), err)
-		}
-
-		var item map[string]any
-		if err := json.Unmarshal(data, &item); err != nil {
-			return nil, fmt.Errorf("parse JSON %s failed: %v", entry.Name(), err)
-		}
-
-		result = append(result, item)
-	}
-
-	return &models.DatasetItem{
-		Items: result,
-		Total: total,
-	}, nil
-}
-
 func (d *DatasetLocal) Close() error {
 	return nil
+}
+
+func updateMetadata(datasetId string, name string) (*models.Dataset, error) {
+	path := filepath.Join(storageDir, datasetDir, datasetId, metadataFile)
+	file, err := os.ReadFile(path)
+	var meta = &models.Dataset{}
+	if err == nil {
+		if err := json.Unmarshal(file, &meta); err != nil {
+			return nil, fmt.Errorf("parse JSON %s failed: %v", datasetId, err)
+		}
+	} else {
+		err := os.MkdirAll(filepath.Join(storageDir, datasetDir, datasetId), os.ModeDir)
+		if err != nil {
+			return nil, fmt.Errorf("create dataset failed, cause: %v", err)
+		}
+		meta.Id = datasetId
+		meta.CreatedAt = time.Now().Format(time.RFC3339Nano)
+	}
+	meta.Name = name
+	meta.UpdatedAt = time.Now().Format(time.RFC3339Nano)
+	indent, err := json.MarshalIndent(meta, "", "  ")
+	if err != nil {
+		log.Warnf("warn json marshal err: %v", err)
+	}
+	if err := os.WriteFile(path, indent, 0644); err != nil {
+		return nil, fmt.Errorf("write file %s failed: %v", path, err)
+	}
+	return meta, nil
 }

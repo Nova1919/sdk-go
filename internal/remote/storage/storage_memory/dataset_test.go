@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/scrapeless-ai/sdk-go/internal/remote/storage/models"
 	"testing"
 )
 
@@ -23,11 +24,22 @@ func TestAddDataset(t *testing.T) {
 		{"name": "wu", "sex": "woman", "age": "28"},
 		{"name": "op", "sex": "man", "age": "38"},
 	}
-	items, err := local.AddItems(ctx, "", maps)
+	items, err := local.AddDatasetItem(ctx, "", maps)
 	if err != nil {
 		t.Error(err)
 	}
 	fmt.Println(items)
+}
+
+func TestCreate(t *testing.T) {
+	rep, err := local.CreateDataset(ctx, &models.CreateDatasetRequest{
+		Name: "test-create",
+	})
+	if err != nil {
+		t.Error(err)
+	}
+	marshal, _ := json.Marshal(rep)
+	fmt.Println(string(marshal))
 }
 
 func TestDeleteDataset(t *testing.T) {
@@ -39,7 +51,12 @@ func TestDeleteDataset(t *testing.T) {
 }
 
 func TestGetItems(t *testing.T) {
-	items, err := local.GetItems(ctx, datasetId, 1, 1, true)
+	items, err := local.GetDataset(ctx, &models.GetDataset{
+		DatasetId: datasetId,
+		Desc:      false,
+		Page:      1,
+		PageSize:  2,
+	})
 	if err != nil {
 		t.Error(err)
 	}
@@ -48,7 +65,13 @@ func TestGetItems(t *testing.T) {
 }
 
 func TestListDataset(t *testing.T) {
-	datasets, err := local.ListDatasets(ctx, 1, 1, true)
+	datasets, err := local.ListDatasets(ctx, &models.ListDatasetsRequest{
+		ActorId:  nil,
+		RunId:    nil,
+		Page:     1,
+		PageSize: 1,
+		Desc:     false,
+	})
 	if err != nil {
 		t.Error(err)
 	}
@@ -57,9 +80,9 @@ func TestListDataset(t *testing.T) {
 }
 
 func TestUpdateDataset(t *testing.T) {
-	ok, name, err := local.UpdateDataset(ctx, datasetId, "hq")
+	ok, err := local.UpdateDataset(ctx, datasetId, "hq")
 	if err != nil {
 		t.Error(err)
 	}
-	fmt.Println(ok, name)
+	fmt.Println(ok)
 }
