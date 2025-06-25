@@ -15,6 +15,7 @@ const (
 	objectDir   = "objects_stores"
 
 	metadataFile = "metadata.json"
+	defaultDir   = "default"
 )
 
 var defaultLocalClient *LocalClient
@@ -45,22 +46,22 @@ func EnsureDir(storageDir string) error {
 	if err != nil {
 		log.Warnf("warn create storage dir err: %v", err)
 	}
-	kvPath := filepath.Join(absPath, keyValueDir)
+	kvPath := filepath.Join(absPath, keyValueDir, defaultDir)
 	err = os.MkdirAll(kvPath, os.ModeDir)
 	if err != nil {
 		log.Warnf("warn create storage dir err: %v", err)
 	}
-	queuePath := filepath.Join(absPath, queueDir)
+	queuePath := filepath.Join(absPath, queueDir, defaultDir)
 	err = os.MkdirAll(queuePath, os.ModeDir)
 	if err != nil {
 		log.Warnf("warn create storage dir err: %v", err)
 	}
-	datasetPath := filepath.Join(absPath, datasetDir)
+	datasetPath := filepath.Join(absPath, datasetDir, defaultDir)
 	err = os.MkdirAll(datasetPath, os.ModeDir)
 	if err != nil {
 		log.Warnf("warn create storage dir err: %v", err)
 	}
-	objectPath := filepath.Join(absPath, objectDir)
+	objectPath := filepath.Join(absPath, objectDir, defaultDir)
 	err = os.MkdirAll(objectPath, os.ModeDir)
 	if err != nil {
 		log.Warnf("warn create storage dir err: %v", err)
