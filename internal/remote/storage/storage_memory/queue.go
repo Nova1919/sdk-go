@@ -13,13 +13,7 @@ import (
 	"time"
 )
 
-// todo Queue File Operation
-
-type QueueLocal struct {
-	queueId string
-}
-
-func (q *QueueLocal) CreateQueue(ctx context.Context, req *models.CreateQueueRequest) (*models.CreateQueueResponse, error) {
+func (q *LocalClient) CreateQueue(ctx context.Context, req *models.CreateQueueRequest) (*models.CreateQueueResponse, error) {
 	id := uuid.NewString()
 	exists, err := isNameExists(filepath.Join(storageDir, queueDir), req.Name)
 	if err != nil {
@@ -51,7 +45,7 @@ func (q *QueueLocal) CreateQueue(ctx context.Context, req *models.CreateQueueReq
 	}, nil
 }
 
-func (q *QueueLocal) GetQueue(ctx context.Context, req *models.GetQueueRequest) (*models.GetQueueResponse, error) {
+func (q *LocalClient) GetQueue(ctx context.Context, req *models.GetQueueRequest) (*models.GetQueueResponse, error) {
 	queuePath := filepath.Join(storageDir, queueDir, req.Id)
 	ok := isDirExists(queuePath)
 	if !ok {
@@ -73,7 +67,7 @@ func (q *QueueLocal) GetQueue(ctx context.Context, req *models.GetQueueRequest) 
 	}, nil
 }
 
-func (q *QueueLocal) GetQueues(ctx context.Context, req *models.GetQueuesRequest) (*models.ListQueuesResponse, error) {
+func (q *LocalClient) GetQueues(ctx context.Context, req *models.GetQueuesRequest) (*models.ListQueuesResponse, error) {
 	dirPath := filepath.Join(storageDir, queueDir)
 
 	entries, err := os.ReadDir(dirPath)
@@ -135,7 +129,7 @@ func (q *QueueLocal) GetQueues(ctx context.Context, req *models.GetQueuesRequest
 	}, nil
 }
 
-func (q *QueueLocal) UpdateQueue(ctx context.Context, req *models.UpdateQueueRequest) error {
+func (q *LocalClient) UpdateQueue(ctx context.Context, req *models.UpdateQueueRequest) error {
 	queuePath := filepath.Join(storageDir, queueDir, req.QueueId)
 	ok := isDirExists(queuePath)
 	if !ok {
@@ -159,7 +153,7 @@ func (q *QueueLocal) UpdateQueue(ctx context.Context, req *models.UpdateQueueReq
 	return q.updateMetadata(&queue)
 }
 
-func (q *QueueLocal) DelQueue(ctx context.Context, req *models.DelQueueRequest) error {
+func (q *LocalClient) DelQueue(ctx context.Context, req *models.DelQueueRequest) error {
 	queuePath := filepath.Join(storageDir, queueDir, req.QueueId)
 	err := os.RemoveAll(queuePath)
 	if err != nil {
@@ -168,7 +162,7 @@ func (q *QueueLocal) DelQueue(ctx context.Context, req *models.DelQueueRequest) 
 	return nil
 }
 
-func (q *QueueLocal) CreateMsg(ctx context.Context, req *models.CreateMsgRequest) (*models.CreateMsgResponse, error) {
+func (q *LocalClient) CreateMsg(ctx context.Context, req *models.CreateMsgRequest) (*models.CreateMsgResponse, error) {
 	id := uuid.NewString()
 	if req.Deadline < time.Now().Unix()+300 {
 		return nil, fmt.Errorf("deadline must after now + 300s")
@@ -201,7 +195,7 @@ func (q *QueueLocal) CreateMsg(ctx context.Context, req *models.CreateMsgRequest
 	}, nil
 }
 
-func (q *QueueLocal) GetMsg(ctx context.Context, req *models.GetMsgRequest) (*models.GetMsgResponse, error) {
+func (l *LocalClient) GetMsg(ctx context.Context, req *models.GetMsgRequest) (*models.GetMsgResponse, error) {
 	queuePath := filepath.Join(storageDir, queueDir, req.QueueId)
 
 	msgs := make([]*models.MsgLocal, 0)
@@ -249,21 +243,16 @@ func (q *QueueLocal) GetMsg(ctx context.Context, req *models.GetMsgRequest) (*mo
 	return nil, nil
 }
 
-func (q *QueueLocal) AckMsg(ctx context.Context, req *models.AckMsgRequest) error {
+func (q *LocalClient) AckMsg(ctx context.Context, req *models.AckMsgRequest) error {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (q *QueueLocal) updateMetadata(queue *models.Queue) error {
+func (q *LocalClient) updateMetadata(queue *models.Queue) error {
 	path := filepath.Join(storageDir, queueDir, queue.Id, metadataFile)
 	marshal, err := json.Marshal(queue)
 	if err != nil {
 		return fmt.Errorf("json marshal failed: %s", err)
 	}
 	return os.WriteFile(path, marshal, os.ModePerm)
-}
-
-func (q *QueueLocal) Close() error {
-	//TODO implement me
-	panic("implement me")
 }
