@@ -178,8 +178,12 @@ func (c *LocalClient) SetValue(ctx context.Context, req *models.SetValue) (bool,
 	if req.Key == "INPUT" && req.NamespaceId == "default" {
 		return false, nil
 	}
+	keyFile := fmt.Sprintf("%s.json", req.Key)
+	if keyFile == metadataFile {
+		return false, fmt.Errorf("key name can't use 'meatadata'")
+	}
 	path := filepath.Join(storageDir, keyValueDir, req.NamespaceId)
-	file := filepath.Join(path, fmt.Sprintf("%s.json", req.Key))
+	file := filepath.Join(path, keyFile)
 	if req.Expiration == 0 {
 		req.Expiration = MaxExpireTime
 	}
