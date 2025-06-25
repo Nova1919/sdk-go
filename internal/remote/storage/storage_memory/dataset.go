@@ -60,7 +60,7 @@ func (d *DatasetLocal) ListDatasets(ctx context.Context, req *models.ListDataset
 		return allDatasets[i].Name < allDatasets[j].Name
 	})
 
-	total := int64(len(allDatasets))
+	total := len(allDatasets)
 
 	// page
 	start := (req.Page - 1) * req.PageSize
@@ -75,8 +75,11 @@ func (d *DatasetLocal) ListDatasets(ctx context.Context, req *models.ListDataset
 	pagedItems := allDatasets[start:end]
 
 	return &models.ListDatasetsResponse{
-		Items: pagedItems,
-		Total: total,
+		Items:     pagedItems,
+		Total:     total,
+		Page:      req.Page,
+		PageSize:  req.PageSize,
+		TotalPage: total/req.PageSize + 1,
 	}, nil
 }
 
@@ -175,8 +178,11 @@ func (d *DatasetLocal) GetDataset(ctx context.Context, req *models.GetDataset) (
 	}
 
 	return &models.DatasetItem{
-		Items: result,
-		Total: total,
+		Items:     result,
+		Total:     total,
+		Page:      req.Page,
+		PageSize:  req.PageSize,
+		TotalPage: total/req.PageSize + 1,
 	}, nil
 }
 
