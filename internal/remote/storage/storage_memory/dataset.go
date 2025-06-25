@@ -118,7 +118,9 @@ func (c *LocalClient) DelDataset(ctx context.Context, datasetID string) (bool, e
 
 func (c *LocalClient) GetDataset(ctx context.Context, req *models.GetDataset) (*models.DatasetItem, error) {
 	dirPath := filepath.Join(storageDir, datasetDir, req.DatasetId)
-
+	if isDirExists(dirPath) {
+		return nil, ErrResourceNotFound
+	}
 	entries, err := os.ReadDir(dirPath)
 	if err != nil {
 		return nil, fmt.Errorf("read dir failed: %v", err)
@@ -184,6 +186,9 @@ func (c *LocalClient) GetDataset(ctx context.Context, req *models.GetDataset) (*
 
 func (c *LocalClient) AddDatasetItem(ctx context.Context, datasetId string, items []map[string]any) (bool, error) {
 	dirPath := filepath.Join(storageDir, datasetDir, datasetId)
+	if !isDirExists(dirPath) {
+		return false, ErrResourceNotFound
+	}
 	meta, err := updateMetadata(datasetId, "default")
 	if err != nil {
 		return false, err
