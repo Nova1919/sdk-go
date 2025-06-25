@@ -1,7 +1,6 @@
 package storage_memory
 
 import (
-	"fmt"
 	"github.com/smash-hq/sdk-go/scrapeless/log"
 	"os"
 	"path/filepath"
@@ -50,11 +49,14 @@ func EnsureDir(storageDir string) error {
 	}
 	kvPath := filepath.Join(absPath, keyValueDir, defaultDir)
 	err = os.MkdirAll(kvPath, os.ModeDir)
-	create, err := os.Create(fmt.Sprintf("%s/%s", kvPath, inputJson))
-	if err != nil {
-		log.Warnf("create INPUT.json failed: %v", err)
+	inputPath := filepath.Join(kvPath, inputJson)
+	if !isFileExists(inputPath) {
+		create, err := os.Create(inputPath)
+		defer create.Close()
+		if err != nil {
+			log.Warnf("create INPUT.json failed: %v", err)
+		}
 	}
-	defer create.Close()
 	if err != nil {
 		log.Warnf("warn create storage dir err: %v", err)
 	}
