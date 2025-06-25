@@ -6,7 +6,7 @@
 
 ### 1. 提交 Issue
 
-- 在新建 issue 前，请先搜索 [已有 issue](https://github.com/scrapeless-ai/sdk-go/issues)。
+- 在新建 issue 前，请先搜索 [已有 issue](https://github.com/smash-hq/sdk-go/issues)。
 - 请提供清晰的标题和详细描述。
 - 如涉及 bug，请附上复现步骤、期望行为和相关环境信息。
 
@@ -36,7 +36,7 @@
 
 ```bash
 # 克隆仓库
-git clone https://github.com/scrapeless-ai/sdk-go.git
+git clone https://github.com/smash-hq/sdk-go.git
 cd scrapeless-actor-sdk-go
 
 # 安装依赖

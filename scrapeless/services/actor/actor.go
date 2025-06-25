@@ -2,12 +2,12 @@ package actor
 
 import (
 	"context"
-	"github.com/scrapeless-ai/sdk-go/env"
-	"github.com/scrapeless-ai/sdk-go/internal/code"
-	"github.com/scrapeless-ai/sdk-go/internal/remote/actor"
-	actor_http "github.com/scrapeless-ai/sdk-go/internal/remote/actor/http"
-	"github.com/scrapeless-ai/sdk-go/internal/remote/actor/models"
-	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
+	"github.com/smash-hq/sdk-go/env"
+	"github.com/smash-hq/sdk-go/internal/code"
+	"github.com/smash-hq/sdk-go/internal/remote/actor"
+	actor_http "github.com/smash-hq/sdk-go/internal/remote/actor/http"
+	"github.com/smash-hq/sdk-go/internal/remote/actor/models"
+	"github.com/smash-hq/sdk-go/scrapeless/log"
 )
 
 func NewActor(serverMode string) *ActorService {

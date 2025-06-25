@@ -2,12 +2,12 @@ package deepserp
 
 import (
 	"context"
-	"github.com/scrapeless-ai/sdk-go/env"
-	"github.com/scrapeless-ai/sdk-go/internal/code"
-	"github.com/scrapeless-ai/sdk-go/internal/remote/deepserp"
-	dh "github.com/scrapeless-ai/sdk-go/internal/remote/deepserp/http"
-	"github.com/scrapeless-ai/sdk-go/internal/remote/deepserp/models"
-	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
+	"github.com/smash-hq/sdk-go/env"
+	"github.com/smash-hq/sdk-go/internal/code"
+	"github.com/smash-hq/sdk-go/internal/remote/deepserp"
+	dh "github.com/smash-hq/sdk-go/internal/remote/deepserp/http"
+	"github.com/smash-hq/sdk-go/internal/remote/deepserp/models"
+	"github.com/smash-hq/sdk-go/scrapeless/log"
 	"github.com/tidwall/gjson"
 	"strings"
 	"time"

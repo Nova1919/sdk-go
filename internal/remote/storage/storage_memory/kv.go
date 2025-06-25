@@ -6,7 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/google/uuid"
-	"github.com/scrapeless-ai/sdk-go/internal/remote/storage/models"
+	"github.com/smash-hq/sdk-go/internal/remote/storage/models"
 	"io/fs"
 	"os"
 	"path/filepath"

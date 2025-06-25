@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/scrapeless-ai/sdk-go/internal/remote/storage/models"
+	"github.com/smash-hq/sdk-go/internal/remote/storage/models"
 	"testing"
 )
 

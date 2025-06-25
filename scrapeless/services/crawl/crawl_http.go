@@ -2,10 +2,10 @@ package crawl
 
 import (
 	"context"
-	"github.com/scrapeless-ai/sdk-go/env"
-	"github.com/scrapeless-ai/sdk-go/internal/remote/crawl"
-	"github.com/scrapeless-ai/sdk-go/internal/remote/crawl/models"
-	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
+	"github.com/smash-hq/sdk-go/env"
+	"github.com/smash-hq/sdk-go/internal/remote/crawl"
+	"github.com/smash-hq/sdk-go/internal/remote/crawl/models"
+	"github.com/smash-hq/sdk-go/scrapeless/log"
 )
 
 type Crawl struct{}

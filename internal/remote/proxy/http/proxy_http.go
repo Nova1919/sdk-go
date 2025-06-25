@@ -3,8 +3,8 @@ package http
 import (
 	"context"
 	"fmt"
-	"github.com/scrapeless-ai/sdk-go/env"
-	"github.com/scrapeless-ai/sdk-go/internal/remote/proxy/models"
+	"github.com/smash-hq/sdk-go/env"
+	"github.com/smash-hq/sdk-go/internal/remote/proxy/models"
 	"github.com/thoas/go-funk"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

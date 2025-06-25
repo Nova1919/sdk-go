@@ -1,8 +1,8 @@
 package storage
 
 import (
-	"github.com/scrapeless-ai/sdk-go/env"
-	"github.com/scrapeless-ai/sdk-go/internal/remote/storage"
+	"github.com/smash-hq/sdk-go/env"
+	"github.com/smash-hq/sdk-go/internal/remote/storage"
 	"sync"
 )
 

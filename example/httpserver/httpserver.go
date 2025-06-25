@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/scrapeless-ai/sdk-go/scrapeless"
-	sh "github.com/scrapeless-ai/sdk-go/scrapeless/services/httpserver"
+	"github.com/smash-hq/sdk-go/scrapeless"
+	sh "github.com/smash-hq/sdk-go/scrapeless/services/httpserver"
 )
 
 func main() {

@@ -2,9 +2,9 @@ package main
 
 import (
 	"context"
-	"github.com/scrapeless-ai/sdk-go/scrapeless"
-	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
-	proxy2 "github.com/scrapeless-ai/sdk-go/scrapeless/services/proxies"
+	"github.com/smash-hq/sdk-go/scrapeless"
+	"github.com/smash-hq/sdk-go/scrapeless/log"
+	proxy2 "github.com/smash-hq/sdk-go/scrapeless/services/proxies"
 	"io"
 	"net/http"
 	"net/url"

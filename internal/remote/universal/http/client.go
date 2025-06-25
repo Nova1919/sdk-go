@@ -1,7 +1,7 @@
 package http
 
 import (
-	"github.com/scrapeless-ai/sdk-go/env"
+	"github.com/smash-hq/sdk-go/env"
 	"net/http"
 )
 

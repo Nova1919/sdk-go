@@ -1,7 +1,7 @@
 package storage_memory
 
 import (
-	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
+	"github.com/smash-hq/sdk-go/scrapeless/log"
 	"os"
 	"path/filepath"
 )

@@ -2,12 +2,12 @@ package proxies
 
 import (
 	"context"
-	"github.com/scrapeless-ai/sdk-go/env"
-	"github.com/scrapeless-ai/sdk-go/internal/code"
-	rp "github.com/scrapeless-ai/sdk-go/internal/remote/proxy"
-	"github.com/scrapeless-ai/sdk-go/internal/remote/proxy/http"
-	proxy2 "github.com/scrapeless-ai/sdk-go/internal/remote/proxy/models"
-	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
+	"github.com/smash-hq/sdk-go/env"
+	"github.com/smash-hq/sdk-go/internal/code"
+	rp "github.com/smash-hq/sdk-go/internal/remote/proxy"
+	"github.com/smash-hq/sdk-go/internal/remote/proxy/http"
+	proxy2 "github.com/smash-hq/sdk-go/internal/remote/proxy/models"
+	"github.com/smash-hq/sdk-go/scrapeless/log"
 )
 
 type Proxy struct {

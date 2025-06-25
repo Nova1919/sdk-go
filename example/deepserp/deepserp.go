@@ -2,9 +2,9 @@ package main
 
 import (
 	"context"
-	scrapeless "github.com/scrapeless-ai/sdk-go/scrapeless"
-	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
-	"github.com/scrapeless-ai/sdk-go/scrapeless/services/deepserp"
+	scrapeless "github.com/smash-hq/sdk-go/scrapeless"
+	"github.com/smash-hq/sdk-go/scrapeless/log"
+	"github.com/smash-hq/sdk-go/scrapeless/services/deepserp"
 )
 
 func main() {
