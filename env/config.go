@@ -53,10 +53,18 @@ func (c *config) Validate() error {
 		return errors.New("invalid env param team_Id")
 	}
 	if c.Actor.ActorId == "" {
-		return errors.New("invalid env param actor_Id")
+		if !c.IsOnline {
+			c.Actor.ActorId = "default"
+		} else {
+			return errors.New("invalid env param actor_Id")
+		}
 	}
 	if c.Actor.RunId == "" {
-		return errors.New("invalid env param run_Id")
+		if !c.IsOnline {
+			c.Actor.RunId = "default"
+		} else {
+			return errors.New("invalid env param run_Id")
+		}
 	}
 	if c.Actor.ApiKey == "" {
 		return errors.New("invalid env param apikey")
