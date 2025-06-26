@@ -2,12 +2,12 @@ package services
 
 import (
 	"context"
-	"github.com/smash-hq/sdk-go/scrapeless/services/extension"
+	"github.com/smash-hq/sdk-go/scrapeless/services/browser"
 	"testing"
 )
 
 func TestExtension(t *testing.T) {
-	client := extension.NewExtension("http")
+	client := browser.NewBrowser("http")
 
 	list, err := client.List(context.Background())
 	if err != nil {
