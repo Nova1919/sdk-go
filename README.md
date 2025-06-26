@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**[English](README.md) | [中文文档](README-zh.md)**
+
 
 The official Go SDK of [Scrapeless AI](https://scrapeless.com) - a powerful web scraping and browser automation platform that helps you extract data from any website at scale.
 
@@ -195,6 +195,109 @@ func main() {
 	log.Infof("runInfo:%+v", runInfo)
 }
 ```
+### Crawl
+
+```go
+package main
+
+import (
+	"context"
+	"github.com/smash-hq/sdk-go/scrapeless"
+	"github.com/smash-hq/sdk-go/scrapeless/log"
+	"github.com/smash-hq/sdk-go/scrapeless/services/crawl"
+)
+
+func main() {
+	client := scrapeless.New(scrapeless.WithCrawl())
+
+	// Crawl
+	response, err := client.Crawl.CrawlUrl(context.Background(), "https://redditinc.com/blog", crawl.CrawlParams{
+		Limit: 10,
+		ScrapeOptions: crawl.ScrapeOptions{
+			Formats: []string{"links",
+				"markdown",
+				"html",
+				"screenshot"},
+		},
+		BrowserOptions: crawl.ICreateBrowser{
+			SessionName:      "Crawl",
+			SessionTTL:       "900",
+			SessionRecording: "true",
+			ProxyCountry:     "ANY",
+		},
+	})
+	if err != nil {
+		panic(err)
+	}
+	log.Infof("Crawl response: %v", response)
+
+	// scrape
+	scrapeResponse, err := client.Crawl.ScrapeUrl(context.Background(), "https://docs.scrapeless.com/en/overview/", crawl.ScrapeOptions{
+		BrowserOptions: crawl.ICreateBrowser{
+			SessionName:      "Crawl",
+			SessionTTL:       "900",
+			SessionRecording: "true",
+			ProxyCountry:     "ANY",
+		},
+	})
+	if err != nil {
+		panic(err)
+	}
+	log.Infof("Scrape response: %v", scrapeResponse)
+}
+```
+### Extension
+
+```go
+package main
+
+import (
+	"context"
+	"github.com/smash-hq/sdk-go/scrapeless"
+	"github.com/smash-hq/sdk-go/scrapeless/log"
+)
+
+func main() {
+	client := scrapeless.New(scrapeless.WithExtension())
+
+	// upload extension
+	uploadExtension, err := client.Extension.Upload(context.Background(), "your-file-path.zip", "Scrapeless")
+	if err != nil {
+		panic(err)
+	}
+	log.Infof("Uploaded extension: %v", uploadExtension)
+
+	// update extension
+	updateExtensionSuccess, err := client.Extension.Update(context.Background(), uploadExtension.ExtensionID, "your-file-path.zip", "Scrapeless")
+	if err != nil {
+		panic(err)
+	}
+	log.Infof("Updated extension: %v", updateExtensionSuccess)
+
+	// get extension
+	extensionDetail, err := client.Extension.Get(context.Background(), "extensionID")
+	if err != nil {
+		panic(err)
+	}
+	log.Infof("Extension: %v", extensionDetail)
+
+	// list extensions
+	extensionList, err := client.Extension.List(context.Background())
+	if err != nil {
+		panic(err)
+	}
+	log.Infof("Extensions: %v", extensionList)
+
+	// delete extension
+	success, err := client.Extension.Delete(context.Background(), "extensionID")
+	if err != nil {
+		panic(err)
+	}
+	log.Infof("Deleted extension: %v", success)
+
+}
+
+```
 
 ## 🔧 API Reference
 
@@ -229,6 +332,8 @@ Check the `example` directory for complete usage examples:
 - [Storage Queue Usage Example](./example/storage_queue/storage_queue.go)
 - [Route Call](./example/router/router.go)
 - [HTTP Service](./example/httpserver/httpserver.go)
+- [Crawl Usage Example](./example/crawl/crawl.go)
+- [Extension Example](./example/extension/extension.go)
 
 ## 🛠️ Contribution & Development Guide
 

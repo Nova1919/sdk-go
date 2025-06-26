@@ -14,10 +14,10 @@ import (
 
 type Crawl struct{}
 
-func New() Crawl {
+func New() *Crawl {
 	log.Info("Internal Crawl init")
 	crawl.NewClient("http", env.Env.ScrapelessCrawlApiUrl)
-	return Crawl{}
+	return &Crawl{}
 }
 
 func (c *Crawl) ScrapeUrl(ctx context.Context, url string, crawlScrapeOptions ScrapeOptions) (scrapeStatusResponse *ScrapeStatusResponse, err error) {

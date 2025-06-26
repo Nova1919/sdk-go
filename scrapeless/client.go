@@ -4,7 +4,9 @@ import (
 	"github.com/smash-hq/sdk-go/scrapeless/services/actor"
 	"github.com/smash-hq/sdk-go/scrapeless/services/browser"
 	"github.com/smash-hq/sdk-go/scrapeless/services/captcha"
+	"github.com/smash-hq/sdk-go/scrapeless/services/crawl"
 	"github.com/smash-hq/sdk-go/scrapeless/services/deepserp"
+	"github.com/smash-hq/sdk-go/scrapeless/services/extension"
 	"github.com/smash-hq/sdk-go/scrapeless/services/httpserver"
 	"github.com/smash-hq/sdk-go/scrapeless/services/proxies"
 	"github.com/smash-hq/sdk-go/scrapeless/services/router"
@@ -24,6 +26,8 @@ type Client struct {
 	Scraping  *scraping.Scraping
 	Universal *universal.Universal
 	Actor     *actor.ActorService
+	Crawl     *crawl.Crawl
+	Extension *extension.Extension
 	CloseFun  []func() error
 }
 
@@ -215,6 +219,44 @@ func WithActor(tp ...string) Option {
 		tp = append(tp, typeHttp)
 	}
 	return &ActorOption{
+		tp: tp[0],
+	}
+}
+
+type CrawlOption struct {
+	tp string
+}
+
+func (o *CrawlOption) Apply(c *Client) {
+	c.Crawl = crawl.New()
+	c.CloseFun = append(c.CloseFun, c.Crawl.Close)
+}
+
+// WithCrawl choose crawl type.
+func WithCrawl(tp ...string) Option {
+	if len(tp) == 0 {
+		tp = append(tp, typeHttp)
+	}
+	return &CrawlOption{
+		tp: tp[0],
+	}
+}
+
+type ExtensionOption struct {
+	tp string
+}
+
+func (o *ExtensionOption) Apply(c *Client) {
+	c.Extension = extension.NewExtension(o.tp)
+	c.CloseFun = append(c.CloseFun, c.Extension.Close)
+}
+
+// WithExtension choose extension type.
+func WithExtension(tp ...string) Option {
+	if len(tp) == 0 {
+		tp = append(tp, typeHttp)
+	}
+	return &CrawlOption{
 		tp: tp[0],
 	}
 }
