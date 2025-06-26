@@ -76,7 +76,7 @@ func (c *Client) CreateCollections(ctx context.Context, req *models.CreateCollec
 		return nil, err
 	}
 	if resp.Err {
-		return nil, fmt.Errorf("get collection list err: %s", resp.Msg)
+		return nil, fmt.Errorf("create collection err: %s", resp.Msg)
 	}
 	marshal, _ := json.Marshal(&resp.Data)
 	var coll models.Collection
@@ -114,7 +114,7 @@ func (c *Client) UpdateCollection(ctx context.Context, req *models.UpdateCollect
 		return err
 	}
 	if resp.Err {
-		return fmt.Errorf("edit collection err:%s", resp.Msg)
+		return fmt.Errorf("update collection err:%s", resp.Msg)
 	}
 	return nil
 }
@@ -125,9 +125,9 @@ func (c *Client) DelCollection(ctx context.Context, collId string) error {
 		Url:     fmt.Sprintf("%s/api/v1/vector/%s", c.BaseUrl, collId),
 		Headers: map[string]string{},
 	})
-	log.Infof("up collection body:%s", body)
+	log.Infof("delete collection body:%s", body)
 	if err != nil {
-		log.Errorf("up collection err:%v", err)
+		log.Errorf("delete collection err:%v", err)
 		return err
 	}
 	var resp request2.RespInfo
@@ -137,7 +137,7 @@ func (c *Client) DelCollection(ctx context.Context, collId string) error {
 		return err
 	}
 	if resp.Err {
-		return fmt.Errorf("edit collection err:%s", resp.Msg)
+		return fmt.Errorf("delete collection err:%s", resp.Msg)
 	}
 	return nil
 }
@@ -160,7 +160,7 @@ func (c *Client) GetCollection(ctx context.Context, collId string) (*models.Coll
 		return nil, err
 	}
 	if resp.Err {
-		return nil, fmt.Errorf("get collection item err:%s", resp.Msg)
+		return nil, fmt.Errorf("get collection err:%s", resp.Msg)
 	}
 	marshal, _ := json.Marshal(&resp.Data)
 	var respData models.Collection
@@ -183,9 +183,9 @@ func (c *Client) CreateDocs(ctx context.Context, req *models.CreateDocsRequest) 
 		Body:    string(reqBody),
 		Headers: map[string]string{},
 	})
-	log.Infof("get collection body:%s", body)
+	log.Infof("create docs body:%s", body)
 	if err != nil {
-		log.Errorf("get collection err:%v", err)
+		log.Errorf("create docs err:%v", err)
 		return nil, err
 	}
 	var resp request2.RespInfo
@@ -195,7 +195,7 @@ func (c *Client) CreateDocs(ctx context.Context, req *models.CreateDocsRequest) 
 		return nil, err
 	}
 	if resp.Err {
-		return nil, fmt.Errorf("get collection item err:%s", resp.Msg)
+		return nil, fmt.Errorf("create docs err:%s", resp.Msg)
 	}
 	marshal, _ := json.Marshal(&resp.Data)
 	var respData models.DocOpResponse
@@ -218,9 +218,9 @@ func (c *Client) UpdateDocs(ctx context.Context, req *models.UpdateDocsRequest) 
 		Body:    string(reqBody),
 		Headers: map[string]string{},
 	})
-	log.Infof("get collection body:%s", body)
+	log.Infof("update docs body:%s", body)
 	if err != nil {
-		log.Errorf("get collection err:%v", err)
+		log.Errorf("update docs err:%v", err)
 		return nil, err
 	}
 	var resp request2.RespInfo
@@ -230,7 +230,7 @@ func (c *Client) UpdateDocs(ctx context.Context, req *models.UpdateDocsRequest) 
 		return nil, err
 	}
 	if resp.Err {
-		return nil, fmt.Errorf("get collection item err:%s", resp.Msg)
+		return nil, fmt.Errorf("update docs err:%s", resp.Msg)
 	}
 	marshal, _ := json.Marshal(&resp.Data)
 	var respData models.DocOpResponse
@@ -253,9 +253,9 @@ func (c *Client) UpsertDocs(ctx context.Context, req *models.UpsertVectorDocsPar
 		Body:    string(reqBody),
 		Headers: map[string]string{},
 	})
-	log.Infof("get collection body:%s", body)
+	log.Infof("upsert docs body:%s", body)
 	if err != nil {
-		log.Errorf("get collection err:%v", err)
+		log.Errorf("upsert docs  err:%v", err)
 		return nil, err
 	}
 	var resp request2.RespInfo
@@ -265,7 +265,7 @@ func (c *Client) UpsertDocs(ctx context.Context, req *models.UpsertVectorDocsPar
 		return nil, err
 	}
 	if resp.Err {
-		return nil, fmt.Errorf("get collection item err:%s", resp.Msg)
+		return nil, fmt.Errorf("upsert docs err:%s", resp.Msg)
 	}
 	marshal, _ := json.Marshal(&resp.Data)
 	var respData models.DocOpResponse
@@ -288,9 +288,9 @@ func (c *Client) DelDocs(ctx context.Context, req *models.DeleteDocsRequest) (*m
 		Body:    string(reqBody),
 		Headers: map[string]string{},
 	})
-	log.Infof("get collection body:%s", body)
+	log.Infof("del docs body:%s", body)
 	if err != nil {
-		log.Errorf("get collection err:%v", err)
+		log.Errorf("del docs err:%v", err)
 		return nil, err
 	}
 	var resp request2.RespInfo
@@ -300,7 +300,7 @@ func (c *Client) DelDocs(ctx context.Context, req *models.DeleteDocsRequest) (*m
 		return nil, err
 	}
 	if resp.Err {
-		return nil, fmt.Errorf("get collection item err:%s", resp.Msg)
+		return nil, fmt.Errorf("del docs err:%s", resp.Msg)
 	}
 	marshal, _ := json.Marshal(&resp.Data)
 	var respData models.DocOpResponse
@@ -323,9 +323,9 @@ func (c *Client) QueryDocs(ctx context.Context, req *models.QueryVectorRequest) 
 		Body:    string(reqBody),
 		Headers: map[string]string{},
 	})
-	log.Infof("get collection body:%s", body)
+	log.Infof("query docs body:%s", body)
 	if err != nil {
-		log.Errorf("get collection err:%v", err)
+		log.Errorf("query docs err:%v", err)
 		return nil, err
 	}
 	var resp request2.RespInfo
@@ -335,7 +335,7 @@ func (c *Client) QueryDocs(ctx context.Context, req *models.QueryVectorRequest) 
 		return nil, err
 	}
 	if resp.Err {
-		return nil, fmt.Errorf("get collection item err:%s", resp.Msg)
+		return nil, fmt.Errorf("query docs err:%s", resp.Msg)
 	}
 	marshal, _ := json.Marshal(&resp.Data)
 	respData := make([]*models.Doc, 0)
@@ -363,9 +363,9 @@ func (c *Client) QueryDocsByIds(ctx context.Context, req *models.QueryDocsByIdsR
 		Method: http.MethodGet,
 		Url:    u.String(),
 	})
-	log.Infof("get docs body: %s", body)
+	log.Infof("query docs byIds body: %s", body)
 	if err != nil {
-		log.Errorf("get collection err: %v", err)
+		log.Errorf("query docs byIds err: %v", err)
 		return nil, err
 	}
 	var resp request2.RespInfo
@@ -375,7 +375,7 @@ func (c *Client) QueryDocsByIds(ctx context.Context, req *models.QueryDocsByIdsR
 		return nil, err
 	}
 	if resp.Err {
-		return nil, fmt.Errorf("get collection item err:%s", resp.Msg)
+		return nil, fmt.Errorf("query docs byIds err:%s", resp.Msg)
 	}
 	marshal, _ := json.Marshal(&resp.Data)
 	respData := make(map[string]*models.Doc)

@@ -8,7 +8,7 @@ import (
 	"github.com/scrapeless-ai/sdk-go/scrapeless/services/browser"
 	"github.com/scrapeless-ai/sdk-go/scrapeless/services/captcha"
 	proxy2 "github.com/scrapeless-ai/sdk-go/scrapeless/services/proxies"
-	"github.com/scrapeless-ai/sdk-go/scrapeless/services/storage/queue"
+	"github.com/scrapeless-ai/sdk-go/scrapeless/services/storage"
 	"net/url"
 )
 
@@ -103,7 +103,7 @@ func main() {
 
 	// 6. Queue operations
 	// 6.1 Push message to queue
-	msgId, err := a.PushMessage(context.Background(), queue.PushQueue{
+	msgId, err := a.PushMessage(context.Background(), storage.PushQueue{
 		Name:    "example",
 		Payload: []byte("example"),
 	})
