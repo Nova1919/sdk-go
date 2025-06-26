@@ -219,7 +219,6 @@ func (c *LocalClient) AddDatasetItem(ctx context.Context, datasetId string, item
 		}
 	}
 	meta.UpdatedAt = time.Now().Format(time.RFC3339Nano)
-	meta.AccessedAt = time.Now().Format(time.RFC3339Nano)
 	meta.Stats = models.DatasetStats{
 		Count: uint64(len(items)),
 	}
