@@ -6,18 +6,18 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/smash-hq/sdk-go/env"
-	"github.com/smash-hq/sdk-go/internal/remote/crawl"
-	"github.com/smash-hq/sdk-go/internal/remote/crawl/models"
-	"github.com/smash-hq/sdk-go/scrapeless/log"
+	"github.com/scrapeless-ai/sdk-go/env"
+	"github.com/scrapeless-ai/sdk-go/internal/remote/crawl"
+	"github.com/scrapeless-ai/sdk-go/internal/remote/crawl/models"
+	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
 )
 
 type Crawl struct{}
 
-func New() Crawl {
+func New() *Crawl {
 	log.Info("Internal Crawl init")
 	crawl.NewClient("http", env.Env.ScrapelessCrawlApiUrl)
-	return Crawl{}
+	return &Crawl{}
 }
 
 func (c *Crawl) ScrapeUrl(ctx context.Context, url string, crawlScrapeOptions ScrapeOptions) (scrapeStatusResponse *ScrapeStatusResponse, err error) {

@@ -1,10 +1,10 @@
 package router
 
 import (
-	"github.com/smash-hq/sdk-go/internal/remote/router"
+	"github.com/scrapeless-ai/sdk-go/internal/remote/router"
 	"io"
 
-	"github.com/smash-hq/sdk-go/scrapeless/log"
+	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
 )
 
 type Router struct{}

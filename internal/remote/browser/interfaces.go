@@ -2,9 +2,9 @@ package browser
 
 import (
 	"context"
-	browser_http "github.com/smash-hq/sdk-go/internal/remote/browser/http"
-	"github.com/smash-hq/sdk-go/internal/remote/browser/models"
-	"github.com/smash-hq/sdk-go/scrapeless/log"
+	browser_http "github.com/scrapeless-ai/sdk-go/internal/remote/browser/http"
+	"github.com/scrapeless-ai/sdk-go/internal/remote/browser/models"
+	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
 )
 
 type Browser interface {

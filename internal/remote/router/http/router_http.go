@@ -2,8 +2,8 @@ package http
 
 import (
 	"fmt"
-	"github.com/smash-hq/sdk-go/env"
-	"github.com/smash-hq/sdk-go/scrapeless/log"
+	"github.com/scrapeless-ai/sdk-go/env"
+	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
 	"io"
 	"net/http"
 )

@@ -1,8 +1,8 @@
 package http
 
 import (
+	"github.com/scrapeless-ai/sdk-go/env"
 	log "github.com/sirupsen/logrus"
-	"github.com/smash-hq/sdk-go/env"
 	"net/http"
 )
 

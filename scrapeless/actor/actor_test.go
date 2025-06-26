@@ -2,7 +2,7 @@ package actor
 
 import (
 	"context"
-	proxy2 "github.com/smash-hq/sdk-go/scrapeless/services/proxies"
+	proxy2 "github.com/scrapeless-ai/sdk-go/scrapeless/services/proxies"
 	"testing"
 )
 

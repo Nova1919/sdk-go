@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"github.com/rs/zerolog"
-	"github.com/smash-hq/sdk-go/env"
-	"github.com/smash-hq/sdk-go/internal/helper"
+	"github.com/scrapeless-ai/sdk-go/env"
+	"github.com/scrapeless-ai/sdk-go/internal/helper"
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 

@@ -2,7 +2,7 @@ package scrapeless
 
 import (
 	"context"
-	"github.com/smash-hq/sdk-go/scrapeless/services/proxies"
+	"github.com/scrapeless-ai/sdk-go/scrapeless/services/proxies"
 	"testing"
 )
 

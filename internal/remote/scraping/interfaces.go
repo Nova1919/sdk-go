@@ -2,9 +2,9 @@ package scraping
 
 import (
 	"context"
-	scraping_http "github.com/smash-hq/sdk-go/internal/remote/scraping/http"
-	"github.com/smash-hq/sdk-go/internal/remote/scraping/models"
-	"github.com/smash-hq/sdk-go/scrapeless/log"
+	scraping_http "github.com/scrapeless-ai/sdk-go/internal/remote/scraping/http"
+	"github.com/scrapeless-ai/sdk-go/internal/remote/scraping/models"
+	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
 )
 
 type Scraping interface {

@@ -3,12 +3,12 @@ package captcha
 import (
 	"context"
 	"encoding/json"
-	"github.com/smash-hq/sdk-go/env"
-	"github.com/smash-hq/sdk-go/internal/code"
-	"github.com/smash-hq/sdk-go/internal/remote/captcha"
-	"github.com/smash-hq/sdk-go/internal/remote/captcha/http"
-	gateway_captcha "github.com/smash-hq/sdk-go/internal/remote/captcha/models"
-	"github.com/smash-hq/sdk-go/scrapeless/log"
+	"github.com/scrapeless-ai/sdk-go/env"
+	"github.com/scrapeless-ai/sdk-go/internal/code"
+	"github.com/scrapeless-ai/sdk-go/internal/remote/captcha"
+	"github.com/scrapeless-ai/sdk-go/internal/remote/captcha/http"
+	gateway_captcha "github.com/scrapeless-ai/sdk-go/internal/remote/captcha/models"
+	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
 	"github.com/tidwall/gjson"
 )
 

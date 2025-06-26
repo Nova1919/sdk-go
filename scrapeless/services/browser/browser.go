@@ -3,12 +3,13 @@ package browser
 import (
 	"context"
 	"fmt"
-	"github.com/smash-hq/sdk-go/env"
-	"github.com/smash-hq/sdk-go/internal/code"
-	"github.com/smash-hq/sdk-go/internal/remote/browser"
-	"github.com/smash-hq/sdk-go/internal/remote/browser/http"
-	remote_brwoser "github.com/smash-hq/sdk-go/internal/remote/browser/models"
-	"github.com/smash-hq/sdk-go/scrapeless/log"
+	"github.com/scrapeless-ai/sdk-go/env"
+	"github.com/scrapeless-ai/sdk-go/internal/code"
+	"github.com/scrapeless-ai/sdk-go/internal/remote/browser"
+	"github.com/scrapeless-ai/sdk-go/internal/remote/browser/http"
+	remote_brwoser "github.com/scrapeless-ai/sdk-go/internal/remote/browser/models"
+	"github.com/scrapeless-ai/sdk-go/internal/remote/extension"
+	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"net/url"
@@ -19,14 +20,12 @@ type Browser struct {
 }
 
 func NewBrowser(serverMode string) *Browser {
-	log.Info("browser http init")
+	log.Info("browser init")
 	browser.NewClient(serverMode, env.Env.ScrapelessBrowserUrl)
-	if http.Default() == nil {
-		http.Init(env.Env.ScrapelessBrowserUrl)
-	}
+	extension.NewClient(serverMode, env.Env.ScrapelessBaseApiUrl)
 	return &Browser{}
 }
-func (bh *Browser) Create(ctx context.Context, req Actor) (*CreateResp, error) {
+func (b *Browser) Create(ctx context.Context, req Actor) (*CreateResp, error) {
 	create, err := browser.ClientInterface.ScrapingBrowserCreate(ctx, &remote_brwoser.CreateBrowserRequest{
 		ApiKey: env.GetActorEnv().ApiKey,
 		Input: map[string]string{
@@ -54,7 +53,7 @@ func (bh *Browser) Create(ctx context.Context, req Actor) (*CreateResp, error) {
 	return nil, nil
 }
 
-func (bh *Browser) CreateOnce(ctx context.Context, req ActorOnce) (*CreateResp, error) {
+func (b *Browser) CreateOnce(ctx context.Context, req ActorOnce) (*CreateResp, error) {
 	u, err := url.Parse(env.Env.ScrapelessBrowserUrl)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "parse url error: %s", err.Error())
@@ -68,6 +67,67 @@ func (bh *Browser) CreateOnce(ctx context.Context, req ActorOnce) (*CreateResp, 
 		DevtoolsUrl: devtoolsUrl + "?" + value.Encode(),
 	}, nil
 }
-func (bh *Browser) Close() error {
+
+// Upload upload extension
+func (b *Browser) Upload(ctx context.Context, filePath, pluginName string) (uploadExtension *UploadExtensionResponse, err error) {
+	upload, err := extension.ClientInterface.Upload(ctx, filePath, pluginName)
+	if err != nil {
+		return nil, err
+	}
+	return &UploadExtensionResponse{
+		ExtensionID: upload.ExtensionID,
+		Name:        upload.Name,
+		CreatedAt:   upload.CreatedAt,
+		UpdatedAt:   upload.UpdatedAt,
+	}, nil
+}
+
+// Update update extension
+func (b *Browser) Update(ctx context.Context, extensionId, filePath, pluginName string) (success bool, err error) {
+	return extension.ClientInterface.Update(ctx, extensionId, filePath, pluginName)
+}
+
+// Get get extension detail by extensionId
+func (b *Browser) Get(ctx context.Context, extensionId string) (extensionDetail *ExtensionDetail, err error) {
+	detail, err := extension.ClientInterface.Get(ctx, extensionId)
+	if err != nil {
+		return nil, err
+	}
+	return &ExtensionDetail{
+		ExtensionID:  detail.ExtensionID,
+		Name:         detail.Name,
+		ManifestName: detail.ManifestName,
+		TeamID:       detail.TeamID,
+		CreatedAt:    detail.CreatedAt,
+		UpdatedAt:    detail.UpdatedAt,
+		Version:      detail.Version,
+	}, nil
+
+}
+
+// List list extension
+func (b *Browser) List(ctx context.Context) (extensionList []ExtensionListItem, err error) {
+	list, err := extension.ClientInterface.List(ctx)
+	if err != nil {
+		return nil, err
+	}
+	for _, item := range list {
+		extensionList = append(extensionList, ExtensionListItem{
+			ExtensionID: item.ExtensionID,
+			Name:        item.Name,
+			Version:     item.Version,
+			CreatedAt:   item.CreatedAt,
+			UpdatedAt:   item.UpdatedAt,
+		})
+	}
+	return extensionList, nil
+}
+
+// Delete delete extension by extensionId
+func (b *Browser) Delete(ctx context.Context, extensionId string) (success bool, err error) {
+	return extension.ClientInterface.Delete(ctx, extensionId)
+}
+
+func (b *Browser) Close() error {
 	return http.Default().Close()
 }

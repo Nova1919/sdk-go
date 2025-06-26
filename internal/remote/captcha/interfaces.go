@@ -2,9 +2,9 @@ package captcha
 
 import (
 	"context"
-	captcha_http "github.com/smash-hq/sdk-go/internal/remote/captcha/http"
-	"github.com/smash-hq/sdk-go/internal/remote/captcha/models"
-	"github.com/smash-hq/sdk-go/scrapeless/log"
+	captcha_http "github.com/scrapeless-ai/sdk-go/internal/remote/captcha/http"
+	"github.com/scrapeless-ai/sdk-go/internal/remote/captcha/models"
+	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
 )
 
 type Captcha interface {
