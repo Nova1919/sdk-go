@@ -3,11 +3,11 @@ package storage
 import (
 	"context"
 
-	"github.com/smash-hq/sdk-go/env"
-	"github.com/smash-hq/sdk-go/internal/code"
-	"github.com/smash-hq/sdk-go/internal/remote/storage"
-	"github.com/smash-hq/sdk-go/internal/remote/storage/models"
-	"github.com/smash-hq/sdk-go/scrapeless/log"
+	"github.com/scrapeless-ai/sdk-go/env"
+	"github.com/scrapeless-ai/sdk-go/internal/code"
+	"github.com/scrapeless-ai/sdk-go/internal/remote/storage"
+	"github.com/scrapeless-ai/sdk-go/internal/remote/storage/models"
+	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
 )
 
 type Vector struct{}

@@ -2,7 +2,7 @@ package storage_memory
 
 import (
 	"context"
-	"github.com/smash-hq/sdk-go/internal/remote/storage/models"
+	"github.com/scrapeless-ai/sdk-go/internal/remote/storage/models"
 )
 
 func (c *LocalClient) ListCollections(ctx context.Context, req *models.ListCollectionsRequest) (*models.ListCollectionsResponse, error) {

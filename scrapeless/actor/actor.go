@@ -177,27 +177,27 @@ func (a *Actor) GetItems(ctx context.Context, page int, pageSize int, desc bool)
 
 // ListQueues List all available queues
 func (a *Actor) ListQueues(ctx context.Context, page int64, pageSize int64, desc bool) (*storage.ListQueuesResponse, error) {
-	return a.storage.Queue.List(ctx, page, pageSize, desc)
+	return a.storage.Queue.ListQueues(ctx, page, pageSize, desc)
 }
 
 // CreateQueue Create a new queue
 func (a *Actor) CreateQueue(ctx context.Context, req *storage.CreateQueueReq) (queueId string, queueName string, err error) {
-	return a.storage.Queue.Create(ctx, req)
+	return a.storage.Queue.CreateQueue(ctx, req)
 }
 
 // GetQueue Get a queue by name
 func (a *Actor) GetQueue(ctx context.Context, name string) (*storage.Item, error) {
-	return a.storage.Queue.Get(ctx, a.queueId, name)
+	return a.storage.Queue.GetQueue(ctx, a.queueId, name)
 }
 
 // UpdateQueue Update a queue
 func (a *Actor) UpdateQueue(ctx context.Context, name string, description string) error {
-	return a.storage.Queue.Update(ctx, a.queueId, name, description)
+	return a.storage.Queue.UpdateQueue(ctx, a.queueId, name, description)
 }
 
 // DeleteQueue Delete a queue
 func (a *Actor) DeleteQueue(ctx context.Context) error {
-	return a.storage.Queue.Delete(ctx, a.queueId)
+	return a.storage.Queue.DeleteQueue(ctx, a.queueId)
 }
 
 // PushMessage Push a message to the default queue (from environment variable)
@@ -241,20 +241,20 @@ func (a *Actor) GetBucket(ctx context.Context) (*storage.Bucket, error) {
 
 // List list objects in a bucket
 func (a *Actor) List(ctx context.Context, fuzzyFileName string, page int64, pageSize int64) (*storage.ListObjectsResponse, error) {
-	return a.storage.Object.List(ctx, a.bucketId, fuzzyFileName, page, pageSize)
+	return a.storage.Object.ListObjects(ctx, a.bucketId, fuzzyFileName, page, pageSize)
 }
 
 // GetObject Get an object from the default bucket (from environment variable)
 func (a *Actor) GetObject(ctx context.Context, objectId string) ([]byte, error) {
-	return a.storage.Object.Get(ctx, a.bucketId, objectId)
+	return a.storage.Object.GetObject(ctx, a.bucketId, objectId)
 }
 
 // PutObject Upload an object to the default bucket (from environment variable)
 func (a *Actor) PutObject(ctx context.Context, filename string, data []byte) (string, error) {
-	return a.storage.Object.Put(ctx, a.bucketId, filename, data)
+	return a.storage.Object.PutObject(ctx, a.bucketId, filename, data)
 }
 
 // DeleteObject Delete an object from a bucket
 func (a *Actor) DeleteObject(ctx context.Context, objectId string) (bool, error) {
-	return a.storage.Object.Delete(ctx, a.bucketId, objectId)
+	return a.storage.Object.DeleteObject(ctx, a.bucketId, objectId)
 }
