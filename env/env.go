@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"path"
-	"path/filepath"
 	"reflect"
 	"runtime"
 	"time"
@@ -27,11 +26,7 @@ func init() {
 	}
 
 	// Optionally read .env file (non-fatal)
-	_, filename, _, _ := runtime.Caller(0)
-	dir := filepath.Dir(filename)
-	fmt.Println(filepath.Join(dir, ".env"))
-	viper.SetConfigFile(filepath.Join(dir, ".env"))
-
+	viper.SetConfigFile(".env")
 	err := viper.ReadInConfig()
 	if err != nil {
 		log.Warnf("scrapeless: warn reading config file: %v", err)

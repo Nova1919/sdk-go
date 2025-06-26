@@ -30,6 +30,8 @@ func (s *Vector) ListCollections(ctx context.Context, page int64, pageSize int64
 		Page:     page,
 		PageSize: pageSize,
 		Desc:     desc,
+		ActorId:  &env.GetActorEnv().ActorId,
+		RunId:    &env.GetActorEnv().RunId,
 	})
 	if err != nil {
 		log.Errorf("failed to list queues: %v", code.Format(err))
@@ -68,7 +70,7 @@ func (s *Vector) ListCollections(ctx context.Context, page int64, pageSize int64
 //
 //	ctx: The context for the request.
 //	req: The request object containing collection configuration details.
-func (s *Vector) CreateCollections(ctx context.Context, req CreateCollectionRequest) (*CreateCollectionResponse, error) {
+func (s *Vector) CreateCollections(ctx context.Context, req *CreateCollectionRequest) (*CreateCollectionResponse, error) {
 	name := req.Name + "-" + env.GetActorEnv().RunId
 	resp, err := storage.ClientInterface.CreateCollections(ctx, &models.CreateCollectionRequest{
 		ActorId:     env.GetActorEnv().ActorId,
@@ -172,14 +174,13 @@ func (s *Vector) GetCollection(ctx context.Context, collId string) (*Collection,
 //	ctx: The context for the request.
 //	collId: The ID of the collection.
 //	docs: The documents to insert.
-func (s *Vector) CreateDocs(ctx context.Context, collId string, docs []Doc) (*DocOpResponse, error) {
+func (s *Vector) CreateDocs(ctx context.Context, collId string, docs []*BaseDoc) (*DocOpResponse, error) {
 	var modelDocs []models.Doc
 	for _, d := range docs {
 		modelDocs = append(modelDocs, models.Doc{
 			Vector:       d.Vector,
 			Content:      d.Content,
 			SparseVector: d.SparseVector,
-			Score:        d.Score,
 		})
 	}
 	req := &models.CreateDocsRequest{
@@ -211,7 +212,7 @@ func (s *Vector) CreateDocs(ctx context.Context, collId string, docs []Doc) (*Do
 //	ctx: The context for the request.
 //	collId: The ID of the collection.
 //	docs: The documents to update.
-func (s *Vector) UpdateDocs(ctx context.Context, collId string, docs []Doc) (*DocOpResponse, error) {
+func (s *Vector) UpdateDocs(ctx context.Context, collId string, docs []*Doc) (*DocOpResponse, error) {
 	var modelDocs []models.Doc
 	for _, d := range docs {
 		modelDocs = append(modelDocs, models.Doc{
@@ -251,7 +252,7 @@ func (s *Vector) UpdateDocs(ctx context.Context, collId string, docs []Doc) (*Do
 //	ctx: The context for the request.
 //	collId: The ID of the collection.
 //	docs: The documents to upsert.
-func (s *Vector) UpsertDocs(ctx context.Context, collId string, docs []Doc) (*DocOpResponse, error) {
+func (s *Vector) UpsertDocs(ctx context.Context, collId string, docs []*Doc) (*DocOpResponse, error) {
 	var modelDocs []models.Doc
 	for _, d := range docs {
 		modelDocs = append(modelDocs, models.Doc{
@@ -320,7 +321,10 @@ func (s *Vector) DelDocs(ctx context.Context, collId string, ids []string) (*Doc
 //
 //	ctx: The context for the request.
 //	query: The param of query.
-func (s *Vector) QueryDocs(ctx context.Context, collId string, query QueryVectorParam) ([]Doc, error) {
+func (s *Vector) QueryDocs(ctx context.Context, collId string, query *QueryVectorParam) ([]*Doc, error) {
+	if query.Topk < 1 || query.Topk > 1024 {
+		query.Topk = 1
+	}
 	req := &models.QueryVectorRequest{
 		CollId:         collId,
 		Vector:         query.Vector,
@@ -334,9 +338,9 @@ func (s *Vector) QueryDocs(ctx context.Context, collId string, query QueryVector
 		log.Errorf("failed to query docs: %v", code.Format(err))
 		return nil, code.Format(err)
 	}
-	var docs []Doc
+	var docs []*Doc
 	for _, d := range resp {
-		docs = append(docs, Doc{
+		docs = append(docs, &Doc{
 			ID:           d.ID,
 			Vector:       d.Vector,
 			Content:      d.Content,

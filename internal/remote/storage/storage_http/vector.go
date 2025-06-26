@@ -12,9 +12,21 @@ import (
 )
 
 func (c *Client) ListCollections(ctx context.Context, req *models.ListCollectionsRequest) (*models.ListCollectionsResponse, error) {
+	u, err := url.Parse(fmt.Sprintf("%s/api/v1/vector?page=%d&pageSize=%d&desc=%t", c.BaseUrl, req.Page, req.PageSize, req.Desc))
+	if err != nil {
+		return nil, err
+	}
+	q := u.Query()
+	if req.RunId != nil && *req.RunId != "" {
+		q.Add("runId", *req.RunId)
+	}
+	if req.ActorId != nil && *req.ActorId != "" {
+		q.Add("actorId", *req.ActorId)
+	}
+	u.RawQuery = q.Encode()
 	body, err := request2.Request(ctx, request2.ReqInfo{
 		Method:  http.MethodGet,
-		Url:     fmt.Sprintf("%s/api/v1/vector?actorId=%s&desc=%v&page=%d&pageSize=%d&runId=%s", c.BaseUrl, *req.ActorId, req.Desc, req.Page, req.PageSize, *req.RunId),
+		Url:     u.String(),
 		Headers: map[string]string{},
 	})
 	log.Infof("list collection body:%s", body)
@@ -340,9 +352,13 @@ func (c *Client) QueryDocsByIds(ctx context.Context, req *models.QueryDocsByIdsR
 	if err != nil {
 		return nil, err
 	}
+
+	query := u.Query()
 	for i := range req.Ids {
-		u.Query().Add("ids", req.Ids[i])
+		query.Add("ids", req.Ids[i])
 	}
+	u.RawQuery = query.Encode()
+
 	body, err := request2.Request(ctx, request2.ReqInfo{
 		Method: http.MethodGet,
 		Url:    u.String(),

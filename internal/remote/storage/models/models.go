@@ -322,7 +322,7 @@ type Doc struct {
 	ID           string             `json:"id"`
 	Vector       []float64          `json:"vector"`
 	Content      string             `json:"content"`
-	SparseVector map[string]float64 `json:"sparse_vector"`
+	SparseVector map[string]float64 `json:"sparseVector"`
 	Score        float64            `json:"score"`
 }
 

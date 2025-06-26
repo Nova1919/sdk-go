@@ -258,3 +258,62 @@ func (a *Actor) PutObject(ctx context.Context, filename string, data []byte) (st
 func (a *Actor) DeleteObject(ctx context.Context, objectId string) (bool, error) {
 	return a.storage.Object.DeleteObject(ctx, a.bucketId, objectId)
 }
+
+/**
+ * Vector storage convenience methods with environment variables
+ */
+
+// ListCollections retrieves a list of vector collections with pagination and sorting options.
+func (a *Actor) ListCollections(ctx context.Context, page int64, pageSize int64, desc bool) (*storage.ListCollectionsResponse, error) {
+	return a.storage.Vector.ListCollections(ctx, page, pageSize, desc)
+}
+
+// CreateCollections creates a new vector collection with the provided request parameters.
+func (a *Actor) CreateCollections(ctx context.Context, req *storage.CreateCollectionRequest) (*storage.CreateCollectionResponse, error) {
+	return a.storage.Vector.CreateCollections(ctx, req)
+}
+
+// UpdateCollection updates the collection information with the provided name and description.
+func (a *Actor) UpdateCollection(ctx context.Context, collId string, name string, description string) error {
+	return a.storage.Vector.UpdateCollection(ctx, collId, name, description)
+}
+
+// DelCollection deletes the collection by its ID.
+func (a *Actor) DelCollection(ctx context.Context, collId string) error {
+	return a.storage.Vector.DelCollection(ctx, collId)
+}
+
+// GetCollection retrieves a collection by its ID.
+func (a *Actor) GetCollection(ctx context.Context, collId string) (*storage.Collection, error) {
+	return a.storage.Vector.GetCollection(ctx, collId)
+}
+
+// CreateDocs inserts new documents into the collection.
+func (a *Actor) CreateDocs(ctx context.Context, collId string, docs []*storage.BaseDoc) (*storage.DocOpResponse, error) {
+	return a.storage.Vector.CreateDocs(ctx, collId, docs)
+}
+
+// UpdateDocs updates existing documents in the collection.
+func (a *Actor) UpdateDocs(ctx context.Context, collId string, docs []*storage.Doc) (*storage.DocOpResponse, error) {
+	return a.storage.Vector.UpdateDocs(ctx, collId, docs)
+}
+
+// UpsertDocs inserts or updates documents in the collection.
+func (a *Actor) UpsertDocs(ctx context.Context, collId string, docs []*storage.Doc) (*storage.DocOpResponse, error) {
+	return a.storage.Vector.UpsertDocs(ctx, collId, docs)
+}
+
+// DelDocs deletes documents from the collection by their IDs.
+func (a *Actor) DelDocs(ctx context.Context, collId string, ids []string) (*storage.DocOpResponse, error) {
+	return a.storage.Vector.DelDocs(ctx, collId, ids)
+}
+
+// QueryDocs queries documents in the collection by vector.
+func (a *Actor) QueryDocs(ctx context.Context, collId string, query *storage.QueryVectorParam) ([]*storage.Doc, error) {
+	return a.storage.Vector.QueryDocs(ctx, collId, query)
+}
+
+// QueryDocsByIds queries documents in the collection by their IDs.
+func (a *Actor) QueryDocsByIds(ctx context.Context, collId string, ids []string) (map[string]*storage.Doc, error) {
+	return a.storage.Vector.QueryDocsByIds(ctx, collId, ids)
+}
