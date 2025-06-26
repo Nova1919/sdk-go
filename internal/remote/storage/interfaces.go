@@ -58,11 +58,27 @@ type Object interface {
 	Close() error
 }
 
+type Vector interface {
+	ListCollections(ctx context.Context, req *models.ListCollectionsRequest) (*models.ListCollectionsResponse, error)
+	CreateCollections(ctx context.Context, req *models.CreateCollectionRequest) (*models.CreateCollectionResponse, error)
+	UpdateCollection(ctx context.Context, req *models.UpdateCollectionRequest) error
+	DelCollection(ctx context.Context, collId string) error
+	GetCollection(ctx context.Context, collId string) (*models.Collection, error)
+	CreateDocs(ctx context.Context, req *models.CreateDocsRequest) (*models.DocOpResponse, error)
+	UpdateDocs(ctx context.Context, req *models.UpdateDocsRequest) (*models.DocOpResponse, error)
+	UpsertDocs(ctx context.Context, req *models.UpsertVectorDocsParam) (*models.DocOpResponse, error)
+	DelDocs(ctx context.Context, req *models.DeleteDocsRequest) (*models.DocOpResponse, error)
+	QueryDocs(ctx context.Context, req *models.QueryVectorRequest) ([]*models.Doc, error)
+	QueryDocsByIds(ctx context.Context, req *models.QueryDocsByIdsRequest) (map[string]*models.Doc, error)
+	Close() error
+}
+
 type Storage interface {
 	Dataset
 	KV
 	Object
 	Queue
+	Vector
 }
 
 var ClientInterface Storage

@@ -1,6 +1,8 @@
 package models
 
-import "time"
+import (
+	"time"
+)
 
 // Dataset
 
@@ -17,7 +19,7 @@ type ListDatasetsResponse struct {
 	Total     int64     `json:"total,omitempty"`
 	TotalPage int64     `json:"totalPage,omitempty"`
 	Page      int64     `json:"page,omitempty"`
-	PageSize  int64     `son:"pageSize,omitempty"`
+	PageSize  int64     `json:"pageSize,omitempty"`
 }
 
 type Dataset struct {
@@ -296,3 +298,100 @@ type BulkItem struct {
 	Value      string `json:"value"`
 	Expiration uint   `json:"expiration"`
 }
+
+type Stats struct {
+	Count uint64 `json:"count"`
+	Size  uint64 `json:"size"`
+}
+
+type Collection struct {
+	Id          string    `json:"id"`
+	Name        string    `json:"name"`
+	TeamId      string    `json:"teamId"`
+	ActorId     string    `json:"actorId"`
+	RunId       string    `json:"runId"`
+	Description string    `json:"description"`
+	CreatedAt   time.Time `json:"createdAt"`
+	UpdatedAt   time.Time `json:"updatedAt"`
+	Dimension   uint32    `json:"dimension"`
+	Metric      string    `json:"metric"`
+	Stats       Stats     `json:"stats"`
+}
+
+type Doc struct {
+	ID           string             `json:"id"`
+	Vector       []float64          `json:"vector"`
+	Content      string             `json:"content"`
+	SparseVector map[string]float64 `json:"sparse_vector"`
+	Score        float64            `json:"score"`
+}
+
+type ListCollectionsRequest struct {
+	ActorId  *string `json:"actorId,omitempty"`
+	RunId    *string `json:"runId,omitempty"`
+	Page     int64   `json:"page,omitempty"`
+	PageSize int64   `json:"pageSize,omitempty"`
+	Desc     bool    `json:"desc,omitempty"`
+}
+
+type ListCollectionsResponse struct {
+	Items     []Collection `json:"items"`
+	Total     int64        `json:"total"`
+	Page      int64        `json:"page"`
+	PageSize  int64        `json:"pageSize"`
+	TotalPage int64        `json:"totalPage"`
+}
+
+type CreateCollectionRequest struct {
+	ActorId     string `json:"actorId"`
+	Description string `json:"description"`
+	Dimension   int    `json:"dimension"`
+	Name        string `json:"name"`
+	RunId       string `json:"runId"`
+}
+
+type CreateCollectionResponse struct {
+	Coll Collection `json:"coll"`
+}
+
+type UpdateCollectionRequest struct {
+	CollId      string `json:"-"`
+	Description string `json:"description"`
+	Name        string `json:"name"`
+}
+
+type DocOpResult struct {
+	DocOp   string `json:"docOp"`
+	Id      string `json:"id"`
+	Code    int32  `json:"code"`
+	Message string `json:"message"`
+}
+
+type CreateDocsRequest struct {
+	CollId string `json:"-"`
+	Docs   []Doc  `json:"docs"`
+}
+
+type DocOpResponse struct {
+	Output []DocOpResult `json:"output"`
+}
+
+type UpdateDocsRequest CreateDocsRequest
+
+type UpsertVectorDocsParam CreateDocsRequest
+
+type DeleteDocsRequest struct {
+	CollId string   `json:"-"`
+	Ids    []string `json:"ids"`
+}
+
+type QueryVectorRequest struct {
+	CollId         string             `json:"-"`
+	Vector         []float64          `json:"vector"`
+	SparseVector   map[string]float64 `json:"sparseVector"`
+	Topk           int32              `json:"topk"`
+	IncludeVector  bool               `json:"includeVector"`
+	IncludeContent bool               `json:"includeContent"`
+}
+
+type QueryDocsByIdsRequest DeleteDocsRequest

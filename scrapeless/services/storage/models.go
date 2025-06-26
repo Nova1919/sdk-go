@@ -1,5 +1,7 @@
 package storage
 
+import "time"
+
 // Dataset
 
 type ItemsResponse struct {
@@ -172,3 +174,71 @@ type Msg struct {
 }
 
 type GetMsgResponse []*Msg
+
+// Vector
+
+type Stats struct {
+	Count uint64 `json:"count"`
+	Size  uint64 `json:"size"`
+}
+
+type Collection struct {
+	Id          string    `json:"id"`
+	Name        string    `json:"name"`
+	TeamId      string    `json:"teamId"`
+	ActorId     string    `json:"actorId"`
+	RunId       string    `json:"runId"`
+	Description string    `json:"description"`
+	CreatedAt   time.Time `json:"createdAt"`
+	UpdatedAt   time.Time `json:"updatedAt"`
+	Dimension   uint32    `json:"dimension"`
+	Metric      string    `json:"metric"`
+	Stats       Stats     `json:"stats"`
+}
+
+type Doc struct {
+	ID           string             `json:"id"`
+	Vector       []float64          `json:"vector"`
+	Content      string             `json:"content"`
+	SparseVector map[string]float64 `json:"sparse_vector"`
+	Score        float64            `json:"score"`
+}
+
+type ListCollectionsResponse struct {
+	Items     []Collection `json:"items"`
+	Total     int64        `json:"total"`
+	Page      int64        `json:"page"`
+	PageSize  int64        `json:"pageSize"`
+	TotalPage int64        `json:"totalPage"`
+}
+
+type CreateCollectionRequest struct {
+	ActorId     string `json:"actorId"`
+	Description string `json:"description"`
+	Dimension   int    `json:"dimension"`
+	Name        string `json:"name"`
+	RunId       string `json:"runId"`
+}
+
+type CreateCollectionResponse struct {
+	Coll Collection `json:"coll"`
+}
+
+type DocOpResult struct {
+	DocOp   string `json:"docOp"`
+	Id      string `json:"id"`
+	Code    int32  `json:"code"`
+	Message string `json:"message"`
+}
+
+type DocOpResponse struct {
+	Output []DocOpResult `json:"output"`
+}
+
+type QueryVectorParam struct {
+	Vector         []float64          `json:"vector"`
+	SparseVector   map[string]float64 `json:"sparseVector"`
+	Topk           int32              `json:"topk"`
+	IncludeVector  bool               `json:"includeVector"`
+	IncludeContent bool               `json:"includeContent"`
+}

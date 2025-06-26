@@ -11,6 +11,7 @@ type Storage struct {
 	*KV
 	*Object
 	*Queue
+	*Vector
 }
 
 var (
@@ -24,6 +25,7 @@ func init() {
 		KV:      &KV{},
 		Object:  &Object{},
 		Queue:   &Queue{},
+		Vector:  &Vector{},
 	}
 }
 
