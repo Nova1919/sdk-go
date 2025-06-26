@@ -3,10 +3,11 @@ package storage_http
 import (
 	"context"
 	"fmt"
+	"github.com/scrapeless-ai/sdk-go/internal/remote/storage/models"
 	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
 )
 
-func (c *Client) CreateQueue(ctx context.Context, req *CreateQueueRequest) (*CreateQueueResponse, error) {
+func (c *Client) CreateQueue(ctx context.Context, req *models.CreateQueueRequest) (*models.CreateQueueResponse, error) {
 	handel, ok := queueHandel[createQueue]
 	if !ok {
 		return nil, fmt.Errorf("not found handle func")
@@ -16,7 +17,7 @@ func (c *Client) CreateQueue(ctx context.Context, req *CreateQueueRequest) (*Cre
 		return nil, err
 	}
 
-	var resp CreateQueueResponse
+	var resp models.CreateQueueResponse
 	err = handel.Unmarshal(&resp)
 	if err != nil {
 		return nil, err
@@ -24,7 +25,7 @@ func (c *Client) CreateQueue(ctx context.Context, req *CreateQueueRequest) (*Cre
 	return &resp, err
 }
 
-func (c *Client) GetQueue(ctx context.Context, req *GetQueueRequest) (*GetQueueResponse, error) {
+func (c *Client) GetQueue(ctx context.Context, req *models.GetQueueRequest) (*models.GetQueueResponse, error) {
 	handel, ok := queueHandel[getQueue]
 	if !ok {
 		return nil, fmt.Errorf("not found handle func")
@@ -34,7 +35,7 @@ func (c *Client) GetQueue(ctx context.Context, req *GetQueueRequest) (*GetQueueR
 		return nil, err
 	}
 
-	var resp GetQueueResponse
+	var resp models.GetQueueResponse
 	err = handel.Unmarshal(&resp)
 	if err != nil {
 		return nil, err
@@ -42,7 +43,7 @@ func (c *Client) GetQueue(ctx context.Context, req *GetQueueRequest) (*GetQueueR
 	return &resp, err
 }
 
-func (c *Client) GetQueues(ctx context.Context, req *GetQueuesRequest) (*ListQueuesResponse, error) {
+func (c *Client) GetQueues(ctx context.Context, req *models.GetQueuesRequest) (*models.ListQueuesResponse, error) {
 	handel, ok := queueHandel[getQueues]
 	if !ok {
 		return nil, fmt.Errorf("not found handle func")
@@ -52,7 +53,7 @@ func (c *Client) GetQueues(ctx context.Context, req *GetQueuesRequest) (*ListQue
 		return nil, err
 	}
 
-	var resp ListQueuesResponse
+	var resp models.ListQueuesResponse
 	err = handel.Unmarshal(&resp)
 	if err != nil {
 		return nil, err
@@ -60,7 +61,7 @@ func (c *Client) GetQueues(ctx context.Context, req *GetQueuesRequest) (*ListQue
 	return &resp, err
 }
 
-func (c *Client) UpdateQueue(ctx context.Context, req *UpdateQueueRequest) error {
+func (c *Client) UpdateQueue(ctx context.Context, req *models.UpdateQueueRequest) error {
 	handel, ok := queueHandel[updateQueue]
 	if !ok {
 		return fmt.Errorf("not found handle func")
@@ -74,7 +75,7 @@ func (c *Client) UpdateQueue(ctx context.Context, req *UpdateQueueRequest) error
 	return nil
 }
 
-func (c *Client) DelQueue(ctx context.Context, req *DelQueueRequest) error {
+func (c *Client) DelQueue(ctx context.Context, req *models.DelQueueRequest) error {
 	handel, ok := queueHandel[delQueue]
 	if !ok {
 		return fmt.Errorf("not found handle func")
@@ -87,7 +88,7 @@ func (c *Client) DelQueue(ctx context.Context, req *DelQueueRequest) error {
 	return nil
 }
 
-func (c *Client) CreateMsg(ctx context.Context, req *CreateMsgRequest) (*CreateMsgResponse, error) {
+func (c *Client) CreateMsg(ctx context.Context, req *models.CreateMsgRequest) (*models.CreateMsgResponse, error) {
 	handel, ok := queueHandel[createMsg]
 	if !ok {
 		return nil, fmt.Errorf("not found handle func")
@@ -97,7 +98,7 @@ func (c *Client) CreateMsg(ctx context.Context, req *CreateMsgRequest) (*CreateM
 		return nil, err
 	}
 
-	var resp CreateMsgResponse
+	var resp models.CreateMsgResponse
 	err = handel.Unmarshal(&resp)
 	if err != nil {
 		return nil, err
@@ -105,7 +106,7 @@ func (c *Client) CreateMsg(ctx context.Context, req *CreateMsgRequest) (*CreateM
 	return &resp, err
 }
 
-func (c *Client) GetMsg(ctx context.Context, req *GetMsgRequest) (*GetMsgResponse, error) {
+func (c *Client) GetMsg(ctx context.Context, req *models.GetMsgRequest) (*models.GetMsgResponse, error) {
 	handel, ok := queueHandel[getMsg]
 	if !ok {
 		return nil, fmt.Errorf("not found handle func")
@@ -114,7 +115,7 @@ func (c *Client) GetMsg(ctx context.Context, req *GetMsgRequest) (*GetMsgRespons
 	if err != nil {
 		return nil, err
 	}
-	var resp GetMsgResponse
+	var resp models.GetMsgResponse
 	err = handel.Unmarshal(&resp)
 	if err != nil {
 		return nil, err
@@ -122,7 +123,7 @@ func (c *Client) GetMsg(ctx context.Context, req *GetMsgRequest) (*GetMsgRespons
 	return &resp, err
 }
 
-func (c *Client) AckMsg(ctx context.Context, req *AckMsgRequest) error {
+func (c *Client) AckMsg(ctx context.Context, req *models.AckMsgRequest) error {
 	handel, ok := queueHandel[ackMsg]
 	if !ok {
 		return fmt.Errorf("not found handle func")

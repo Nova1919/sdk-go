@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	request2 "github.com/scrapeless-ai/sdk-go/internal/remote/request"
+	"github.com/scrapeless-ai/sdk-go/internal/remote/storage/models"
 	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
 	"net/http"
 )
@@ -55,7 +56,7 @@ func (c *Client) regisHttpHandleFunc() {
 			Url:            fmt.Sprintf("%s/api/v1/queue", c.BaseUrl),
 			NeedMarshalReq: false,
 			FormatURL: func(h *HttpHandle[request2.RespInfo]) (string, error) {
-				req, ok := h.Req.(*GetQueueRequest)
+				req, ok := h.Req.(*models.GetQueueRequest)
 				if !ok {
 					return "", errors.New(fmt.Sprintf("type err need GetQueueRequest, but get %T", h.Req))
 				}
@@ -67,7 +68,7 @@ func (c *Client) regisHttpHandleFunc() {
 			Url:            fmt.Sprintf("%s/api/v1/queue/queues", c.BaseUrl),
 			NeedMarshalReq: true,
 			FormatURL: func(h *HttpHandle[request2.RespInfo]) (string, error) {
-				req, ok := h.Req.(*GetQueuesRequest)
+				req, ok := h.Req.(*models.GetQueuesRequest)
 				if !ok {
 					return "", errors.New(fmt.Sprintf("type err need GetQueueRequest, but get %T", h.Req))
 				}
@@ -79,7 +80,7 @@ func (c *Client) regisHttpHandleFunc() {
 			Url:            fmt.Sprintf("%s/api/v1/queue", c.BaseUrl),
 			NeedMarshalReq: true,
 			FormatURL: func(h *HttpHandle[request2.RespInfo]) (string, error) {
-				req, ok := h.Req.(*UpdateQueueRequest)
+				req, ok := h.Req.(*models.UpdateQueueRequest)
 				if !ok {
 					return "", errors.New(fmt.Sprintf("type err need DelQueueRequest, but get %T", h.Req))
 				}
@@ -90,7 +91,7 @@ func (c *Client) regisHttpHandleFunc() {
 			Method: http.MethodDelete,
 			Url:    fmt.Sprintf("%s/api/v1/queue", c.BaseUrl),
 			FormatURL: func(h *HttpHandle[request2.RespInfo]) (string, error) {
-				req, ok := h.Req.(*DelQueueRequest)
+				req, ok := h.Req.(*models.DelQueueRequest)
 				if !ok {
 					return "", errors.New(fmt.Sprintf("type err need DelQueueRequest, but get %T", h.Req))
 				}
@@ -102,7 +103,7 @@ func (c *Client) regisHttpHandleFunc() {
 			Url:            fmt.Sprintf("%s/api/v1/queue", c.BaseUrl),
 			NeedMarshalReq: true,
 			FormatURL: func(h *HttpHandle[request2.RespInfo]) (string, error) {
-				req, ok := h.Req.(*CreateMsgRequest)
+				req, ok := h.Req.(*models.CreateMsgRequest)
 				if !ok {
 					return "", errors.New(fmt.Sprintf("type err need DelQueueRequest, but get %T", h.Req))
 				}
@@ -113,7 +114,7 @@ func (c *Client) regisHttpHandleFunc() {
 			Method: http.MethodGet,
 			Url:    fmt.Sprintf("%s/api/v1/queue", c.BaseUrl),
 			FormatURL: func(h *HttpHandle[request2.RespInfo]) (string, error) {
-				req, ok := h.Req.(*GetMsgRequest)
+				req, ok := h.Req.(*models.GetMsgRequest)
 				if !ok {
 					return "", errors.New(fmt.Sprintf("type err need DelQueueRequest, but get %T", h.Req))
 				}
@@ -125,7 +126,7 @@ func (c *Client) regisHttpHandleFunc() {
 			Url:            fmt.Sprintf("%s/api/v1/queue", c.BaseUrl),
 			NeedMarshalReq: true,
 			FormatURL: func(h *HttpHandle[request2.RespInfo]) (string, error) {
-				req, ok := h.Req.(*AckMsgRequest)
+				req, ok := h.Req.(*models.AckMsgRequest)
 				if !ok {
 					return "", errors.New(fmt.Sprintf("type err need DelQueueRequest, but get %T", h.Req))
 				}

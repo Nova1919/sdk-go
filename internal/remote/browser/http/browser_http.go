@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/scrapeless-ai/sdk-go/internal/remote/browser"
+	"github.com/scrapeless-ai/sdk-go/internal/remote/browser/models"
 	request2 "github.com/scrapeless-ai/sdk-go/internal/remote/request"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -12,7 +12,7 @@ import (
 	"net/url"
 )
 
-func (c *Client) ScrapingBrowserCreate(ctx context.Context, req *browser.CreateBrowserRequest) (*browser.CreateBrowserResponse, error) {
+func (c *Client) ScrapingBrowserCreate(ctx context.Context, req *models.CreateBrowserRequest) (*models.CreateBrowserResponse, error) {
 	value := &url.Values{}
 	value.Set("token", req.ApiKey)
 	value.Set("proxy_country", req.Proxy.Country)
@@ -36,7 +36,7 @@ func (c *Client) ScrapingBrowserCreate(ctx context.Context, req *browser.CreateB
 		return nil, err
 	}
 
-	var task *browser.CreateBrowserResponse
+	var task *models.CreateBrowserResponse
 	err = json.Unmarshal([]byte(request), &task)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "create task failed, unmarshal response body error")

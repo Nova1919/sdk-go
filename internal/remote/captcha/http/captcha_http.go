@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/scrapeless-ai/sdk-go/internal/remote/captcha"
+	"github.com/scrapeless-ai/sdk-go/internal/remote/captcha/models"
 	request2 "github.com/scrapeless-ai/sdk-go/internal/remote/request"
 	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
 	"github.com/tidwall/gjson"
@@ -14,7 +14,7 @@ import (
 	"time"
 )
 
-func (c *Client) CaptchaSolverCreateTask(ctx context.Context, req *captcha.CreateTaskRequest) (string, error) {
+func (c *Client) CaptchaSolverCreateTask(ctx context.Context, req *models.CreateTaskRequest) (string, error) {
 	reqBodyM := map[string]any{
 		"service": req.Actor,
 		"input":   req.Input,
@@ -24,6 +24,7 @@ func (c *Client) CaptchaSolverCreateTask(ctx context.Context, req *captcha.Creat
 	if err != nil {
 		return "", err
 	}
+	fmt.Println(fmt.Sprintf("%s/api/v1/createTask", c.BaseUrl))
 	body, err := request2.Request(ctx, request2.ReqInfo{
 		Method: http.MethodPost,
 		Url:    fmt.Sprintf("%s/api/v1/createTask", c.BaseUrl),
@@ -45,7 +46,7 @@ func (c *Client) CaptchaSolverCreateTask(ctx context.Context, req *captcha.Creat
 
 }
 
-func (c *Client) CaptchaSolverGetTaskResult(ctx context.Context, req *captcha.GetTaskResultRequest) (map[string]any, error) {
+func (c *Client) CaptchaSolverGetTaskResult(ctx context.Context, req *models.GetTaskResultRequest) (map[string]any, error) {
 	body, err := request2.Request(ctx, request2.ReqInfo{
 		Method: http.MethodGet,
 		Url:    fmt.Sprintf("%s/api/v1/getTaskResult/%s", c.BaseUrl, req.TaskId),
@@ -69,7 +70,7 @@ func (c *Client) CaptchaSolverGetTaskResult(ctx context.Context, req *captcha.Ge
 	return solution, nil
 }
 
-func (c *Client) CaptchaSolverSolverTask(ctx context.Context, req *captcha.CreateTaskRequest) (map[string]any, error) {
+func (c *Client) CaptchaSolverSolverTask(ctx context.Context, req *models.CreateTaskRequest) (map[string]any, error) {
 	task, err := c.CaptchaSolverCreateTask(ctx, req)
 	if err != nil {
 		return nil, err
@@ -79,7 +80,7 @@ func (c *Client) CaptchaSolverSolverTask(ctx context.Context, req *captcha.Creat
 		case <-ctx.Done():
 			return nil, status.Errorf(codes.DeadlineExceeded, ctx.Err().Error())
 		case <-time.After(time.Second):
-			result, err := c.CaptchaSolverGetTaskResult(ctx, &captcha.GetTaskResultRequest{TaskId: task, ApiKey: req.ApiKey})
+			result, err := c.CaptchaSolverGetTaskResult(ctx, &models.GetTaskResultRequest{TaskId: task, ApiKey: req.ApiKey})
 			if err != nil {
 				return nil, status.Errorf(codes.Aborted, err.Error())
 			}

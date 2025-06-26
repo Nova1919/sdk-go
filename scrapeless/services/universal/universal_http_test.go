@@ -6,7 +6,7 @@ import (
 )
 
 func TestUniversalHttp_CreateTask(t *testing.T) {
-	universal := New()
+	universal := New("http")
 	task, err := universal.CreateTask(context.Background(), UniversalTaskRequest{
 		Actor: ScraperUniversal,
 		Input: map[string]any{

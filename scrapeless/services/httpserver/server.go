@@ -28,13 +28,13 @@ type Server struct {
 	handler http.Handler
 }
 
-func New(mode ...ServerMode) Server {
+func New(mode ...ServerMode) *Server {
 	if len(mode) > 0 {
 		gin.SetMode(string(mode[0]))
 	} else {
 		gin.SetMode(string(ReleaseMode))
 	}
-	return Server{
+	return &Server{
 		handler: gin.Default(),
 	}
 }

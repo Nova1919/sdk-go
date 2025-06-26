@@ -2,15 +2,19 @@ package env
 
 import (
 	"fmt"
+	"os"
+	"path"
 	"path/filepath"
 	"reflect"
 	"runtime"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
 func init() {
+	initLog()
 	// Set default values
 	setDefaults()
 
@@ -47,6 +51,23 @@ func init() {
 	log.Infof("scrapeless: conf: %+v", Env)
 }
 
+func initLog() {
+	log.SetOutput(os.Stdout)
+	log.SetFormatter(&log.TextFormatter{
+		FullTimestamp: true,
+		DisableColors: false,
+		ForceColors:   true,
+		CallerPrettyfier: func(f *runtime.Frame) (function string, file string) {
+			filename := path.Base(f.File)
+			fc := path.Base(f.Function)
+			return fmt.Sprintf("%s()", fc), fmt.Sprintf(" - %s:%d", filename, f.Line)
+		},
+		TimestampFormat: time.DateTime,
+	})
+	log.SetReportCaller(true)
+	log.SetLevel(log.TraceLevel)
+}
+
 func setDefaults() {
 	viper.SetDefault("SCRAPELESS_PROXY_COUNTRY", "ANY")
 	//viper.SetDefault("SCRAPELESS_BROWSER_API_HOST", "https://api.scrapeless.com")
@@ -57,6 +78,7 @@ func setDefaults() {
 	viper.SetDefault("SCRAPELESS_ACTOR_API_URL", "https://actor.scrapeless.com")
 	viper.SetDefault("SCRAPELESS_STORAGE_API_URL", "https://storage.scrapeless.com")
 	viper.SetDefault("SCRAPELESS_BROWSER_API_URL", "https://browser.scrapeless.com")
+	viper.SetDefault("SCRAPELESS_CRAWL_API_URL", "https://api.scrapeless.com")
 }
 
 func bindEnvs(v *viper.Viper, iface any) error {
