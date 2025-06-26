@@ -127,21 +127,21 @@ const (
 )
 
 type CrawlParams struct {
-	Url                    string              `json:"url"`
-	IncludePaths           []string            `json:"includePaths"`
-	ExcludePaths           []string            `json:"excludePaths"`
-	MaxDepth               int                 `json:"maxDepth"`
-	MaxDiscoveryDepth      int                 `json:"maxDiscoveryDepth"`
-	Limit                  int                 `json:"limit,omitempty"`
-	AllowBackwardLinks     bool                `json:"allowBackwardLinks"`
-	AllowExternalLinks     bool                `json:"allowExternalLinks"`
-	IgnoreSitemap          bool                `json:"ignoreSitemap"`
-	DeduplicateSimilarURLs bool                `json:"deduplicateSimilarURLs"`
-	IgnoreQueryParameters  bool                `json:"ignoreQueryParameters"`
-	RegexOnFullURL         bool                `json:"regexOnFullURL"`
-	Delay                  int                 `json:"delay"`
-	ScrapeOptions          *CrawlScrapeOptions `json:"scrapeOptions"`
-	BrowserOptions         *ICreateBrowser     `json:"browserOptions"`
+	Url                    string             `json:"url,omitempty"`
+	IncludePaths           []string           `json:"includePaths,omitempty"`
+	ExcludePaths           []string           `json:"excludePaths,omitempty"`
+	MaxDepth               int                `json:"maxDepth,omitempty"`
+	MaxDiscoveryDepth      int                `json:"maxDiscoveryDepth,omitempty"`
+	Limit                  int                `json:"limit,omitempty"`
+	AllowBackwardLinks     bool               `json:"allowBackwardLinks,omitempty"`
+	AllowExternalLinks     bool               `json:"allowExternalLinks,omitempty"`
+	IgnoreSitemap          bool               `json:"ignoreSitemap,omitempty"`
+	DeduplicateSimilarURLs bool               `json:"deduplicateSimilarURLs,omitempty"`
+	IgnoreQueryParameters  bool               `json:"ignoreQueryParameters,omitempty"`
+	RegexOnFullURL         bool               `json:"regexOnFullURL,omitempty"`
+	Delay                  int                `json:"delay,omitempty"`
+	ScrapeOptions          CrawlScrapeOptions `json:"scrapeOptions,omitempty"`
+	BrowserOptions         ICreateBrowser     `json:"browserOptions,omitempty"`
 }
 type CrawlScrapeOptions struct {
 	Formats         []string          `json:"formats,omitempty"`

@@ -14,12 +14,14 @@ import (
 // ScrapeUrl scrape a single url
 func (c *Client) ScrapeUrl(ctx context.Context, req *models.ScrapeOptions) (id string, err error) {
 	body, _ := json.Marshal(req)
+	fmt.Println(string(body))
 	response, err := request2.Request(ctx, request2.ReqInfo{
 		Method:  http.MethodPost,
 		Url:     fmt.Sprintf("%s/api/v1/crawler/scrape", c.BaseUrl),
 		Body:    string(body),
 		Headers: map[string]string{},
 	})
+	fmt.Println(response)
 	if err != nil {
 		return "", err
 	}
@@ -104,12 +106,14 @@ func (c *Client) CheckBatchScrapeStatus(ctx context.Context, id string) (scrapeS
 
 func (c *Client) CrawlUrl(ctx context.Context, req *models.CrawlParams) (id string, err error) {
 	body, _ := json.Marshal(req)
+	fmt.Println(string(body))
 	response, err := request2.Request(ctx, request2.ReqInfo{
 		Method:  http.MethodPost,
 		Url:     fmt.Sprintf("%s/api/v1/crawler/crawl", c.BaseUrl),
 		Body:    string(body),
 		Headers: map[string]string{},
 	})
+	fmt.Println(response)
 	if err != nil {
 		return "", err
 	}
@@ -126,6 +130,7 @@ func (c *Client) CheckCrawlStatus(ctx context.Context, id string) (crawlStatusRe
 		Url:     fmt.Sprintf("%s/api/v1/crawler/crawl/%s", c.BaseUrl, id),
 		Headers: map[string]string{},
 	})
+	fmt.Println("body:", response)
 	if err != nil {
 		return nil, err
 	}

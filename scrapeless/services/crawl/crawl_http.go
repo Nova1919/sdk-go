@@ -2,21 +2,46 @@ package crawl
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"github.com/scrapeless-ai/sdk-go/env"
 	"github.com/scrapeless-ai/sdk-go/internal/remote/crawl"
 	"github.com/scrapeless-ai/sdk-go/internal/remote/crawl/models"
 	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
+	"time"
 )
 
 type Crawl struct{}
 
 func New() Crawl {
 	log.Info("Internal Crawl init")
-	crawl.NewClient("http", env.Env.ScrapelessBaseApiUrl)
+	crawl.NewClient("http", env.Env.ScrapelessCrawlApiUrl)
 	return Crawl{}
 }
 
-func (c *Crawl) ScrapeUrl(ctx context.Context, url string, crawlScrapeOptions ScrapeOptions) (id string, err error) {
+func (c *Crawl) ScrapeUrl(ctx context.Context, url string, crawlScrapeOptions ScrapeOptions) (scrapeStatusResponse *ScrapeStatusResponse, err error) {
+	id, err := c.AsyncScrapeUrl(ctx, url, crawlScrapeOptions)
+	if err != nil {
+		return nil, err
+	}
+	for {
+		scrapeStatusResponse, err = c.CheckScrapeStatus(ctx, id)
+		if err != nil {
+			return nil, err
+		}
+		switch scrapeStatusResponse.Status {
+		case StatusCompleted:
+			return scrapeStatusResponse, nil
+		case StatusActive, StatusPaused, StatusPending, StatusQueued, StatusWaiting, StatusScraping:
+			log.Info("Scraping status: ", scrapeStatusResponse.Status)
+			time.Sleep(time.Millisecond * 400)
+		default:
+			return nil, errors.New(fmt.Sprintf("Crawl job failed or was stopped. Status: %s", scrapeStatusResponse.Status))
+		}
+	}
+}
+
+func (c *Crawl) AsyncScrapeUrl(ctx context.Context, url string, crawlScrapeOptions ScrapeOptions) (id string, err error) {
 	id, err = crawl.ClientInterface.ScrapeUrl(ctx, &models.ScrapeOptions{
 		Url:             url,
 		Formats:         crawlScrapeOptions.Formats,
@@ -43,7 +68,7 @@ func (c *Crawl) CheckScrapeStatus(ctx context.Context, id string) (scrapeStatusR
 		return nil, err
 	}
 	return &ScrapeStatusResponse{
-		Status: ScrapeStatus(response.Status),
+		Status: Status(response.Status),
 		Data:   *c.internalScrapingCrawlDocumentFormat(&response.Data),
 	}, nil
 }
@@ -129,7 +154,7 @@ func (c *Crawl) internalScrapeStatusResponseMultipleFormat(in *models.ScrapeStat
 	multiple := &ScrapeStatusResponseMultiple{
 		Completed: in.Completed,
 		Total:     in.Total,
-		Status:    ScrapeStatus(in.Status),
+		Status:    Status(in.Status),
 	}
 	for _, datum := range in.Data {
 		multiple.Data = append(multiple.Data, *c.internalScrapingCrawlDocumentFormat(&datum))
@@ -137,7 +162,7 @@ func (c *Crawl) internalScrapeStatusResponseMultipleFormat(in *models.ScrapeStat
 	return multiple
 }
 
-func (c *Crawl) CrawlUrl(ctx context.Context, url string, params CrawlParams) (id string, err error) {
+func (c *Crawl) AsyncCrawlUrl(ctx context.Context, url string, params CrawlParams) (id string, err error) {
 	crawlUrl, err := crawl.ClientInterface.CrawlUrl(ctx, &models.CrawlParams{
 		Url:                    url,
 		IncludePaths:           params.IncludePaths,
@@ -152,7 +177,7 @@ func (c *Crawl) CrawlUrl(ctx context.Context, url string, params CrawlParams) (i
 		IgnoreQueryParameters:  params.IgnoreQueryParameters,
 		RegexOnFullURL:         params.RegexOnFullURL,
 		Delay:                  params.Delay,
-		ScrapeOptions: &models.CrawlScrapeOptions{
+		ScrapeOptions: models.CrawlScrapeOptions{
 			Formats:         params.ScrapeOptions.Formats,
 			Headers:         params.ScrapeOptions.Headers,
 			IncludeTags:     params.ScrapeOptions.IncludeTags,
@@ -161,7 +186,7 @@ func (c *Crawl) CrawlUrl(ctx context.Context, url string, params CrawlParams) (i
 			WaitFor:         params.ScrapeOptions.WaitFor,
 			Timeout:         params.ScrapeOptions.Timeout,
 		},
-		BrowserOptions: &models.ICreateBrowser{
+		BrowserOptions: models.ICreateBrowser{
 			SessionName:      params.BrowserOptions.SessionName,
 			SessionTTL:       params.BrowserOptions.SessionTTL,
 			SessionRecording: params.BrowserOptions.SessionRecording,
@@ -175,6 +200,29 @@ func (c *Crawl) CrawlUrl(ctx context.Context, url string, params CrawlParams) (i
 	}
 	return crawlUrl, nil
 }
+
+func (c *Crawl) CrawlUrl(ctx context.Context, url string, params CrawlParams) (crawlStatusResponse *CrawlStatusResponse, err error) {
+	id, err := c.AsyncCrawlUrl(ctx, url, params)
+	if err != nil {
+		return nil, err
+	}
+	for {
+		crawlStatusResponse, err = c.CheckCrawlStatus(ctx, id)
+		if err != nil {
+			return nil, err
+		}
+		switch crawlStatusResponse.Status {
+		case StatusCompleted:
+			return crawlStatusResponse, nil
+		case StatusActive, StatusPaused, StatusPending, StatusQueued, StatusWaiting, StatusScraping:
+			log.Info("Scraping status: ", crawlStatusResponse.Status)
+			time.Sleep(time.Millisecond * 400)
+		default:
+			return nil, errors.New(fmt.Sprintf("Crawl job failed or was stopped. Status: %s", crawlStatusResponse.Status))
+		}
+	}
+
+}
 func (c *Crawl) CheckCrawlStatus(ctx context.Context, id string) (crawlStatusResponse *CrawlStatusResponse, err error) {
 	response, err := crawl.ClientInterface.CheckCrawlStatus(ctx, id)
 	if err != nil {
@@ -186,7 +234,7 @@ func (c *Crawl) CheckCrawlStatus(ctx context.Context, id string) (crawlStatusRes
 		scrapingCrawlDocuments = append(scrapingCrawlDocuments, *format)
 	}
 	return &CrawlStatusResponse{
-		Status: CrawlStatus(response.Status),
+		Status: Status(response.Status),
 		Data:   scrapingCrawlDocuments,
 	}, nil
 }

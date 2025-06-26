@@ -32,13 +32,18 @@ type ScrapeResponse struct {
 	InvalidURLs []string `json:"success"`
 }
 
-type ScrapeStatus string
+type Status string
 
 const (
-	StatusScraping  ScrapeStatus = "scraping"
-	StatusCompleted ScrapeStatus = "completed"
-	StatusFailed    ScrapeStatus = "failed"
-	StatusCancelled ScrapeStatus = "cancelled"
+	StatusScraping  Status = "scraping"
+	StatusCompleted Status = "completed"
+	StatusFailed    Status = "failed"
+	StatusCancelled Status = "cancelled"
+	StatusActive    Status = "active"
+	StatusPaused    Status = "paused"
+	StatusPending   Status = "pending"
+	StatusQueued    Status = "queued"
+	StatusWaiting   Status = "waiting"
 )
 
 type ScrapingCrawlDocumentMetadata struct {
@@ -90,14 +95,14 @@ type ScrapingCrawlDocument struct {
 }
 
 type ScrapeStatusResponse struct {
-	Status ScrapeStatus          `json:"status"`
-	Data   ScrapingCrawlDocument `json:"data"`
+	Status Status                `json:"status,omitempty"`
+	Data   ScrapingCrawlDocument `json:"data,omitempty"`
 }
 
 type ScrapeStatusResponseMultiple struct {
 	Total     int                     `json:"total"`
 	Completed int                     `json:"completed"`
-	Status    ScrapeStatus            `json:"status"`
+	Status    Status                  `json:"status"`
 	Data      []ScrapingCrawlDocument `json:"data"`
 }
 
@@ -115,30 +120,21 @@ type ScrapeParams struct {
 	BrowserOptions *ICreateBrowser `json:"browserOptions,omitempty"`
 }
 
-type BatchScrapeStatus string
-
-const (
-	BatchStatusScraping  BatchScrapeStatus = "scraping"
-	BatchStatusCompleted BatchScrapeStatus = "completed"
-	BatchStatusFailed    BatchScrapeStatus = "failed"
-	BatchStatusCancelled BatchScrapeStatus = "cancelled"
-)
-
 type CrawlParams struct {
-	IncludePaths           []string        `json:"includePaths"`
-	ExcludePaths           []string        `json:"excludePaths"`
-	MaxDepth               int             `json:"maxDepth"`
-	MaxDiscoveryDepth      int             `json:"maxDiscoveryDepth"`
-	Limit                  int             `json:"limit,omitempty"`
-	AllowBackwardLinks     bool            `json:"allowBackwardLinks"`
-	AllowExternalLinks     bool            `json:"allowExternalLinks"`
-	IgnoreSitemap          bool            `json:"ignoreSitemap"`
-	DeduplicateSimilarURLs bool            `json:"deduplicateSimilarURLs"`
-	IgnoreQueryParameters  bool            `json:"ignoreQueryParameters"`
-	RegexOnFullURL         bool            `json:"regexOnFullURL"`
-	Delay                  int             `json:"delay"`
-	ScrapeOptions          *ScrapeOptions  `json:"scrapeOptions"`
-	BrowserOptions         *ICreateBrowser `json:"browserOptions"`
+	IncludePaths           []string       `json:"includePaths,omitempty"`
+	ExcludePaths           []string       `json:"excludePaths,omitempty"`
+	MaxDepth               int            `json:"maxDepth,omitempty"`
+	MaxDiscoveryDepth      int            `json:"maxDiscoveryDepth,omitempty"`
+	Limit                  int            `json:"limit,omitempty,omitempty"`
+	AllowBackwardLinks     bool           `json:"allowBackwardLinks,omitempty"`
+	AllowExternalLinks     bool           `json:"allowExternalLinks,omitempty"`
+	IgnoreSitemap          bool           `json:"ignoreSitemap,omitempty"`
+	DeduplicateSimilarURLs bool           `json:"deduplicateSimilarURLs,omitempty"`
+	IgnoreQueryParameters  bool           `json:"ignoreQueryParameters,omitempty"`
+	RegexOnFullURL         bool           `json:"regexOnFullURL,omitempty"`
+	Delay                  int            `json:"delay,omitempty"`
+	ScrapeOptions          ScrapeOptions  `json:"scrapeOptions,omitempty"`
+	BrowserOptions         ICreateBrowser `json:"browserOptions,omitempty"`
 }
 type CrawlScrapeOptions struct {
 	Formats         []string          `json:"formats,omitempty"`
@@ -156,17 +152,8 @@ type CrawlResponse struct {
 	Error   string `json:"error,omitempty"`
 }
 
-type CrawlStatus string
-
-const (
-	CrawlStatusScraping  CrawlStatus = "scraping"
-	CrawlStatusCompleted CrawlStatus = "completed"
-	CrawlStatusFailed    CrawlStatus = "failed"
-	CrawlStatusCancelled CrawlStatus = "cancelled"
-)
-
 type CrawlStatusResponse struct {
-	Status    CrawlStatus             `json:"status"`
+	Status    Status                  `json:"status"`
 	Completed int                     `json:"completed"`
 	Total     int                     `json:"total"`
 	Data      []ScrapingCrawlDocument `json:"data"`
