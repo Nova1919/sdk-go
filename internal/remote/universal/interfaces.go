@@ -2,9 +2,9 @@ package universal
 
 import (
 	"context"
-	universal_http "github.com/scrapeless-ai/sdk-go/internal/remote/universal/http"
-	"github.com/scrapeless-ai/sdk-go/internal/remote/universal/models"
-	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
+	universal_http "github.com/smash-hq/sdk-go/internal/remote/universal/http"
+	"github.com/smash-hq/sdk-go/internal/remote/universal/models"
+	"github.com/smash-hq/sdk-go/scrapeless/log"
 )
 
 type Browser interface {

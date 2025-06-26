@@ -1,4 +1,4 @@
-module github.com/scrapeless-ai/sdk-go
+module github.com/smash-hq/sdk-go
 
 go 1.24.0
 

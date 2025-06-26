@@ -24,7 +24,7 @@ type config struct {
 	Actor actorEnv `mapstructure:",squash"`
 	Log   logEnv   `mapstructure:",squash"`
 
-	IsOnline bool `mapstructure:"IS_LOCAL"`
+	IsOnline bool `mapstructure:"SCRAPELESS_IS_ONLINE"`
 }
 
 type actorEnv struct {
@@ -49,6 +49,16 @@ type logEnv struct {
 }
 
 func (c *config) Validate() error {
+	defaultID := "default"
+	if !c.IsOnline {
+		c.Actor.TeamId = defaultID
+		c.Actor.ActorId = defaultID
+		c.Actor.RunId = defaultID
+		c.Actor.DatasetId = defaultID
+		c.Actor.QueueId = defaultID
+		c.Actor.KvNamespaceId = defaultID
+		c.Actor.BucketId = defaultID
+	}
 	if c.Actor.TeamId == "" {
 		return errors.New("invalid env param team_Id")
 	}

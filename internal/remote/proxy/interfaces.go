@@ -2,9 +2,9 @@ package proxy
 
 import (
 	"context"
-	proxy_http "github.com/scrapeless-ai/sdk-go/internal/remote/proxy/http"
-	"github.com/scrapeless-ai/sdk-go/internal/remote/proxy/models"
-	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
+	proxy_http "github.com/smash-hq/sdk-go/internal/remote/proxy/http"
+	"github.com/smash-hq/sdk-go/internal/remote/proxy/models"
+	"github.com/smash-hq/sdk-go/scrapeless/log"
 )
 
 type Proxy interface {

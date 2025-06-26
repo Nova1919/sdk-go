@@ -2,9 +2,9 @@ package deepserp
 
 import (
 	"context"
-	deepserp_http "github.com/scrapeless-ai/sdk-go/internal/remote/deepserp/http"
-	"github.com/scrapeless-ai/sdk-go/internal/remote/deepserp/models"
-	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
+	deepserp_http "github.com/smash-hq/sdk-go/internal/remote/deepserp/http"
+	"github.com/smash-hq/sdk-go/internal/remote/deepserp/models"
+	"github.com/smash-hq/sdk-go/scrapeless/log"
 )
 
 type DeepSerp interface {

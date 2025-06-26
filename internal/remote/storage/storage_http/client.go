@@ -1,7 +1,7 @@
 package storage_http
 
 import (
-	"github.com/scrapeless-ai/sdk-go/env"
+	"github.com/smash-hq/sdk-go/env"
 	"google.golang.org/grpc"
 	"net/http"
 )

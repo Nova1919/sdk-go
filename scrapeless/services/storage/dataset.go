@@ -2,11 +2,11 @@ package storage
 
 import (
 	"context"
-	"github.com/scrapeless-ai/sdk-go/env"
-	"github.com/scrapeless-ai/sdk-go/internal/code"
-	"github.com/scrapeless-ai/sdk-go/internal/remote/storage"
-	"github.com/scrapeless-ai/sdk-go/internal/remote/storage/models"
-	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
+	"github.com/smash-hq/sdk-go/env"
+	"github.com/smash-hq/sdk-go/internal/code"
+	"github.com/smash-hq/sdk-go/internal/remote/storage"
+	"github.com/smash-hq/sdk-go/internal/remote/storage/models"
+	"github.com/smash-hq/sdk-go/scrapeless/log"
 )
 
 type Dataset struct{}
@@ -28,8 +28,8 @@ func (s *Dataset) ListDatasets(ctx context.Context, page int64, pageSize int64, 
 	datasets, err := storage.ClientInterface.ListDatasets(ctx, &models.ListDatasetsRequest{
 		ActorId:  &env.GetActorEnv().ActorId,
 		RunId:    &env.GetActorEnv().RunId,
-		Page:     int(page),
-		PageSize: int(pageSize),
+		Page:     page,
+		PageSize: pageSize,
 		Desc:     desc,
 	})
 	if err != nil {
@@ -39,19 +39,18 @@ func (s *Dataset) ListDatasets(ctx context.Context, page int64, pageSize int64, 
 	var itemArray []DatasetInfo
 	for _, item := range datasets.Items {
 		itemArray = append(itemArray, DatasetInfo{
-			Id:         item.Id,
-			Name:       item.Name,
-			ActorId:    item.ActorId,
-			RunId:      item.RunId,
-			Fields:     item.Fields,
-			CreatedAt:  item.CreatedAt,
-			UpdatedAt:  item.UpdatedAt,
-			AccessedAt: item.AccessedAt,
+			Id:        item.Id,
+			Name:      item.Name,
+			ActorId:   item.ActorId,
+			RunId:     item.RunId,
+			Fields:    item.Fields,
+			CreatedAt: item.CreatedAt,
+			UpdatedAt: item.UpdatedAt,
 		})
 	}
 	return &ListDatasetsResponse{
 		Items: itemArray,
-		Total: int64(datasets.Total),
+		Total: datasets.Total,
 	}, nil
 }
 

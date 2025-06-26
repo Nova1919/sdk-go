@@ -5,15 +5,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/google/uuid"
-	"github.com/scrapeless-ai/sdk-go/internal/remote/storage/models"
-	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
+	"github.com/smash-hq/sdk-go/internal/remote/storage/models"
+	"github.com/smash-hq/sdk-go/scrapeless/log"
 	"os"
 	"path/filepath"
 	"sort"
 	"time"
 )
 
-func (d *LocalClient) ListDatasets(ctx context.Context, req *models.ListDatasetsRequest) (*models.ListDatasetsResponse, error) {
+func (c *LocalClient) ListDatasets(ctx context.Context, req *models.ListDatasetsRequest) (*models.ListDatasetsResponse, error) {
 	dirPath := filepath.Join(storageDir, datasetDir)
 
 	entries, err := os.ReadDir(dirPath)
@@ -79,7 +79,7 @@ func (d *LocalClient) ListDatasets(ctx context.Context, req *models.ListDatasets
 	}, nil
 }
 
-func (d *LocalClient) CreateDataset(ctx context.Context, req *models.CreateDatasetRequest) (*models.Dataset, error) {
+func (c *LocalClient) CreateDataset(ctx context.Context, req *models.CreateDatasetRequest) (*models.Dataset, error) {
 	newUUID, err := uuid.NewUUID()
 	var rep = &models.Dataset{}
 	rep.Name = req.Name
@@ -99,7 +99,7 @@ func (d *LocalClient) CreateDataset(ctx context.Context, req *models.CreateDatas
 	return rep, nil
 }
 
-func (d *LocalClient) UpdateDataset(ctx context.Context, datasetID string, name string) (ok bool, err error) {
+func (c *LocalClient) UpdateDataset(ctx context.Context, datasetID string, name string) (ok bool, err error) {
 	_, err = updateMetadata(datasetID, name)
 	if err != nil {
 		return false, fmt.Errorf("dataset update failed, cause: %v", err)
@@ -107,7 +107,7 @@ func (d *LocalClient) UpdateDataset(ctx context.Context, datasetID string, name 
 	return true, nil
 }
 
-func (d *LocalClient) DelDataset(ctx context.Context, datasetID string) (bool, error) {
+func (c *LocalClient) DelDataset(ctx context.Context, datasetID string) (bool, error) {
 	absPath := filepath.Join(storageDir, datasetDir, datasetID)
 	err := os.RemoveAll(absPath)
 	if err != nil {
@@ -116,9 +116,11 @@ func (d *LocalClient) DelDataset(ctx context.Context, datasetID string) (bool, e
 	return true, nil
 }
 
-func (d *LocalClient) GetDataset(ctx context.Context, req *models.GetDataset) (*models.DatasetItem, error) {
+func (c *LocalClient) GetDataset(ctx context.Context, req *models.GetDataset) (*models.DatasetItem, error) {
 	dirPath := filepath.Join(storageDir, datasetDir, req.DatasetId)
-
+	if isDirExists(dirPath) {
+		return nil, ErrResourceNotFound
+	}
 	entries, err := os.ReadDir(dirPath)
 	if err != nil {
 		return nil, fmt.Errorf("read dir failed: %v", err)
@@ -182,8 +184,11 @@ func (d *LocalClient) GetDataset(ctx context.Context, req *models.GetDataset) (*
 	}, nil
 }
 
-func (d *LocalClient) AddDatasetItem(ctx context.Context, datasetId string, items []map[string]any) (bool, error) {
+func (c *LocalClient) AddDatasetItem(ctx context.Context, datasetId string, items []map[string]any) (bool, error) {
 	dirPath := filepath.Join(storageDir, datasetDir, datasetId)
+	if !isDirExists(dirPath) {
+		return false, ErrResourceNotFound
+	}
 	meta, err := updateMetadata(datasetId, "default")
 	if err != nil {
 		return false, err
@@ -214,7 +219,6 @@ func (d *LocalClient) AddDatasetItem(ctx context.Context, datasetId string, item
 		}
 	}
 	meta.UpdatedAt = time.Now().Format(time.RFC3339Nano)
-	meta.AccessedAt = time.Now().Format(time.RFC3339Nano)
 	meta.Stats = models.DatasetStats{
 		Count: uint64(len(items)),
 	}

@@ -3,11 +3,11 @@ package storage
 import (
 	"context"
 	"errors"
-	"github.com/scrapeless-ai/sdk-go/env"
-	"github.com/scrapeless-ai/sdk-go/internal/code"
-	"github.com/scrapeless-ai/sdk-go/internal/remote/storage"
-	"github.com/scrapeless-ai/sdk-go/internal/remote/storage/models"
-	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
+	"github.com/smash-hq/sdk-go/env"
+	"github.com/smash-hq/sdk-go/internal/code"
+	"github.com/smash-hq/sdk-go/internal/remote/storage"
+	"github.com/smash-hq/sdk-go/internal/remote/storage/models"
+	"github.com/smash-hq/sdk-go/scrapeless/log"
 	"path/filepath"
 	"strings"
 )
@@ -110,14 +110,14 @@ func (s *Object) GetBucket(ctx context.Context, bucketId string) (*Bucket, error
 	return b, nil
 }
 
-// List lists objects with fuzzy filename search and pagination support.
+// ListObjects lists objects with fuzzy filename search and pagination support.
 // Parameters:
 //
 //	ctx: The context for the request.
 //	fuzzyFileName: Search pattern for matching object filenames.
 //	page: Current page number, defaults to 1 if <1.
 //	pageSize: Number of objects per page, defaults to 10 if <10.
-func (s *Object) List(ctx context.Context, bucketId string, fuzzyFileName string, page int64, pageSize int64) (*ListObjectsResponse, error) {
+func (s *Object) ListObjects(ctx context.Context, bucketId string, fuzzyFileName string, page int64, pageSize int64) (*ListObjectsResponse, error) {
 	if page < 1 {
 		page = 1
 	}
@@ -156,13 +156,13 @@ func (s *Object) List(ctx context.Context, bucketId string, fuzzyFileName string
 	}, nil
 }
 
-// Get retrieves an object by its ID using HTTP.
+// GetObject retrieves an object by its ID using HTTP.
 //
 // Parameters:
 //
 //	ctx: The context for the request.
 //	objectId: The unique identifier of the object to retrieve.
-func (s *Object) Get(ctx context.Context, bucketId string, objectId string) ([]byte, error) {
+func (s *Object) GetObject(ctx context.Context, bucketId string, objectId string) ([]byte, error) {
 	object, err := storage.ClientInterface.GetObject(ctx, &models.ObjectRequest{
 		BucketId: bucketId,
 		ObjectId: objectId,
@@ -174,14 +174,14 @@ func (s *Object) Get(ctx context.Context, bucketId string, objectId string) ([]b
 	return object, nil
 }
 
-// Put uploads the provided data to the object storage with the given filename.
+// PutObject uploads the provided data to the object storage with the given filename.
 //
 // Parameters:
 //
 //	ctx: The context for the request.
 //	filename: The name of the file to store.
 //	data: The byte data to upload.
-func (s *Object) Put(ctx context.Context, bucketId string, filename string, data []byte) (string, error) {
+func (s *Object) PutObject(ctx context.Context, bucketId string, filename string, data []byte) (string, error) {
 	_, ok := getObjectType(filename)
 	if !ok {
 		return "", errors.New("object type not supported")
@@ -200,12 +200,12 @@ func (s *Object) Put(ctx context.Context, bucketId string, filename string, data
 	return object, nil
 }
 
-// Delete deletes an object from the specified bucket.
+// DeleteObject deletes an object from the specified bucket.
 // Parameters:
 //
 //	ctx: The context used for the HTTP request.
 //	objectId: The identifier of the object to delete.
-func (s *Object) Delete(ctx context.Context, bucketId string, objectId string) (bool, error) {
+func (s *Object) DeleteObject(ctx context.Context, bucketId string, objectId string) (bool, error) {
 	resp, err := storage.ClientInterface.DeleteObject(ctx, &models.ObjectRequest{
 		BucketId: bucketId,
 		ObjectId: objectId,

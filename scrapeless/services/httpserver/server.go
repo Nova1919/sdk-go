@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/scrapeless-ai/sdk-go/env"
+	"github.com/smash-hq/sdk-go/env"
 	"io"
 	"net/http"
 	"strings"

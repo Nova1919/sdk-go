@@ -6,7 +6,7 @@ Thank you for your interest in contributing to the Scrapeless Actor SDK Go proje
 
 ### 1. Submit an Issue
 
-* Before opening a new issue, please search through the [existing issues](https://github.com/scrapeless-ai/sdk-go/issues).
+* Before opening a new issue, please search through the [existing issues](https://github.com/smash-hq/sdk-go/issues).
 * Provide a clear title and detailed description.
 * For bug reports, include steps to reproduce, expected behavior, and environment information.
 
@@ -37,7 +37,7 @@ Thank you for your interest in contributing to the Scrapeless Actor SDK Go proje
 
 ```bash
 # Clone the repository
-git clone https://github.com/scrapeless-ai/sdk-go.git
+git clone https://github.com/smash-hq/sdk-go.git
 cd scrapeless-actor-sdk-go
 
 # Install dependencies

@@ -9,6 +9,11 @@ import (
 	"path/filepath"
 )
 
+var (
+	ErrResourceNotFound = errors.New("resource not found")
+	ErrResourceExists   = errors.New("resource exists")
+)
+
 func isDirExists(path string) bool {
 	info, err := os.Stat(path)
 	if os.IsNotExist(err) {
@@ -31,6 +36,9 @@ func totalPage(total, pageSize int64) int64 {
 
 func isNameExists(path string, name string) (bool, error) {
 	err := filepath.WalkDir(path, func(path string, d fs.DirEntry, err error) error {
+		if !d.IsDir() {
+			return nil
+		}
 		if d.Name() == queueDir || d.Name() == datasetDir || d.Name() == keyValueDir ||
 			d.Name() == objectDir || d.Name() == metadataFile {
 			return nil

@@ -4,11 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/scrapeless-ai/sdk-go/env"
-	"github.com/scrapeless-ai/sdk-go/internal/remote/crawl"
-	"github.com/scrapeless-ai/sdk-go/internal/remote/crawl/models"
-	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
 	"time"
+
+	"github.com/smash-hq/sdk-go/env"
+	"github.com/smash-hq/sdk-go/internal/remote/crawl"
+	"github.com/smash-hq/sdk-go/internal/remote/crawl/models"
+	"github.com/smash-hq/sdk-go/scrapeless/log"
 )
 
 type Crawl struct{}

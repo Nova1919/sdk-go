@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/scrapeless-ai/sdk-go/internal/remote/crawl/models"
-	request2 "github.com/scrapeless-ai/sdk-go/internal/remote/request"
+	"github.com/smash-hq/sdk-go/internal/remote/crawl/models"
+	request2 "github.com/smash-hq/sdk-go/internal/remote/request"
 	"github.com/tidwall/gjson"
 	"net/http"
 )

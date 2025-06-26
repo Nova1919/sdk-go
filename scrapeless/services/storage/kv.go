@@ -2,11 +2,11 @@ package storage
 
 import (
 	"context"
-	"github.com/scrapeless-ai/sdk-go/env"
-	"github.com/scrapeless-ai/sdk-go/internal/code"
-	"github.com/scrapeless-ai/sdk-go/internal/remote/storage"
-	"github.com/scrapeless-ai/sdk-go/internal/remote/storage/models"
-	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
+	"github.com/smash-hq/sdk-go/env"
+	"github.com/smash-hq/sdk-go/internal/code"
+	"github.com/smash-hq/sdk-go/internal/remote/storage"
+	"github.com/smash-hq/sdk-go/internal/remote/storage/models"
+	"github.com/smash-hq/sdk-go/scrapeless/log"
 )
 
 type KV struct{}
@@ -33,13 +33,12 @@ func (s *KV) ListNamespaces(ctx context.Context, page int64, pageSize int64, des
 	var KvNamespaceItems []KvNamespaceItem
 	for _, item := range keyResp.Items {
 		namespaceItem := KvNamespaceItem{
-			Id:         item.Id,
-			Name:       item.Name,
-			ActorId:    item.ActorId,
-			RunId:      item.RunId,
-			CreatedAt:  item.CreatedAt,
-			UpdatedAt:  item.UpdatedAt,
-			AccessedAt: item.AccessedAt,
+			Id:        item.Id,
+			Name:      item.Name,
+			ActorId:   item.ActorId,
+			RunId:     item.RunId,
+			CreatedAt: item.CreatedAt,
+			UpdatedAt: item.UpdatedAt,
 		}
 		KvNamespaceItems = append(KvNamespaceItems, namespaceItem)
 	}
@@ -80,13 +79,12 @@ func (s *KV) GetNamespace(ctx context.Context, namespaceName string) (*KvNamespa
 		return nil, code.Format(err)
 	}
 	resp := &KvNamespaceItem{
-		Id:         namespace.Id,
-		Name:       namespace.Name,
-		ActorId:    namespace.ActorId,
-		RunId:      namespace.RunId,
-		CreatedAt:  namespace.CreatedAt,
-		UpdatedAt:  namespace.UpdatedAt,
-		AccessedAt: namespace.AccessedAt,
+		Id:        namespace.Id,
+		Name:      namespace.Name,
+		ActorId:   namespace.ActorId,
+		RunId:     namespace.RunId,
+		CreatedAt: namespace.CreatedAt,
+		UpdatedAt: namespace.UpdatedAt,
 	}
 	return resp, nil
 }

@@ -3,10 +3,9 @@ package storage_memory
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/google/uuid"
-	"github.com/scrapeless-ai/sdk-go/internal/remote/storage/models"
+	"github.com/smash-hq/sdk-go/internal/remote/storage/models"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -14,14 +13,9 @@ import (
 	"time"
 )
 
-var (
-	ErrResourceNotFound = errors.New("resource not found")
-	ErrResourceExists   = errors.New("resource exists")
-)
-
 const MaxExpireTime = 24 * 60 * 60 * 7
 
-func (d *LocalClient) GetNamespace(ctx context.Context, namespaceId string) (*models.KvNamespaceItem, error) {
+func (c *LocalClient) GetNamespace(ctx context.Context, namespaceId string) (*models.KvNamespaceItem, error) {
 	nsPath := filepath.Join(storageDir, keyValueDir, namespaceId)
 	ok := isDirExists(nsPath)
 	if !ok {
@@ -41,7 +35,7 @@ func (d *LocalClient) GetNamespace(ctx context.Context, namespaceId string) (*mo
 	return &namespace, nil
 }
 
-func (d *LocalClient) ListNamespaces(ctx context.Context, page int64, pageSize int64, desc bool) (*models.KvNamespace, error) {
+func (c *LocalClient) ListNamespaces(ctx context.Context, page int64, pageSize int64, desc bool) (*models.KvNamespace, error) {
 	dirPath := filepath.Join(storageDir, keyValueDir)
 
 	entries, err := os.ReadDir(dirPath)
@@ -103,7 +97,7 @@ func (d *LocalClient) ListNamespaces(ctx context.Context, page int64, pageSize i
 	}, nil
 }
 
-func (d *LocalClient) CreateNamespace(ctx context.Context, req *models.CreateKvNamespaceRequest) (namespaceId string, err error) {
+func (c *LocalClient) CreateNamespace(ctx context.Context, req *models.CreateKvNamespaceRequest) (namespaceId string, err error) {
 	id := uuid.NewString()
 	path := filepath.Join(storageDir, keyValueDir, id)
 
@@ -141,7 +135,7 @@ func (d *LocalClient) CreateNamespace(ctx context.Context, req *models.CreateKvN
 	return id, nil
 }
 
-func (d *LocalClient) DelNamespace(ctx context.Context, namespaceId string) (bool, error) {
+func (c *LocalClient) DelNamespace(ctx context.Context, namespaceId string) (bool, error) {
 	absPath := filepath.Join(storageDir, keyValueDir, namespaceId)
 	err := os.RemoveAll(absPath)
 	if err != nil {
@@ -150,7 +144,7 @@ func (d *LocalClient) DelNamespace(ctx context.Context, namespaceId string) (boo
 	return true, nil
 }
 
-func (d *LocalClient) RenameNamespace(ctx context.Context, namespaceId string, name string) (ok bool, err error) {
+func (c *LocalClient) RenameNamespace(ctx context.Context, namespaceId string, name string) (ok bool, err error) {
 	nsPath := filepath.Join(storageDir, keyValueDir, namespaceId)
 	exists := isDirExists(nsPath)
 	if !exists {
@@ -180,9 +174,16 @@ func (d *LocalClient) RenameNamespace(ctx context.Context, namespaceId string, n
 	return true, nil
 }
 
-func (d *LocalClient) SetValue(ctx context.Context, req *models.SetValue) (bool, error) {
+func (c *LocalClient) SetValue(ctx context.Context, req *models.SetValue) (bool, error) {
+	if req.Key == "INPUT" && req.NamespaceId == "default" {
+		return false, nil
+	}
+	keyFile := fmt.Sprintf("%s.json", req.Key)
+	if keyFile == metadataFile {
+		return false, fmt.Errorf("key name can't use 'metadata'")
+	}
 	path := filepath.Join(storageDir, keyValueDir, req.NamespaceId)
-	file := filepath.Join(path, fmt.Sprintf("%s.json", req.Key))
+	file := filepath.Join(path, keyFile)
 	if req.Expiration == 0 {
 		req.Expiration = MaxExpireTime
 	}
@@ -206,7 +207,7 @@ func (d *LocalClient) SetValue(ctx context.Context, req *models.SetValue) (bool,
 	return true, nil
 }
 
-func (d *LocalClient) ListKeys(ctx context.Context, req *models.ListKeyInfo) (*models.KvKeys, error) {
+func (c *LocalClient) ListKeys(ctx context.Context, req *models.ListKeyInfo) (*models.KvKeys, error) {
 	dirPath := filepath.Join(storageDir, keyValueDir, req.NamespaceId)
 	var keys []map[string]any
 
@@ -264,10 +265,10 @@ func (d *LocalClient) ListKeys(ctx context.Context, req *models.ListKeyInfo) (*m
 	return kvKeys, nil
 }
 
-func (d *LocalClient) BulkSetValue(ctx context.Context, req *models.BulkSet) (int64, error) {
+func (c *LocalClient) BulkSetValue(ctx context.Context, req *models.BulkSet) (int64, error) {
 	var success int64
 	for i := range req.Items {
-		ok, _ := d.SetValue(ctx, &models.SetValue{
+		ok, _ := c.SetValue(ctx, &models.SetValue{
 			NamespaceId: req.NamespaceId,
 			Key:         req.Items[i].Key,
 			Value:       req.Items[i].Value,
@@ -281,7 +282,7 @@ func (d *LocalClient) BulkSetValue(ctx context.Context, req *models.BulkSet) (in
 	return success, nil
 }
 
-func (d *LocalClient) DelValue(ctx context.Context, namespaceId string, key string) (bool, error) {
+func (c *LocalClient) DelValue(ctx context.Context, namespaceId string, key string) (bool, error) {
 	file := fmt.Sprintf("%s.json", key)
 	if file == metadataFile {
 		return true, nil
@@ -295,9 +296,9 @@ func (d *LocalClient) DelValue(ctx context.Context, namespaceId string, key stri
 	return true, nil
 }
 
-func (d *LocalClient) BulkDelValue(ctx context.Context, namespaceId string, keys []string) (bool, error) {
+func (c *LocalClient) BulkDelValue(ctx context.Context, namespaceId string, keys []string) (bool, error) {
 	for i := range keys {
-		_, err := d.DelValue(ctx, namespaceId, keys[i])
+		_, err := c.DelValue(ctx, namespaceId, keys[i])
 		if err != nil {
 			return false, err
 		}
@@ -305,13 +306,22 @@ func (d *LocalClient) BulkDelValue(ctx context.Context, namespaceId string, keys
 	return true, nil
 }
 
-func (d *LocalClient) GetValue(ctx context.Context, namespaceId string, key string) (string, error) {
+func (c *LocalClient) GetValue(ctx context.Context, namespaceId string, key string) (string, error) {
+	namespacePath := filepath.Join(storageDir, keyValueDir, namespaceId)
+	if !isDirExists(namespacePath) {
+		return "", ErrResourceNotFound
+	}
 	file := fmt.Sprintf("%s.json", key)
-	path := filepath.Join(storageDir, keyValueDir, namespaceId, file)
+	path := filepath.Join(namespacePath, file)
 	buff, err := os.ReadFile(path)
 	if err != nil {
 		return "", fmt.Errorf("read file %s failed: %v", path, err)
 	}
+
+	if key == "INPUT" && namespaceId == "default" {
+		return string(buff), nil
+	}
+
 	var kv models.SetValueLocal
 	if err := json.Unmarshal(buff, &kv); err != nil {
 		return "", fmt.Errorf("json unmarshal failed: %s", err)

@@ -3,9 +3,10 @@ package storage_memory
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/google/uuid"
-	"github.com/scrapeless-ai/sdk-go/internal/remote/storage/models"
+	"github.com/smash-hq/sdk-go/internal/remote/storage/models"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -13,7 +14,7 @@ import (
 	"time"
 )
 
-func (q *LocalClient) CreateQueue(ctx context.Context, req *models.CreateQueueRequest) (*models.CreateQueueResponse, error) {
+func (c *LocalClient) CreateQueue(ctx context.Context, req *models.CreateQueueRequest) (*models.CreateQueueResponse, error) {
 	id := uuid.NewString()
 	exists, err := isNameExists(filepath.Join(storageDir, queueDir), req.Name)
 	if err != nil {
@@ -37,7 +38,7 @@ func (q *LocalClient) CreateQueue(ctx context.Context, req *models.CreateQueueRe
 		CreatedAt:   time.Now().Format(time.RFC3339Nano),
 	}
 
-	if err = q.updateMetadata(queue); err != nil {
+	if err = c.updateMetadata(queue); err != nil {
 		return nil, fmt.Errorf("update metadata failed, err: %v", err)
 	}
 	return &models.CreateQueueResponse{
@@ -45,10 +46,10 @@ func (q *LocalClient) CreateQueue(ctx context.Context, req *models.CreateQueueRe
 	}, nil
 }
 
-func (q *LocalClient) GetQueue(ctx context.Context, req *models.GetQueueRequest) (*models.GetQueueResponse, error) {
+func (c *LocalClient) GetQueue(ctx context.Context, req *models.GetQueueRequest) (*models.GetQueueResponse, error) {
 	queuePath := filepath.Join(storageDir, queueDir, req.Id)
-	ok := isDirExists(queuePath)
-	if !ok {
+
+	if !isDirExists(queuePath) {
 		return nil, ErrResourceNotFound
 	}
 	metaDataPath := filepath.Join(queuePath, metadataFile)
@@ -67,7 +68,7 @@ func (q *LocalClient) GetQueue(ctx context.Context, req *models.GetQueueRequest)
 	}, nil
 }
 
-func (q *LocalClient) GetQueues(ctx context.Context, req *models.GetQueuesRequest) (*models.ListQueuesResponse, error) {
+func (c *LocalClient) GetQueues(ctx context.Context, req *models.GetQueuesRequest) (*models.ListQueuesResponse, error) {
 	dirPath := filepath.Join(storageDir, queueDir)
 
 	entries, err := os.ReadDir(dirPath)
@@ -129,7 +130,7 @@ func (q *LocalClient) GetQueues(ctx context.Context, req *models.GetQueuesReques
 	}, nil
 }
 
-func (q *LocalClient) UpdateQueue(ctx context.Context, req *models.UpdateQueueRequest) error {
+func (c *LocalClient) UpdateQueue(ctx context.Context, req *models.UpdateQueueRequest) error {
 	queuePath := filepath.Join(storageDir, queueDir, req.QueueId)
 	ok := isDirExists(queuePath)
 	if !ok {
@@ -150,10 +151,10 @@ func (q *LocalClient) UpdateQueue(ctx context.Context, req *models.UpdateQueueRe
 	queue.Name = req.Name
 	queue.Description = req.Description
 
-	return q.updateMetadata(&queue)
+	return c.updateMetadata(&queue)
 }
 
-func (q *LocalClient) DelQueue(ctx context.Context, req *models.DelQueueRequest) error {
+func (c *LocalClient) DelQueue(ctx context.Context, req *models.DelQueueRequest) error {
 	queuePath := filepath.Join(storageDir, queueDir, req.QueueId)
 	err := os.RemoveAll(queuePath)
 	if err != nil {
@@ -162,12 +163,15 @@ func (q *LocalClient) DelQueue(ctx context.Context, req *models.DelQueueRequest)
 	return nil
 }
 
-func (q *LocalClient) CreateMsg(ctx context.Context, req *models.CreateMsgRequest) (*models.CreateMsgResponse, error) {
+func (c *LocalClient) CreateMsg(ctx context.Context, req *models.CreateMsgRequest) (*models.CreateMsgResponse, error) {
 	id := uuid.NewString()
 	if req.Deadline < time.Now().Unix()+300 {
 		return nil, fmt.Errorf("deadline must after now + 300s")
 	}
-
+	queuePath := filepath.Join(storageDir, queueDir, req.QueueId)
+	if !isDirExists(queuePath) {
+		return nil, ErrResourceNotFound
+	}
 	msgPath := filepath.Join(storageDir, queueDir, req.QueueId, fmt.Sprintf("%s.json", id))
 	msg := models.MsgLocal{
 		Msg: models.Msg{
@@ -195,7 +199,7 @@ func (q *LocalClient) CreateMsg(ctx context.Context, req *models.CreateMsgReques
 	}, nil
 }
 
-func (l *LocalClient) GetMsg(ctx context.Context, req *models.GetMsgRequest) (*models.GetMsgResponse, error) {
+func (c *LocalClient) GetMsg(ctx context.Context, req *models.GetMsgRequest) (*models.GetMsgResponse, error) {
 	queuePath := filepath.Join(storageDir, queueDir, req.QueueId)
 
 	msgs := make([]*models.MsgLocal, 0)
@@ -217,21 +221,17 @@ func (l *LocalClient) GetMsg(ctx context.Context, req *models.GetMsgRequest) (*m
 		if err != nil {
 			return fmt.Errorf("json unmarshal failed: %s", err)
 		}
-		dead := false
-		// msg is dead
-		if msg.Deadline < now.Unix() {
-			msg.FailedAt = now.Unix()
-			dead = true
+		// msg is finished
+		if msg.SuccessAt > 0 || msg.FailedAt > 0 || msg.Deadline < now.Unix() ||
+			(msg.ReenterTime.Before(now) && msg.Retried >= msg.Retry) {
+			_ = os.Remove(msgPath)
+			return nil
 		}
-		// max retry
-		if msg.ReenterTime.Before(now) && msg.Retried >= msg.Retry {
-			msg.FailedAt = now.Unix()
-			dead = true
+		// msg is not reenter queue
+		if !msg.ReenterTime.Equal(time.Time{}) && msg.ReenterTime.After(now) {
+			return nil
 		}
-		if dead {
-			msg.UpdateTime = now
-			//os.WriteFile(msgPath)
-		}
+
 		msgs = append(msgs, &msg)
 
 		return nil
@@ -239,16 +239,74 @@ func (l *LocalClient) GetMsg(ctx context.Context, req *models.GetMsgRequest) (*m
 	if err != nil {
 		return nil, err
 	}
+	sort.Slice(msgs, func(i, j int) bool {
+		return msgs[i].UpdateTime.Before(msgs[j].UpdateTime)
+	})
+	if len(msgs) > int(req.Limit) {
+		msgs = msgs[:req.Limit]
+	}
 
-	return nil, nil
+	respMsg := make([]*models.Msg, 0, len(msgs))
+	for _, msg := range msgs {
+		msg.ReenterTime = now.Add(time.Duration(msg.Timeout) * time.Second)
+		msg.Retried++
+		msgPath := filepath.Join(queuePath, fmt.Sprintf("%s.json", msg.ID))
+		marshal, err := json.Marshal(msg)
+		if err != nil {
+			return nil, fmt.Errorf("json marshal failed: %s", err)
+		}
+		if err = os.WriteFile(msgPath, marshal, os.ModePerm); err != nil {
+			return nil, fmt.Errorf("write file %s failed: %v", msgPath, err)
+		}
+
+		respMsg = append(respMsg, &models.Msg{
+			ID:        msg.ID,
+			QueueID:   msg.QueueID,
+			Name:      msg.Name,
+			Payload:   msg.Payload,
+			Timeout:   msg.Timeout,
+			Deadline:  msg.Deadline,
+			Retry:     msg.Retry,
+			Retried:   msg.Retried,
+			SuccessAt: msg.SuccessAt,
+			FailedAt:  msg.FailedAt,
+			Desc:      msg.Desc,
+		})
+	}
+	resp := models.GetMsgResponse(respMsg)
+	return &resp, nil
 }
 
-func (q *LocalClient) AckMsg(ctx context.Context, req *models.AckMsgRequest) error {
-	//TODO implement me
-	panic("implement me")
+func (c *LocalClient) AckMsg(ctx context.Context, req *models.AckMsgRequest) error {
+	msgPath := filepath.Join(storageDir, queueDir, req.QueueId, fmt.Sprintf("%s.json", req.MsgId))
+	if !isFileExists(msgPath) {
+		return ErrResourceNotFound
+	}
+
+	buf, err := os.ReadFile(msgPath)
+	if err != nil {
+		return err
+	}
+	var msg models.MsgLocal
+	err = json.Unmarshal(buf, &msg)
+	if err != nil {
+		return fmt.Errorf("json unmarshal failed: %s", err)
+	}
+	if msg.ReenterTime.Equal(time.Time{}) {
+		return ErrResourceNotFound
+	}
+
+	if msg.ReenterTime.Before(time.Now()) {
+		return errors.New("msg is timeout, you must ack within the timeout period")
+	}
+	err = os.Remove(msgPath)
+	if err != nil {
+		return fmt.Errorf("delete file %s failed: %v", msgPath, err)
+	}
+	return nil
 }
 
-func (q *LocalClient) updateMetadata(queue *models.Queue) error {
+func (c *LocalClient) updateMetadata(queue *models.Queue) error {
 	path := filepath.Join(storageDir, queueDir, queue.Id, metadataFile)
 	marshal, err := json.Marshal(queue)
 	if err != nil {

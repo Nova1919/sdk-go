@@ -13,14 +13,13 @@ type ListDatasetsResponse struct {
 }
 
 type DatasetInfo struct {
-	Id         string   `json:"id,omitempty"`
-	Name       string   `json:"name,omitempty"`
-	ActorId    string   `json:"actorId,omitempty"`
-	RunId      string   `json:"runId,omitempty"`
-	Fields     []string `json:"fields,omitempty"` //Fields in the dataset
-	CreatedAt  string   `json:"createdAt,omitempty"`
-	UpdatedAt  string   `json:"updatedAt,omitempty"`
-	AccessedAt string   `json:"accessedAt,omitempty"`
+	Id        string   `json:"id,omitempty"`
+	Name      string   `json:"name,omitempty"`
+	ActorId   string   `json:"actorId,omitempty"`
+	RunId     string   `json:"runId,omitempty"`
+	Fields    []string `json:"fields,omitempty"` //Fields in the dataset
+	CreatedAt string   `json:"createdAt,omitempty"`
+	UpdatedAt string   `json:"updatedAt,omitempty"`
 }
 
 type Timestamp struct {
@@ -39,13 +38,12 @@ type KvNamespace struct {
 }
 
 type KvNamespaceItem struct {
-	Id         string `json:"id"`
-	Name       string `json:"name"`
-	ActorId    string `json:"actorId"`
-	RunId      string `json:"runId"`
-	CreatedAt  string `json:"createdAt"`
-	UpdatedAt  string `json:"updatedAt"`
-	AccessedAt string `json:"accessedAt"`
+	Id        string `json:"id"`
+	Name      string `json:"name"`
+	ActorId   string `json:"actorId"`
+	RunId     string `json:"runId"`
+	CreatedAt string `json:"createdAt"`
+	UpdatedAt string `json:"updatedAt"`
 }
 
 type CreateKvNamespaceRequest struct {
