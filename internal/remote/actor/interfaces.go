@@ -2,9 +2,9 @@ package actor
 
 import (
 	"context"
-	actor_http "github.com/smash-hq/sdk-go/internal/remote/actor/http"
-	"github.com/smash-hq/sdk-go/internal/remote/actor/models"
-	"github.com/smash-hq/sdk-go/scrapeless/log"
+	actor_http "github.com/scrapeless-ai/sdk-go/internal/remote/actor/http"
+	"github.com/scrapeless-ai/sdk-go/internal/remote/actor/models"
+	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
 )
 
 type Actor interface {

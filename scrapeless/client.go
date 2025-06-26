@@ -1,17 +1,17 @@
 package scrapeless
 
 import (
-	"github.com/smash-hq/sdk-go/scrapeless/services/actor"
-	"github.com/smash-hq/sdk-go/scrapeless/services/browser"
-	"github.com/smash-hq/sdk-go/scrapeless/services/captcha"
-	"github.com/smash-hq/sdk-go/scrapeless/services/crawl"
-	"github.com/smash-hq/sdk-go/scrapeless/services/deepserp"
-	"github.com/smash-hq/sdk-go/scrapeless/services/httpserver"
-	"github.com/smash-hq/sdk-go/scrapeless/services/proxies"
-	"github.com/smash-hq/sdk-go/scrapeless/services/router"
-	"github.com/smash-hq/sdk-go/scrapeless/services/scraping"
-	"github.com/smash-hq/sdk-go/scrapeless/services/storage"
-	"github.com/smash-hq/sdk-go/scrapeless/services/universal"
+	"github.com/scrapeless-ai/sdk-go/scrapeless/services/actor"
+	"github.com/scrapeless-ai/sdk-go/scrapeless/services/browser"
+	"github.com/scrapeless-ai/sdk-go/scrapeless/services/captcha"
+	"github.com/scrapeless-ai/sdk-go/scrapeless/services/crawl"
+	"github.com/scrapeless-ai/sdk-go/scrapeless/services/deepserp"
+	"github.com/scrapeless-ai/sdk-go/scrapeless/services/httpserver"
+	"github.com/scrapeless-ai/sdk-go/scrapeless/services/proxies"
+	"github.com/scrapeless-ai/sdk-go/scrapeless/services/router"
+	"github.com/scrapeless-ai/sdk-go/scrapeless/services/scraping"
+	"github.com/scrapeless-ai/sdk-go/scrapeless/services/storage"
+	"github.com/scrapeless-ai/sdk-go/scrapeless/services/universal"
 )
 
 type Client struct {

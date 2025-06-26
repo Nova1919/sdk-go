@@ -2,7 +2,7 @@ package services
 
 import (
 	"context"
-	"github.com/smash-hq/sdk-go/scrapeless/services/browser"
+	"github.com/scrapeless-ai/sdk-go/scrapeless/services/browser"
 	"testing"
 )
 

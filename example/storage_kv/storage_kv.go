@@ -2,8 +2,8 @@ package main
 
 import (
 	"context"
-	"github.com/smash-hq/sdk-go/scrapeless"
-	"github.com/smash-hq/sdk-go/scrapeless/log"
+	"github.com/scrapeless-ai/sdk-go/scrapeless"
+	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
 )
 
 func main() {

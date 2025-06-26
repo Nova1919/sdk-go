@@ -3,12 +3,12 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"github.com/smash-hq/sdk-go/scrapeless/actor"
-	"github.com/smash-hq/sdk-go/scrapeless/log"
-	"github.com/smash-hq/sdk-go/scrapeless/services/browser"
-	"github.com/smash-hq/sdk-go/scrapeless/services/captcha"
-	proxy2 "github.com/smash-hq/sdk-go/scrapeless/services/proxies"
-	"github.com/smash-hq/sdk-go/scrapeless/services/storage/queue"
+	"github.com/scrapeless-ai/sdk-go/scrapeless/actor"
+	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
+	"github.com/scrapeless-ai/sdk-go/scrapeless/services/browser"
+	"github.com/scrapeless-ai/sdk-go/scrapeless/services/captcha"
+	proxy2 "github.com/scrapeless-ai/sdk-go/scrapeless/services/proxies"
+	"github.com/scrapeless-ai/sdk-go/scrapeless/services/storage/queue"
 	"net/url"
 )
 

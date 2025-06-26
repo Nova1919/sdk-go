@@ -3,8 +3,8 @@ package storage_http
 import (
 	"context"
 	"fmt"
-	"github.com/smash-hq/sdk-go/internal/remote/storage/models"
-	"github.com/smash-hq/sdk-go/scrapeless/log"
+	"github.com/scrapeless-ai/sdk-go/internal/remote/storage/models"
+	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
 )
 
 func (c *Client) CreateQueue(ctx context.Context, req *models.CreateQueueRequest) (*models.CreateQueueResponse, error) {

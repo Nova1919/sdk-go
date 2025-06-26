@@ -33,7 +33,7 @@ The official Go SDK of [Scrapeless AI](https://scrapeless.com) - a powerful web 
 Install the SDK using `go get`:
 
 ```bash
-go get -u github.com/smash-hq/sdk-go
+go get -u github.com/scrapeless-ai/sdk-go
 ```
 
 ## 🚀 Quick Start
@@ -44,7 +44,7 @@ go get -u github.com/smash-hq/sdk-go
 package main
 
 import (
-	scrapeless "github.com/smash-hq/sdk-go/scrapeless/actor"
+	scrapeless "github.com/scrapeless-ai/sdk-go/scrapeless/actor"
 )
 
 func main() {
@@ -79,9 +79,9 @@ package main
 
 import (
 	"context"
-	scrapeless "github.com/smash-hq/sdk-go/scrapeless/actor"
-	"github.com/smash-hq/sdk-go/scrapeless/browser"
-	"github.com/smash-hq/sdk-go/scrapeless/log"
+	scrapeless "github.com/scrapeless-ai/sdk-go/scrapeless/actor"
+	"github.com/scrapeless-ai/sdk-go/scrapeless/browser"
+	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
 )
 
 func main() {
@@ -106,9 +106,9 @@ package main
 
 import (
 	"context"
-	scrapeless "github.com/smash-hq/sdk-go/scrapeless/actor"
-	"github.com/smash-hq/sdk-go/scrapeless/log"
-	"github.com/smash-hq/sdk-go/scrapeless/scraping"
+	scrapeless "github.com/scrapeless-ai/sdk-go/scrapeless/actor"
+	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
+	"github.com/scrapeless-ai/sdk-go/scrapeless/scraping"
 )
 
 func main() {
@@ -136,9 +136,9 @@ package main
 
 import (
 	"context"
-	scrapeless "github.com/smash-hq/sdk-go/scrapeless/actor"
-	"github.com/smash-hq/sdk-go/scrapeless/deepserp"
-	"github.com/smash-hq/sdk-go/scrapeless/log"
+	scrapeless "github.com/scrapeless-ai/sdk-go/scrapeless/actor"
+	"github.com/scrapeless-ai/sdk-go/scrapeless/deepserp"
+	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
 )
 
 func main() {
@@ -166,9 +166,9 @@ package main
 
 import (
 	"context"
-	"github.com/smash-hq/sdk-go/internal/remote/actor"
-	"github.com/smash-hq/sdk-go/scrapeless"
-	"github.com/smash-hq/sdk-go/scrapeless/log"
+	"github.com/scrapeless-ai/sdk-go/internal/remote/actor"
+	"github.com/scrapeless-ai/sdk-go/scrapeless"
+	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
 )
 
 func main() {
@@ -202,9 +202,9 @@ package main
 
 import (
 	"context"
-	"github.com/smash-hq/sdk-go/scrapeless"
-	"github.com/smash-hq/sdk-go/scrapeless/log"
-	"github.com/smash-hq/sdk-go/scrapeless/services/crawl"
+	"github.com/scrapeless-ai/sdk-go/scrapeless"
+	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
+	"github.com/scrapeless-ai/sdk-go/scrapeless/services/crawl"
 )
 
 func main() {
@@ -289,7 +289,7 @@ All forms of contributions are welcome! For detailed information on how to submi
 **Quick Start**:
 
 ```bash
-git clone https://github.com/smash-hq/sdk-go.git
+git clone https://github.com/scrapeless-ai/sdk-go.git
 cd scrapeless-actor-sdk-go
 go mod tidy
 go run ./example/actor/actor.go

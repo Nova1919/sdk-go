@@ -2,9 +2,9 @@ package extension
 
 import (
 	"context"
-	extension_http "github.com/smash-hq/sdk-go/internal/remote/extension/http"
-	"github.com/smash-hq/sdk-go/internal/remote/extension/models"
-	"github.com/smash-hq/sdk-go/scrapeless/log"
+	extension_http "github.com/scrapeless-ai/sdk-go/internal/remote/extension/http"
+	"github.com/scrapeless-ai/sdk-go/internal/remote/extension/models"
+	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
 )
 
 type Extension interface {
