@@ -10,6 +10,8 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -194,35 +196,59 @@ func (c *LocalClient) AddDatasetItem(ctx context.Context, datasetId string, item
 		return false, err
 	}
 
-	if err := os.MkdirAll(dirPath, os.ModeDir); err != nil {
+	if err := os.MkdirAll(dirPath, os.ModePerm); err != nil {
 		return false, fmt.Errorf("create dir failed: %v", err)
 	}
 
-	var fields []string
-	for i, item := range items {
-		fileName := fmt.Sprintf("%d.json", i)
-		filePath := filepath.Join(dirPath, fileName)
-		if len(fields) <= 0 {
-			for it := range item {
-				fields = append(fields, it)
+	// get number of file
+	maxIndex := 0
+	files, err := os.ReadDir(dirPath)
+	if err != nil {
+		return false, fmt.Errorf("read dir failed: %v", err)
+	}
+	for _, f := range files {
+		if !f.IsDir() && strings.HasSuffix(f.Name(), ".json") && f.Name() != metadataFile {
+			name := strings.TrimSuffix(f.Name(), ".json")
+			if len(name) == 8 {
+				if idx, err := strconv.Atoi(name); err == nil && idx > maxIndex {
+					maxIndex = idx
+				}
 			}
 		}
-		// Serialize the map to JSON
+	}
+
+	var fields []string
+	var newSize uint64 = 0
+
+	for i, item := range items {
+		index := maxIndex + i + 1
+		fileName := fmt.Sprintf("%08d.json", index)
+		filePath := filepath.Join(dirPath, fileName)
+
+		if len(fields) == 0 {
+			for key := range item {
+				fields = append(fields, key)
+			}
+		}
+
 		data, err := json.MarshalIndent(item, "", "  ")
 		if err != nil {
 			return false, fmt.Errorf("json marshal failed at index %d: %v", i, err)
 		}
 
-		// write file
+		newSize += uint64(len(data))
+
 		if err := os.WriteFile(filePath, data, 0644); err != nil {
 			return false, fmt.Errorf("write file %s failed: %v", fileName, err)
 		}
 	}
+
+	// update metadata
 	meta.UpdatedAt = time.Now().Format(time.RFC3339Nano)
-	meta.Stats = models.DatasetStats{
-		Count: uint64(len(items)),
-	}
+	meta.Stats.Count += uint64(len(items))
+	meta.Stats.Size += newSize
 	meta.Fields = fields
+
 	metaFile := filepath.Join(dirPath, metadataFile)
 	data, err := json.MarshalIndent(meta, "", "  ")
 	if err != nil {

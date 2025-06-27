@@ -29,6 +29,7 @@ type Actor struct {
 	namespaceId string
 	bucketId    string
 	queueId     string
+	vectorId    string
 }
 
 const (
@@ -50,6 +51,7 @@ func New() *Actor {
 	actor.namespaceId = env.Env.Actor.KvNamespaceId
 	actor.bucketId = env.Env.Actor.BucketId
 	actor.queueId = env.Env.Actor.QueueId
+	actor.vectorId = env.Env.Actor.VectorId
 	return actor
 }
 
