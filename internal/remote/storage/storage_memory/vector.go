@@ -2,49 +2,49 @@ package storage_memory
 
 import (
 	"context"
-	"github.com/smash-hq/sdk-go/internal/remote/storage/models"
+	"github.com/scrapeless-ai/sdk-go/internal/remote/storage/models"
 )
 
 func (c *LocalClient) ListCollections(ctx context.Context, req *models.ListCollectionsRequest) (*models.ListCollectionsResponse, error) {
-	return nil, nil
+	return nil, ErrLocalStorageUnimplemented
 }
 
 func (c *LocalClient) CreateCollections(ctx context.Context, req *models.CreateCollectionRequest) (*models.CreateCollectionResponse, error) {
-	return nil, nil
+	return nil, ErrLocalStorageUnimplemented
 }
 
 func (c *LocalClient) UpdateCollection(ctx context.Context, req *models.UpdateCollectionRequest) error {
-	return nil
+	return ErrLocalStorageUnimplemented
 }
 
 func (c *LocalClient) DelCollection(ctx context.Context, collId string) error {
-	return nil
+	return ErrLocalStorageUnimplemented
 }
 
 func (c *LocalClient) GetCollection(ctx context.Context, collId string) (*models.Collection, error) {
-	return nil, nil
+	return nil, ErrLocalStorageUnimplemented
 }
 
 func (c *LocalClient) CreateDocs(ctx context.Context, req *models.CreateDocsRequest) (*models.DocOpResponse, error) {
-	return nil, nil
+	return nil, ErrLocalStorageUnimplemented
 }
 
 func (c *LocalClient) UpdateDocs(ctx context.Context, req *models.UpdateDocsRequest) (*models.DocOpResponse, error) {
-	return nil, nil
+	return nil, ErrLocalStorageUnimplemented
 }
 
 func (c *LocalClient) UpsertDocs(ctx context.Context, req *models.UpsertVectorDocsParam) (*models.DocOpResponse, error) {
-	return nil, nil
+	return nil, ErrLocalStorageUnimplemented
 }
 
 func (c *LocalClient) DelDocs(ctx context.Context, req *models.DeleteDocsRequest) (*models.DocOpResponse, error) {
-	return nil, nil
+	return nil, ErrLocalStorageUnimplemented
 }
 
 func (c *LocalClient) QueryDocs(ctx context.Context, req *models.QueryVectorRequest) ([]*models.Doc, error) {
-	return nil, nil
+	return nil, ErrLocalStorageUnimplemented
 }
 
 func (c *LocalClient) QueryDocsByIds(ctx context.Context, req *models.QueryDocsByIdsRequest) (map[string]*models.Doc, error) {
-	return nil, nil
+	return nil, ErrLocalStorageUnimplemented
 }

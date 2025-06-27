@@ -197,11 +197,17 @@ type Collection struct {
 }
 
 type Doc struct {
-	ID           string             `json:"id"`
-	Vector       []float64          `json:"vector"`
-	Content      string             `json:"content"`
-	SparseVector map[string]float64 `json:"sparse_vector"`
-	Score        float64            `json:"score"`
+	ID           string             `json:"id"`           // DocId
+	Vector       []float64          `json:"vector"`       // The vector content of the text
+	Content      string             `json:"content"`      // The text content of the vector
+	SparseVector map[string]float64 `json:"sparseVector"` // The sparse vector content of the text
+	Score        float64            `json:"score"`        // Matching score of query results
+}
+
+type BaseDoc struct {
+	Vector       []float64          `json:"vector"`       // The vector content of the text
+	Content      string             `json:"content"`      // The text content of the vector
+	SparseVector map[string]float64 `json:"sparseVector"` // The sparse vector content of the text
 }
 
 type ListCollectionsResponse struct {
@@ -236,9 +242,9 @@ type DocOpResponse struct {
 }
 
 type QueryVectorParam struct {
-	Vector         []float64          `json:"vector"`
-	SparseVector   map[string]float64 `json:"sparseVector"`
-	Topk           int32              `json:"topk"`
-	IncludeVector  bool               `json:"includeVector"`
-	IncludeContent bool               `json:"includeContent"`
+	Vector         []float64          `json:"vector"`         // Query vector
+	SparseVector   map[string]float64 `json:"sparseVector"`   // Query sparse vector
+	Topk           int32              `json:"topk"`           // Number of results to return, min:1 max:1024
+	IncludeVector  bool               `json:"includeVector"`  // Whether to return the vector
+	IncludeContent bool               `json:"includeContent"` // Whether to return the content
 }

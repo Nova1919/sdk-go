@@ -4,14 +4,14 @@ import (
 	"context"
 	"github.com/scrapeless-ai/sdk-go/scrapeless"
 	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
-	"github.com/scrapeless-ai/sdk-go/scrapeless/services/storage/queue"
+	"github.com/scrapeless-ai/sdk-go/scrapeless/services/storage"
 )
 
 func main() {
 	client := scrapeless.New(scrapeless.WithStorage())
 
 	// push a message to queue
-	msgId, err := client.Storage.Queue.Push(context.Background(), "queueId", queue.PushQueue{
+	msgId, err := client.Storage.Queue.Push(context.Background(), "queueId", storage.PushQueue{
 		Name:    "test-cy",
 		Payload: []byte("aaaa"),
 	})

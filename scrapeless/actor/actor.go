@@ -177,27 +177,27 @@ func (a *Actor) GetItems(ctx context.Context, page int, pageSize int, desc bool)
 
 // ListQueues List all available queues
 func (a *Actor) ListQueues(ctx context.Context, page int64, pageSize int64, desc bool) (*storage.ListQueuesResponse, error) {
-	return a.storage.Queue.List(ctx, page, pageSize, desc)
+	return a.storage.Queue.ListQueues(ctx, page, pageSize, desc)
 }
 
 // CreateQueue Create a new queue
 func (a *Actor) CreateQueue(ctx context.Context, req *storage.CreateQueueReq) (queueId string, queueName string, err error) {
-	return a.storage.Queue.Create(ctx, req)
+	return a.storage.Queue.CreateQueue(ctx, req)
 }
 
 // GetQueue Get a queue by name
 func (a *Actor) GetQueue(ctx context.Context, name string) (*storage.Item, error) {
-	return a.storage.Queue.Get(ctx, a.queueId, name)
+	return a.storage.Queue.GetQueue(ctx, a.queueId, name)
 }
 
 // UpdateQueue Update a queue
 func (a *Actor) UpdateQueue(ctx context.Context, name string, description string) error {
-	return a.storage.Queue.Update(ctx, a.queueId, name, description)
+	return a.storage.Queue.UpdateQueue(ctx, a.queueId, name, description)
 }
 
 // DeleteQueue Delete a queue
 func (a *Actor) DeleteQueue(ctx context.Context) error {
-	return a.storage.Queue.Delete(ctx, a.queueId)
+	return a.storage.Queue.DeleteQueue(ctx, a.queueId)
 }
 
 // PushMessage Push a message to the default queue (from environment variable)
@@ -241,20 +241,79 @@ func (a *Actor) GetBucket(ctx context.Context) (*storage.Bucket, error) {
 
 // List list objects in a bucket
 func (a *Actor) List(ctx context.Context, fuzzyFileName string, page int64, pageSize int64) (*storage.ListObjectsResponse, error) {
-	return a.storage.Object.List(ctx, a.bucketId, fuzzyFileName, page, pageSize)
+	return a.storage.Object.ListObjects(ctx, a.bucketId, fuzzyFileName, page, pageSize)
 }
 
 // GetObject Get an object from the default bucket (from environment variable)
 func (a *Actor) GetObject(ctx context.Context, objectId string) ([]byte, error) {
-	return a.storage.Object.Get(ctx, a.bucketId, objectId)
+	return a.storage.Object.GetObject(ctx, a.bucketId, objectId)
 }
 
 // PutObject Upload an object to the default bucket (from environment variable)
 func (a *Actor) PutObject(ctx context.Context, filename string, data []byte) (string, error) {
-	return a.storage.Object.Put(ctx, a.bucketId, filename, data)
+	return a.storage.Object.PutObject(ctx, a.bucketId, filename, data)
 }
 
 // DeleteObject Delete an object from a bucket
 func (a *Actor) DeleteObject(ctx context.Context, objectId string) (bool, error) {
-	return a.storage.Object.Delete(ctx, a.bucketId, objectId)
+	return a.storage.Object.DeleteObject(ctx, a.bucketId, objectId)
+}
+
+/**
+ * Vector storage convenience methods with environment variables
+ */
+
+// ListCollections retrieves a list of vector collections with pagination and sorting options.
+func (a *Actor) ListCollections(ctx context.Context, page int64, pageSize int64, desc bool) (*storage.ListCollectionsResponse, error) {
+	return a.storage.Vector.ListCollections(ctx, page, pageSize, desc)
+}
+
+// CreateCollections creates a new vector collection with the provided request parameters.
+func (a *Actor) CreateCollections(ctx context.Context, req *storage.CreateCollectionRequest) (*storage.CreateCollectionResponse, error) {
+	return a.storage.Vector.CreateCollections(ctx, req)
+}
+
+// UpdateCollection updates the collection information with the provided name and description.
+func (a *Actor) UpdateCollection(ctx context.Context, collId string, name string, description string) error {
+	return a.storage.Vector.UpdateCollection(ctx, collId, name, description)
+}
+
+// DelCollection deletes the collection by its ID.
+func (a *Actor) DelCollection(ctx context.Context, collId string) error {
+	return a.storage.Vector.DelCollection(ctx, collId)
+}
+
+// GetCollection retrieves a collection by its ID.
+func (a *Actor) GetCollection(ctx context.Context, collId string) (*storage.Collection, error) {
+	return a.storage.Vector.GetCollection(ctx, collId)
+}
+
+// CreateDocs inserts new documents into the collection.
+func (a *Actor) CreateDocs(ctx context.Context, collId string, docs []*storage.BaseDoc) (*storage.DocOpResponse, error) {
+	return a.storage.Vector.CreateDocs(ctx, collId, docs)
+}
+
+// UpdateDocs updates existing documents in the collection.
+func (a *Actor) UpdateDocs(ctx context.Context, collId string, docs []*storage.Doc) (*storage.DocOpResponse, error) {
+	return a.storage.Vector.UpdateDocs(ctx, collId, docs)
+}
+
+// UpsertDocs inserts or updates documents in the collection.
+func (a *Actor) UpsertDocs(ctx context.Context, collId string, docs []*storage.Doc) (*storage.DocOpResponse, error) {
+	return a.storage.Vector.UpsertDocs(ctx, collId, docs)
+}
+
+// DelDocs deletes documents from the collection by their IDs.
+func (a *Actor) DelDocs(ctx context.Context, collId string, ids []string) (*storage.DocOpResponse, error) {
+	return a.storage.Vector.DelDocs(ctx, collId, ids)
+}
+
+// QueryDocs queries documents in the collection by vector.
+func (a *Actor) QueryDocs(ctx context.Context, collId string, query *storage.QueryVectorParam) ([]*storage.Doc, error) {
+	return a.storage.Vector.QueryDocs(ctx, collId, query)
+}
+
+// QueryDocsByIds queries documents in the collection by their IDs.
+func (a *Actor) QueryDocsByIds(ctx context.Context, collId string, ids []string) (map[string]*storage.Doc, error) {
+	return a.storage.Vector.QueryDocsByIds(ctx, collId, ids)
 }

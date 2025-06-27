@@ -10,8 +10,9 @@ import (
 )
 
 var (
-	ErrResourceNotFound = errors.New("resource not found")
-	ErrResourceExists   = errors.New("resource exists")
+	ErrResourceNotFound          = errors.New("resource not found")
+	ErrResourceExists            = errors.New("resource exists")
+	ErrLocalStorageUnimplemented = errors.New("local storage unimplemented")
 )
 
 func isDirExists(path string) bool {
