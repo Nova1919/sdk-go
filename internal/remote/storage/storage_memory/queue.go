@@ -25,7 +25,7 @@ func (c *LocalClient) CreateQueue(ctx context.Context, req *models.CreateQueueRe
 	}
 
 	path := filepath.Join(storageDir, queueDir, id)
-	err = os.MkdirAll(path, os.ModeDir)
+	err = os.MkdirAll(path, os.ModePerm)
 	if err != nil {
 		return nil, err
 	}

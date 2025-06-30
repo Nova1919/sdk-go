@@ -90,7 +90,7 @@ func (c *LocalClient) CreateDataset(ctx context.Context, req *models.CreateDatas
 	}
 	id := newUUID.String()
 	path := filepath.Join(storageDir, datasetDir, id)
-	err = os.MkdirAll(path, os.ModeDir)
+	err = os.MkdirAll(path, os.ModePerm)
 	rep.Id = id
 	rep.CreatedAt = time.Now().Format(time.RFC3339Nano)
 	rep.UpdatedAt = time.Now().Format(time.RFC3339Nano)
@@ -269,7 +269,7 @@ func updateMetadata(datasetId string, name string) (*models.Dataset, error) {
 			return nil, fmt.Errorf("parse JSON %s failed: %v", datasetId, err)
 		}
 	} else {
-		err := os.MkdirAll(filepath.Join(storageDir, datasetDir, datasetId), os.ModeDir)
+		err := os.MkdirAll(filepath.Join(storageDir, datasetDir, datasetId), os.ModePerm)
 		if err != nil {
 			return nil, fmt.Errorf("create dataset failed, cause: %v", err)
 		}

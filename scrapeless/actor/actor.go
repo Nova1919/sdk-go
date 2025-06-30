@@ -18,18 +18,18 @@ import (
 )
 
 type Actor struct {
-	Browser     *browser.Browser
-	Proxy       *proxies.Proxy
-	Captcha     *captcha.Captcha
-	storage     *storage.Storage
-	Server      *httpserver.Server
-	Router      *router.Router
-	closeFun    []func() error
-	datasetId   string
-	namespaceId string
-	bucketId    string
-	queueId     string
-	vectorId    string
+	Browser      *browser.Browser
+	Proxy        *proxies.Proxy
+	Captcha      *captcha.Captcha
+	storage      *storage.Storage
+	Server       *httpserver.Server
+	Router       *router.Router
+	closeFun     []func() error
+	datasetId    string
+	namespaceId  string
+	bucketId     string
+	queueId      string
+	collectionId string
 }
 
 const (
@@ -51,7 +51,7 @@ func New() *Actor {
 	actor.namespaceId = env.Env.Actor.KvNamespaceId
 	actor.bucketId = env.Env.Actor.BucketId
 	actor.queueId = env.Env.Actor.QueueId
-	actor.vectorId = env.Env.Actor.VectorId
+	actor.collectionId = env.Env.Actor.CollectionId
 	return actor
 }
 
