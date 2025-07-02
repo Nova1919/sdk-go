@@ -253,6 +253,7 @@ type KvNamespaceItem struct {
 	RunId     string `json:"runId"`
 	CreatedAt string `json:"createdAt"`
 	UpdatedAt string `json:"updatedAt"`
+	Stats     Stats  `json:"stats"`
 }
 
 type CreateKvNamespaceRequest struct {
