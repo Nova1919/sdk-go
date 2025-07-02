@@ -43,7 +43,7 @@ func (c *LocalClient) GetNamespace(ctx context.Context, namespaceId string) (*mo
 		}
 		kvFile, err := os.ReadFile(filepath.Join(nsPath, d.Name()))
 		if err != nil {
-			log.Warn("read file %s failed: %v", path, err)
+			log.Warnf("read file %s failed: %v", path, err)
 			return nil
 		}
 		if d.Name() == "INPUT.json" {

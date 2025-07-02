@@ -112,9 +112,12 @@ func createMetadata(path, category string) {
 		}
 		meta, _ = json.MarshalIndent(bucket, "", "  ")
 	}
-	err := os.WriteFile(metaPath, meta, os.ModePerm)
-	if err != nil {
-		log.Warnf("warn create metadata.json failed: %v", err)
+	exists := isFileExists(metaPath)
+	if !exists {
+		err := os.WriteFile(metaPath, meta, os.ModePerm)
+		if err != nil {
+			log.Warnf("warn create metadata.json failed: %v", err)
+		}
 	}
 }
 
