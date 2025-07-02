@@ -130,7 +130,7 @@ func createInput(absPath string) {
 }
 
 func createRoot(absPath string) error {
-	err := os.MkdirAll(absPath, os.ModeDir)
+	err := os.MkdirAll(absPath, os.ModePerm)
 	if err != nil {
 		log.Warnf("warn create storage dir err: %v", err)
 	}
@@ -139,7 +139,7 @@ func createRoot(absPath string) error {
 
 func createDir(absPath string, dirName string) (string, error) {
 	path := filepath.Join(absPath, dirName, defaultDir)
-	err := os.MkdirAll(path, os.ModeDir)
+	err := os.MkdirAll(path, os.ModePerm)
 	if err != nil {
 		log.Warnf("warn create dir err: %v", err)
 	}

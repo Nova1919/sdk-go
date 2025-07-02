@@ -18,17 +18,18 @@ import (
 )
 
 type Actor struct {
-	Browser     *browser.Browser
-	Proxy       *proxies.Proxy
-	Captcha     *captcha.Captcha
-	storage     *storage.Storage
-	Server      *httpserver.Server
-	Router      *router.Router
-	closeFun    []func() error
-	datasetId   string
-	namespaceId string
-	bucketId    string
-	queueId     string
+	Browser      *browser.Browser
+	Proxy        *proxies.Proxy
+	Captcha      *captcha.Captcha
+	storage      *storage.Storage
+	Server       *httpserver.Server
+	Router       *router.Router
+	closeFun     []func() error
+	datasetId    string
+	namespaceId  string
+	bucketId     string
+	queueId      string
+	collectionId string
 }
 
 const (
@@ -50,6 +51,7 @@ func New() *Actor {
 	actor.namespaceId = env.Env.Actor.KvNamespaceId
 	actor.bucketId = env.Env.Actor.BucketId
 	actor.queueId = env.Env.Actor.QueueId
+	actor.collectionId = env.Env.Actor.CollectionId
 	return actor
 }
 
@@ -289,31 +291,31 @@ func (a *Actor) GetCollection(ctx context.Context, collId string) (*storage.Coll
 }
 
 // CreateDocs inserts new documents into the collection.
-func (a *Actor) CreateDocs(ctx context.Context, collId string, docs []*storage.BaseDoc) (*storage.DocOpResponse, error) {
-	return a.storage.Vector.CreateDocs(ctx, collId, docs)
+func (a *Actor) CreateDocs(ctx context.Context, docs []*storage.BaseDoc) (*storage.DocOpResponse, error) {
+	return a.storage.Vector.CreateDocs(ctx, a.collectionId, docs)
 }
 
 // UpdateDocs updates existing documents in the collection.
-func (a *Actor) UpdateDocs(ctx context.Context, collId string, docs []*storage.Doc) (*storage.DocOpResponse, error) {
-	return a.storage.Vector.UpdateDocs(ctx, collId, docs)
+func (a *Actor) UpdateDocs(ctx context.Context, docs []*storage.Doc) (*storage.DocOpResponse, error) {
+	return a.storage.Vector.UpdateDocs(ctx, a.collectionId, docs)
 }
 
 // UpsertDocs inserts or updates documents in the collection.
-func (a *Actor) UpsertDocs(ctx context.Context, collId string, docs []*storage.Doc) (*storage.DocOpResponse, error) {
-	return a.storage.Vector.UpsertDocs(ctx, collId, docs)
+func (a *Actor) UpsertDocs(ctx context.Context, docs []*storage.Doc) (*storage.DocOpResponse, error) {
+	return a.storage.Vector.UpsertDocs(ctx, a.collectionId, docs)
 }
 
 // DelDocs deletes documents from the collection by their IDs.
-func (a *Actor) DelDocs(ctx context.Context, collId string, ids []string) (*storage.DocOpResponse, error) {
-	return a.storage.Vector.DelDocs(ctx, collId, ids)
+func (a *Actor) DelDocs(ctx context.Context, ids []string) (*storage.DocOpResponse, error) {
+	return a.storage.Vector.DelDocs(ctx, a.collectionId, ids)
 }
 
 // QueryDocs queries documents in the collection by vector.
-func (a *Actor) QueryDocs(ctx context.Context, collId string, query *storage.QueryVectorParam) ([]*storage.Doc, error) {
-	return a.storage.Vector.QueryDocs(ctx, collId, query)
+func (a *Actor) QueryDocs(ctx context.Context, query *storage.QueryVectorParam) ([]*storage.Doc, error) {
+	return a.storage.Vector.QueryDocs(ctx, a.collectionId, query)
 }
 
 // QueryDocsByIds queries documents in the collection by their IDs.
-func (a *Actor) QueryDocsByIds(ctx context.Context, collId string, ids []string) (map[string]*storage.Doc, error) {
-	return a.storage.Vector.QueryDocsByIds(ctx, collId, ids)
+func (a *Actor) QueryDocsByIds(ctx context.Context, ids []string) (map[string]*storage.Doc, error) {
+	return a.storage.Vector.QueryDocsByIds(ctx, a.collectionId, ids)
 }

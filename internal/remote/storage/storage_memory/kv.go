@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/scrapeless-ai/sdk-go/internal/remote/storage/models"
+	"github.com/scrapeless-ai/sdk-go/scrapeless/log"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -31,6 +32,39 @@ func (c *LocalClient) GetNamespace(ctx context.Context, namespaceId string) (*mo
 	if err = json.Unmarshal(file, &namespace); err != nil {
 		return nil, fmt.Errorf("json unmarshal failed: %s", err)
 	}
+	now := time.Now()
+	stats := models.Stats{}
+	_ = filepath.WalkDir(nsPath, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() || d.Name() == metadataFile {
+			return nil
+		}
+		kvFile, err := os.ReadFile(filepath.Join(nsPath, d.Name()))
+		if err != nil {
+			log.Warn("read file %s failed: %v", path, err)
+			return nil
+		}
+		if d.Name() == "INPUT.json" {
+			stats.Size += uint64(len(kvFile))
+			stats.Count++
+			return nil
+		}
+		var kv models.SetValueLocal
+		err = json.Unmarshal(kvFile, &kv)
+		if err != nil {
+			log.Warnf("json unmarshal failed: %s", err)
+			return nil
+		}
+		if kv.ExpireAt.Before(now) {
+			return nil
+		}
+		stats.Count++
+		stats.Size += uint64(kv.Size)
+		return nil
+	})
+	namespace.Stats = stats
 
 	return &namespace, nil
 }
@@ -87,6 +121,43 @@ func (c *LocalClient) ListNamespaces(ctx context.Context, page int64, pageSize i
 	}
 
 	pagedItems := allNamespaces[start:end]
+	now := time.Now()
+	for i := range pagedItems {
+		stats := models.Stats{}
+		nsPath := filepath.Join(dirPath, pagedItems[i].Id)
+		_ = filepath.WalkDir(nsPath, func(path string, d fs.DirEntry, err error) error {
+			if err != nil {
+				return err
+			}
+			if d.IsDir() || d.Name() == metadataFile {
+				return nil
+			}
+
+			kvFile, err := os.ReadFile(path)
+			if err != nil {
+				log.Warnf("read file %s failed: %v", path, err)
+				return nil
+			}
+			if d.Name() == "INPUT.json" {
+				stats.Size += uint64(len(kvFile))
+				stats.Count++
+				return nil
+			}
+			var kv models.SetValueLocal
+			err = json.Unmarshal(kvFile, &kv)
+			if err != nil {
+				log.Warnf("json unmarshal failed: %s", err)
+				return nil
+			}
+			if kv.ExpireAt.Before(now) {
+				return nil
+			}
+			stats.Count++
+			stats.Size += uint64(kv.Size)
+			return nil
+		})
+		pagedItems[i].Stats = stats
+	}
 
 	return &models.KvNamespace{
 		Items:     pagedItems,

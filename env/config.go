@@ -37,6 +37,7 @@ type actorEnv struct {
 	DatasetId     string `mapstructure:"SCRAPELESS_DATASET_ID"`
 	BucketId      string `mapstructure:"SCRAPELESS_BUCKET_ID"`
 	QueueId       string `mapstructure:"SCRAPELESS_QUEUE_ID"`
+	CollectionId  string `mapstructure:"SCRAPELESS_COLLECTION_ID"`
 
 	HttpPort string `mapstructure:"SCRAPELESS_HTTP_PORT"`
 }
@@ -56,6 +57,7 @@ func (c *config) Validate() error {
 		c.Actor.RunId = defaultID
 		c.Actor.DatasetId = defaultID
 		c.Actor.QueueId = defaultID
+		c.Actor.CollectionId = defaultID
 		c.Actor.KvNamespaceId = defaultID
 		c.Actor.BucketId = defaultID
 	}
