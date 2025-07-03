@@ -62,6 +62,7 @@ func (s *Dataset) ListDatasets(ctx context.Context, page int64, pageSize int64, 
 func (s *Dataset) CreateDataset(ctx context.Context, name string) (id string, datasetName string, err error) {
 	name = name + "-" + env.GetActorEnv().RunId
 	dataset, err := storage.ClientInterface.CreateDataset(ctx, &models.CreateDatasetRequest{
+		Name:    name,
 		ActorId: &env.GetActorEnv().ActorId,
 		RunId:   &env.GetActorEnv().RunId,
 	})
