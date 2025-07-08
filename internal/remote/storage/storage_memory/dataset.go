@@ -187,6 +187,9 @@ func (c *LocalClient) GetDataset(ctx context.Context, req *models.GetDataset) (*
 }
 
 func (c *LocalClient) AddDatasetItem(ctx context.Context, datasetId string, items []map[string]any) (bool, error) {
+	if datasetId == "" {
+		datasetId = "default"
+	}
 	dirPath := filepath.Join(storageDir, datasetDir, datasetId)
 	if !isDirExists(dirPath) {
 		return false, ErrResourceNotFound
@@ -207,16 +210,25 @@ func (c *LocalClient) AddDatasetItem(ctx context.Context, datasetId string, item
 		return false, fmt.Errorf("read dir failed: %v", err)
 	}
 	for _, f := range files {
-		if !f.IsDir() && strings.HasSuffix(f.Name(), ".json") && f.Name() != metadataFile {
-			name := strings.TrimSuffix(f.Name(), ".json")
-			if len(name) == 8 {
-				if idx, err := strconv.Atoi(name); err == nil && idx > maxIndex {
-					maxIndex = idx
-				}
-			}
+		fileName := f.Name()
+		// Exclude non-.json files, metadata files, and directories
+		if f.IsDir() {
+			continue
+		}
+		if !strings.HasSuffix(fileName, ".json") {
+			continue
+		}
+		if fileName == metadataFile {
+			continue
+		}
+		name := strings.TrimSuffix(fileName, ".json")
+		if len(name) != 8 {
+			continue
+		}
+		if idx, err := strconv.Atoi(name); err == nil && idx > maxIndex {
+			maxIndex = idx
 		}
 	}
-
 	var fields []string
 	var newSize uint64 = 0
 
