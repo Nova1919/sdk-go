@@ -10,6 +10,8 @@ type Actor struct {
 	SessionDuration uint64 `json:"sessionDuration"`
 	SessionId       string `json:"sessionId"`
 	Gateway         string `json:"gateway"`
+	ProfileId       string `json:"profileId"`
+	ProfilePersist  bool   `json:"profilePersist"`
 }
 
 type ActorOnce struct {
