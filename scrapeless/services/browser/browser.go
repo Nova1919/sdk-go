@@ -13,6 +13,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"net/url"
+	"strconv"
 	"strings"
 )
 
@@ -29,7 +30,9 @@ func (b *Browser) Create(ctx context.Context, req Actor) (*CreateResp, error) {
 	create, err := browser.ClientInterface.ScrapingBrowserCreate(ctx, &remote_brwoser.CreateBrowserRequest{
 		ApiKey: env.GetActorEnv().ApiKey,
 		Input: map[string]string{
-			"session_ttl": req.Input.SessionTtl,
+			"session_ttl":     req.Input.SessionTtl,
+			"profile_persist": strconv.FormatBool(req.ProfilePersist),
+			"profile_id":      req.ProfileId,
 		},
 		Proxy: &remote_brwoser.ProxyParams{
 			Url:             req.ProxyUrl,
