@@ -18,10 +18,10 @@ func main() {
 	log.Infof("create profile response: %v", response)
 
 	browserInfo, err := client.Browser.Create(context.Background(), browser.Actor{
-		Input:          browser.Input{SessionTtl: "180"},
-		ProxyCountry:   "US",
-		ProfileId:      response.ProfileId, // Reuse the profileId data
-		ProfilePersist: true,               // Persist the browser session
+		//Input:          browser.Input{SessionTtl: "180"},
+		//ProxyCountry:   "US",
+		//ProfileId:      response.ProfileId, // Reuse the profileId data
+		//ProfilePersist: true,               // Persist the browser session
 	})
 
 	log.Infof("%+v", browserInfo)
