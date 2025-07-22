@@ -7,6 +7,7 @@ import (
 	"github.com/scrapeless-ai/sdk-go/scrapeless/services/crawl"
 	"github.com/scrapeless-ai/sdk-go/scrapeless/services/deepserp"
 	"github.com/scrapeless-ai/sdk-go/scrapeless/services/httpserver"
+	"github.com/scrapeless-ai/sdk-go/scrapeless/services/profile"
 	"github.com/scrapeless-ai/sdk-go/scrapeless/services/proxies"
 	"github.com/scrapeless-ai/sdk-go/scrapeless/services/router"
 	"github.com/scrapeless-ai/sdk-go/scrapeless/services/scraping"
@@ -26,6 +27,7 @@ type Client struct {
 	Universal *universal.Universal
 	Actor     *actor.ActorService
 	Crawl     *crawl.Crawl
+	Profile   *profile.Profile
 	CloseFun  []func() error
 }
 
@@ -236,6 +238,25 @@ func WithCrawl(tp ...string) Option {
 		tp = append(tp, typeHttp)
 	}
 	return &CrawlOption{
+		tp: tp[0],
+	}
+}
+
+type ProfileOption struct {
+	tp string
+}
+
+func (o *ProfileOption) Apply(c *Client) {
+	c.Profile = profile.New()
+	c.CloseFun = append(c.CloseFun, c.Profile.Close)
+}
+
+// WithProfile choose profile type.
+func WithProfile(tp ...string) Option {
+	if len(tp) == 0 {
+		tp = append(tp, typeHttp)
+	}
+	return &ProfileOption{
 		tp: tp[0],
 	}
 }
