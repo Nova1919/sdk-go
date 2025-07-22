@@ -25,19 +25,31 @@ func NewBrowser(serverMode string) *Browser {
 	extension.NewClient(serverMode, env.Env.ScrapelessBaseApiUrl)
 	return &Browser{}
 }
+
 func (b *Browser) Create(ctx context.Context, req Actor) (*CreateResp, error) {
+	if req.ProxyCountry == "" {
+		req.ProxyCountry = "ANY"
+	}
 	create, err := browser.ClientInterface.ScrapingBrowserCreate(ctx, &remote_brwoser.CreateBrowserRequest{
-		ApiKey: env.GetActorEnv().ApiKey,
-		Input: map[string]string{
-			"session_ttl": req.Input.SessionTtl,
-		},
-		Proxy: &remote_brwoser.ProxyParams{
-			Url:             req.ProxyUrl,
-			ChannelId:       req.ChannelId,
-			Country:         strings.ToUpper(req.ProxyCountry),
-			SessionDuration: req.SessionDuration,
-			SessionId:       req.SessionId,
-			Gateway:         req.Gateway,
+		ApiKey:           env.GetActorEnv().ApiKey,
+		SessionName:      req.SessionName,
+		SessionTtl:       req.SessionTtl,
+		SessionRecording: req.SessionRecording,
+		ProxyCountry:     req.ProxyCountry,
+		ProxyUrl:         req.ProxyUrl,
+		ExtensionIds:     req.ExtensionIds,
+		Fingerprint: remote_brwoser.Fingerprint{
+			UserAgent: req.Fingerprint.UserAgent,
+			Platform:  req.Fingerprint.Platform,
+			Screen: remote_brwoser.Screen{
+				Width:  req.Fingerprint.Screen.Width,
+				Height: req.Fingerprint.Screen.Height,
+			},
+			Localization: remote_brwoser.Localization{
+				BasedOnIP: req.Fingerprint.Localization.BasedOnIP,
+				Timezone:  req.Fingerprint.Localization.Timezone,
+				Languages: req.Fingerprint.Localization.Languages,
+			},
 		},
 	})
 	if err != nil {

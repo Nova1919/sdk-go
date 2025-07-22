@@ -13,19 +13,16 @@ import (
 )
 
 func (c *Client) ScrapingBrowserCreate(ctx context.Context, req *models.CreateBrowserRequest) (*models.CreateBrowserResponse, error) {
+	fingerprint, _ := json.Marshal(req.Fingerprint)
 	value := &url.Values{}
 	value.Set("token", req.ApiKey)
-	value.Set("proxy_country", req.Proxy.Country)
-	value.Set("proxy_url", req.Proxy.Url)
-	value.Set("session_id", req.Proxy.SessionId)
-	value.Set("session_duration", fmt.Sprintf("%d", req.Proxy.SessionDuration))
-	value.Set("gateway", req.Proxy.Gateway)
-	value.Set("channel_id", req.Proxy.ChannelId)
-	if req.Input != nil {
-		for k, v := range req.Input {
-			value.Set(k, v)
-		}
-	}
+	value.Set("session_name", req.SessionName)
+	value.Set("session_ttl", fmt.Sprintf("%v", req.SessionTtl))
+	value.Set("session_recording", fmt.Sprintf("%v", req.SessionRecording))
+	value.Set("proxy_country", req.ProxyCountry)
+	value.Set("proxy_url", req.ProxyUrl)
+	value.Set("fingerprint", string(fingerprint))
+	value.Set("extension_ids", req.ExtensionIds)
 	parse, _ := url.Parse(fmt.Sprintf("%s/browser", c.BaseUrl))
 	parse.RawQuery = value.Encode()
 	request, err := request2.Request(ctx, request2.ReqInfo{
@@ -51,14 +48,6 @@ func (c *Client) ScrapingBrowserCreate(ctx context.Context, req *models.CreateBr
 	}
 	devValue := &url.Values{}
 	devValue.Set("token", req.ApiKey)
-	if req.Input != nil {
-		for k, v := range req.Input {
-			devValue.Set(k, v)
-		}
-	}
-	if req.Proxy.Country != "" {
-		devValue.Set("proxy_country", req.Proxy.Country)
-	}
 	task.DevtoolsUrl = fmt.Sprintf("wss://%s/browser/%s?%s", u.Host, task.TaskId, devValue.Encode())
 	return task, nil
 }
